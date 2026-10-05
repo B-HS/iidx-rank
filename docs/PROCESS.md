@@ -217,3 +217,15 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 현지화 404용 [locale]/[...rest]/page.tsx는 Cache Components에서 200 소프트 404가 되어 제거하고 보류 항목으로 옮겼습니다. 로컬 env의 DATABASE_URL이 turso: 스킴이라 기존 환경의 build는 이번 변경과 무관하게 실패했습니다. 수정 내역은 docs/bug/2026-10-06-audit-fixes.md, 보류·결정 필요 항목은 docs/quality-assurance/2026-10-06-audit-deferred.md, 진행 이력은 docs/history/2026-10-06-audit-and-fixes.md에 있습니다.
 
 사용자가 workflow 사용과 Fable 미사용을 명시했습니다. main은 Opus, 하위는 난이도에 따라 Opus(의미적 감사·까다로운 수정)와 Sonnet(범위가 분명한 수정·기계 검증)으로 배정합니다. 하위 에이전트는 Git과 .env에 접근하지 않습니다. 확인된 결함만 최소 변경으로 고치고 요청 밖 리팩토링은 하지 않습니다. 기준: AGENTS.md, llm-rules 전문, docs/ARCHITECTURE.md, docs/CACHE.md, 설치본 Next 문서.
+
+
+## 감사 후속 결정 반영 — 관리자 초기 지정 유지·상위 램프 보호
+
+현재 상태: 수정·검증·기록·GitHub 반영 완료 (4/4), 브라우저 재현과 목록 이메일의 가입 여부 확인은 미수행
+
+- [x] a. 결정 기록 — docs/acknowledge에 관리자 초기 지정 유지(코드 변경 없음, 가입 여부는 사용자가 운영에서 확인)와 상위 램프 보호 규칙 기록, 보류 문서 갱신
+- [x] b. 램프 순환 수정(Sonnet) — checker-lamp.ts의 상위 램프 전이를 자기 자신으로, checker-workspace.tsx는 램프가 바뀌지 않으면 저장 요청 생략, 순환 테스트 추가
+- [x] c. 최소 검증 — 관련 테스트·typecheck·수정 파일 lint — checker 테스트 9 pass, tsc 오류 0, eslint 오류·경고 0, prettier 통과
+- [x] d. 선별 commit/push
+
+사용자 결정(2026-10-06): 관리자 초기 지정은 A(목록 이메일의 가입 여부 확인만, 코드 변경 없음), 노멀 모드 램프 순환은 B(상위 램프는 클릭해도 내려가지 않게 변경). 같은 작업의 후속 단계이므로 workflow 선택을 유지합니다. 설계된 순환의 되돌림(노멀 CLEAR→NO_PLAY, 하드 EX_HARD→NO_PLAY)은 유지합니다.
