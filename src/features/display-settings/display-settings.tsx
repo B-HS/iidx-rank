@@ -61,7 +61,6 @@ export const DisplaySettings: FC<Props> = ({ value, isLoading, isSaving, isAuthe
                             max={MAX_LOGO_OPACITY}
                             step={LOGO_OPACITY_STEP}
                             value={[value.logoOpacity]}
-                            disabled={isSaving}
                             onValueChange={(values) => onPreview({ ...value, logoOpacity: values[0] ?? value.logoOpacity })}
                             onValueCommit={(values) => onSave({ ...value, logoOpacity: values[0] ?? value.logoOpacity })}
                         />

@@ -169,7 +169,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
     }
     const handlePreviewPreferences = (input: DisplayPreferencesInput) => setDisplayDraft({ userId: initialUserId, preferences: input })
     const handleSavePreferences = (input: DisplayPreferencesInput) => {
-        if (isPreferencesPending || isPreferencesLoadFailed || savePreferences.isPending) return
+        if (isPreferencesPending || isPreferencesLoadFailed) return
         handlePreviewPreferences(input)
         if (!isAuthenticated) {
             if (!saveAnonymousPreferences(input)) toast.error(t('display.storageError'))

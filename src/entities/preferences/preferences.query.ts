@@ -5,12 +5,14 @@ import { useTranslations } from 'next-intl'
 import { displayPreferencesQueryOptions } from '@entities/preferences/preferences.query-options'
 import { updateDisplayPreferences } from '@entities/preferences/preferences.api'
 import { QUERY_KEY } from '@shared/constants/query-key'
+const DISPLAY_PREFERENCES_SAVE_SCOPE_ID = 'display-preferences-save'
 export const useDisplayPreferences = (userId: string, enabled: boolean) => useQuery({ ...displayPreferencesQueryOptions(userId), enabled })
 export const useSaveDisplayPreferences = (userId: string) => {
     const t = useTranslations()
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: updateDisplayPreferences,
+        scope: { id: DISPLAY_PREFERENCES_SAVE_SCOPE_ID },
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: QUERY_KEY.PREFERENCES.DISPLAY(userId) })
         },
