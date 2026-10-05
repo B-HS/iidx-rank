@@ -88,11 +88,11 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 ## Vercel Web Analytics·Speed Insights
 
-현재 상태: 두 패키지 전역 적용·빌드 성공, GitHub commit/push와 운영 스크립트 확인 중
+현재 상태: 설치·전역 적용·build·Production 배포·두 수집 스크립트 200 확인 완료
 
 - [x] 현재 레이아웃·의존성과 공식 문서 확인
 - [x] 요청된 두 패키지 설치와 root layout 전역 적용
 - [x] 프로젝트 수집 기능 활성 상태 확인 및 최소 빌드 검증
-- [ ] 검증 결과 기록·선별 commit/push·Production 배포와 수집 스크립트 확인
+- [x] 검증 결과 기록·선별 commit/push·Production 배포와 수집 스크립트 확인
 
 사용자가 이번 작업은 서브에이전트 없이 직접 수행하도록 선택했습니다. Next 전용 컴포넌트를 공통 layout에 적용하고 기본 방문·성능 수집만 사용합니다.
