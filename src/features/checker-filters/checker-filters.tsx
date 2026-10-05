@@ -8,6 +8,7 @@ import { Checkbox } from '@shared/ui/checkbox'
 import { Input } from '@shared/ui/input'
 import { Label } from '@shared/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select'
+import { Skeleton } from '@shared/ui/skeleton'
 import { ToggleGroup, ToggleGroupItem } from '@shared/ui/toggle-group'
 
 type Props = {
@@ -26,6 +27,7 @@ type Props = {
     onPersonalOnlyChange: (value: boolean) => void
     unplayedOnly: boolean
     onUnplayedOnlyChange: (value: boolean) => void
+    isRecordsPending: boolean
     catalogCount: number
     resultCount: number
 }
@@ -46,6 +48,7 @@ export const CheckerFilters: FC<Props> = ({
     onPersonalOnlyChange,
     unplayedOnly,
     onUnplayedOnlyChange,
+    isRecordsPending,
     catalogCount,
     resultCount,
 }) => (
@@ -153,13 +156,14 @@ export const CheckerFilters: FC<Props> = ({
                 <span>{MESSAGES.checker.personalOnly}</span>
             </label>
             <label className='flex cursor-pointer items-center gap-2 text-sm'>
-                <Checkbox checked={unplayedOnly} onCheckedChange={(checked) => onUnplayedOnlyChange(checked === true)} />
+                <Checkbox disabled={isRecordsPending} checked={unplayedOnly} onCheckedChange={(checked) => onUnplayedOnlyChange(checked === true)} />
                 <span>{MESSAGES.checker.unplayedOnly}</span>
             </label>
         </div>
 
-        <p aria-live='polite' className='text-xs text-muted-foreground'>
-            {MESSAGES.checker.resultSummary(resultCount, catalogCount)}
-        </p>
+        <div aria-live='polite' aria-busy={isRecordsPending && unplayedOnly} className='text-xs text-muted-foreground'>
+            {isRecordsPending && unplayedOnly && <Skeleton aria-label={MESSAGES.checker.loadingRecords} className='h-4 w-36 bg-sidebar-accent' />}
+            {(!isRecordsPending || !unplayedOnly) && MESSAGES.checker.resultSummary(resultCount, catalogCount)}
+        </div>
     </div>
 )

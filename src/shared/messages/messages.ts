@@ -31,6 +31,9 @@ export const MESSAGES = {
     },
     checker: {
         title: '아케이드 랭크 체커',
+        loadingFilters: '곡 필터를 불러오는 중입니다.',
+        loadingCatalog: '곡 목록을 불러오는 중입니다.',
+        loadingRecords: '개인 기록을 불러오는 중입니다.',
         description: '곡별 노멀·하드 랭크를 확인하고 플레이 램프를 기록합니다.',
         normalMode: '노멀',
         hardMode: '하드',
@@ -146,6 +149,7 @@ export const MESSAGES = {
     },
     auth: {
         title: '계정으로 시작하기',
+        loadingSession: '계정을 확인하는 중입니다.',
         description: '이메일 계정으로 개인 램프 기록을 저장합니다.',
         signInTitle: '로그인',
         signUpTitle: '계정 만들기',

@@ -45,7 +45,7 @@ type Props = PropsWithChildren<{
 
 const FOOTER_MENU_ITEM_CLASS_NAME = 'flex h-full min-w-0 items-center'
 const FOOTER_MENU_BUTTON_CLASS_NAME =
-    'h-full justify-center rounded-none px-3 group-data-[collapsible=icon]:size-6! group-data-[collapsible=icon]:p-1!'
+    'h-full justify-center rounded-none px-3 group-data-[collapsible=icon]:h-12! group-data-[collapsible=icon]:w-full! group-data-[collapsible=icon]:p-0!'
 
 const ThemeControl: FC = () => {
     const { resolvedTheme, setTheme } = useTheme()
@@ -84,10 +84,14 @@ const AccountControl: FC = () => {
         }
     }
 
-    if (isPending) {
+    if (isPending || identityTransition.isPending) {
         return (
             <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
-                <div className='flex h-full w-full items-center justify-center gap-2 px-3 group-data-[collapsible=icon]:px-1'>
+                <div
+                    role='status'
+                    aria-label={MESSAGES.auth.loadingSession}
+                    aria-busy='true'
+                    className='flex h-full w-full items-center justify-center gap-2 px-3 group-data-[collapsible=icon]:px-1'>
                     <Skeleton className='size-4' />
                     <Skeleton className='h-3 w-20 group-data-[collapsible=icon]:hidden' />
                 </div>
@@ -165,18 +169,22 @@ export const AppShell: FC<Props> = ({ children, sidebarContent }) => (
                     <SidebarContent className='min-h-0 p-0'>
                         <SidebarMenu className='gap-0 p-0'>
                             <SidebarMenuItem className='min-w-0 flex-1'>
-                                <SidebarMenuButton asChild isActive tooltip={MESSAGES.navigation.checker} className='h-9 rounded-none px-3'>
-                                    <Link href='/'>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive
+                                    tooltip={MESSAGES.navigation.checker}
+                                    className='h-9 rounded-none px-3 group-data-[collapsible=icon]:h-9! group-data-[collapsible=icon]:w-full! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!'>
+                                    <Link href='/' aria-label={MESSAGES.navigation.checker}>
                                         <Music2 />
-                                        <span>{MESSAGES.navigation.checker}</span>
+                                        <span className='group-data-[collapsible=icon]:hidden'>{MESSAGES.navigation.checker}</span>
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
                         <div className='min-w-0 group-data-[collapsible=icon]:hidden'>{sidebarContent}</div>
                     </SidebarContent>
-                    <SidebarFooter className='gap-0 bg-sidebar p-0' style={{ height: SHELL_RAIL_CHROME_HEIGHT_PX }}>
-                        <SidebarMenu className='grid h-full grid-cols-2 items-stretch gap-0'>
+                    <SidebarFooter className='h-12 shrink-0 gap-0 bg-sidebar p-0 group-data-[collapsible=icon]:h-24'>
+                        <SidebarMenu className='grid h-full grid-cols-2 items-stretch gap-0 group-data-[collapsible=icon]:grid-cols-1'>
                             <ThemeControl />
                             <AccountControl />
                         </SidebarMenu>

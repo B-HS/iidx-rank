@@ -10,13 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card'
 
 type Props = {
     rank: string
+    isRecordsPending: boolean
     standardCharts: Chart[]
     personalCharts: Chart[]
     records: ReadonlyMap<string, ChartRecord>
     onOpenDetails: (chart: Chart) => void
 }
 
-export const ChartRankSection: FC<Props> = ({ rank, standardCharts, personalCharts, records, onOpenDetails }) => (
+export const ChartRankSection: FC<Props> = ({ rank, standardCharts, personalCharts, records, isRecordsPending, onOpenDetails }) => (
     <section aria-label={rank + MESSAGES.checker.rankSection} className='min-w-0'>
         <Card className='min-w-0 gap-px rounded-none bg-border p-0 shadow-none ring-0'>
             <CardHeader className='flex flex-row items-center justify-between bg-muted p-3'>
@@ -39,7 +40,13 @@ export const ChartRankSection: FC<Props> = ({ rank, standardCharts, personalChar
                                 {group.label}
                                 <span className='tabular-nums'>{group.charts.length}</span>
                             </h3>
-                            <ChartCardGrid charts={group.charts} records={records} label={rank + ' ' + group.label} onOpenDetails={onOpenDetails} />
+                            <ChartCardGrid
+                                isRecordsPending={isRecordsPending}
+                                charts={group.charts}
+                                records={records}
+                                label={rank + ' ' + group.label}
+                                onOpenDetails={onOpenDetails}
+                            />
                         </div>
                     ))}
             </CardContent>

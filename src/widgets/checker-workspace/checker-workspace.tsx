@@ -13,7 +13,10 @@ import { LAMPS, type RecordInput } from '@entities/checker/checker.dto'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
 import { ChartDetails } from '@features/chart-details/chart-details'
 import { CheckerFilters } from '@features/checker-filters/checker-filters'
+import { CheckerRecordsSkeleton } from '@features/checker-skeleton/checker-records-skeleton'
+import { ChartRankSkeleton } from '@features/checker-skeleton/chart-rank-skeleton'
 import { ChartRankSection } from '@features/chart-rank-section/chart-rank-section'
+import { CHECKER_SKELETON_SECTION_IDS } from '@shared/constants/checker'
 import { useIdentityTransition } from '@shared/hooks/use-identity-transition'
 import { MESSAGES } from '@shared/messages/messages'
 import { AppShell } from '@widgets/app-shell/app-shell'
@@ -22,6 +25,7 @@ import { Button } from '@shared/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@shared/ui/empty'
 import { Progress } from '@shared/ui/progress'
 import { SidebarTrigger } from '@shared/ui/sidebar'
+import { Skeleton } from '@shared/ui/skeleton'
 
 type Props = {
     initialUserId: string | null
@@ -46,12 +50,13 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
     const { data: catalog } = useCatalog()
     const isSessionAligned = !identityTransition.isPending && (isSessionPending || (session?.user.id ?? null) === initialUserId)
     const isAuthenticated = initialUserId !== null && isSessionAligned
-    const canSyncCatalog = initialIsAdmin && isAuthenticated
+    const canSyncCatalog = initialIsAdmin && isAuthenticated && !isSessionPending
     const checkerQuery = useChecker(initialUserId ?? '', isAuthenticated)
+    const isRecordsPending = isSessionPending || !isSessionAligned || (isAuthenticated && checkerQuery.isPending)
     const saveRecord = useSaveRecord(initialUserId ?? '')
     const refreshChecker = useRefreshChecker(initialUserId ?? '')
     const syncCatalog = useSyncCatalog()
-    const records = isAuthenticated ? (checkerQuery.data?.records ?? []) : []
+    const records = isAuthenticated && !isRecordsPending ? (checkerQuery.data?.records ?? []) : []
     const recordsByChartId = new Map(records.map((record) => [record.chartId, record]))
     const rankFor = (chart: Chart) => (mode === 'normal' ? chart.normalRank : chart.hardRank)
     const personalFor = (chart: Chart) => (mode === 'normal' ? chart.normalPersonal : chart.hardPersonal)
@@ -130,7 +135,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
         }
     }
     const handleSaveRecord = (input: RecordInput) => {
-        if (!isAuthenticated || checkerLoadFailed) {
+        if (!isAuthenticated || checkerLoadFailed || isRecordsPending) {
             if (!isAuthenticated) {
                 setIsAuthDialogOpen(true)
             }
@@ -165,6 +170,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
             onPersonalOnlyChange={setPersonalOnly}
             unplayedOnly={unplayedOnly}
             onUnplayedOnlyChange={setUnplayedOnly}
+            isRecordsPending={isRecordsPending}
             catalogCount={catalog.charts.length}
             resultCount={filteredCharts.length}
         />
@@ -224,7 +230,8 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
             </section>
             <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
                 <h2 className='checker-micro-label'>{MESSAGES.checker.summaryTitle}</h2>
-                {isAuthenticated ? (
+                {isRecordsPending && <CheckerRecordsSkeleton />}
+                {!isRecordsPending && isAuthenticated && !checkerLoadFailed && (
                     <>
                         <p className='text-xs text-muted-foreground'>{MESSAGES.checker.signedInProgress}</p>
                         <div className='flex min-w-0 items-center justify-between gap-2 text-xs'>
@@ -233,7 +240,11 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
                         </div>
                         <Progress value={completionPercent} aria-label={MESSAGES.checker.completion} />
                     </>
-                ) : (
+                )}
+                {!isRecordsPending && checkerLoadFailed && (
+                    <p className='text-xs text-muted-foreground'>{MESSAGES.checker.recordLoadErrorDescription}</p>
+                )}
+                {!isRecordsPending && !isAuthenticated && (
                     <p className='text-xs leading-relaxed text-muted-foreground'>{MESSAGES.checker.anonymousProgress}</p>
                 )}
                 <div className='flex items-center justify-between gap-2 text-xs'>
@@ -243,6 +254,73 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
             </section>
         </div>
     )
+
+    const renderChartList = () => {
+        if (isRecordsPending && unplayedOnly) {
+            return (
+                <div role='status' aria-label={MESSAGES.checker.loadingRecords} aria-busy='true' className='grid min-w-0 gap-3'>
+                    <span className='sr-only'>{MESSAGES.checker.loadingRecords}</span>
+                    {CHECKER_SKELETON_SECTION_IDS.map((id) => (
+                        <ChartRankSkeleton key={id} />
+                    ))}
+                </div>
+            )
+        }
+
+        if (catalog.charts.length === 0) {
+            return (
+                <Empty className='checker-empty min-h-64 border-0'>
+                    <EmptyHeader>
+                        <EmptyTitle>{MESSAGES.checker.emptyCatalogTitle}</EmptyTitle>
+                        <EmptyDescription>{MESSAGES.checker.emptyCatalogDescription}</EmptyDescription>
+                    </EmptyHeader>
+                    {canSyncCatalog && (
+                        <Button size='sm' variant='outline' disabled={syncCatalog.isPending} onClick={() => void handleCatalogSync()}>
+                            {syncCatalog.isPending ? MESSAGES.checker.sourceSyncing : MESSAGES.checker.sourceSync}
+                        </Button>
+                    )}
+                </Empty>
+            )
+        }
+
+        if (filteredCharts.length === 0) {
+            return (
+                <Empty className='checker-empty min-h-64 border-0'>
+                    <EmptyHeader>
+                        <EmptyTitle>{MESSAGES.checker.emptyFilterTitle}</EmptyTitle>
+                        <EmptyDescription>{MESSAGES.checker.emptyFilterDescription}</EmptyDescription>
+                    </EmptyHeader>
+                    <Button
+                        size='sm'
+                        variant='outline'
+                        onClick={() => {
+                            setSearch('')
+                            setDifficulty('all')
+                            setVersion('all')
+                            setRank('all')
+                            setPersonalOnly(false)
+                            setUnplayedOnly(false)
+                        }}>
+                        {MESSAGES.checker.resetFilters}
+                    </Button>
+                </Empty>
+            )
+        }
+
+        return (
+            <div className='grid min-w-0 gap-3'>
+                {rankSections.map((section) => (
+                    <ChartRankSection
+                        isRecordsPending={isRecordsPending}
+                        key={section.rank}
+                        {...section}
+                        records={recordsByChartId}
+                        onOpenDetails={setSelectedChart}
+                    />
+                ))}
+            </div>
+        )
+    }
 
     useEffect(() => {
         const userId = session?.user.id ?? null
@@ -276,17 +354,22 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
                         </div>
                     </div>
                     <div className='flex shrink-0 items-center gap-1'>
-                        <span className='hidden text-xs tabular-nums text-muted-foreground sm:inline'>
-                            {MESSAGES.checker.resultCount(filteredCharts.length)}
-                        </span>
+                        <div className='hidden text-xs tabular-nums text-muted-foreground sm:block'>
+                            {isRecordsPending && unplayedOnly ? (
+                                <Skeleton className='h-4 w-20' />
+                            ) : (
+                                MESSAGES.checker.resultCount(filteredCharts.length)
+                            )}
+                        </div>
                         {isAuthenticated && (
                             <Button
                                 variant='ghost'
                                 size='icon-sm'
                                 aria-label={MESSAGES.checker.refreshRecords}
-                                disabled={refreshChecker.isPending}
+                                aria-busy={refreshChecker.isPending}
+                                disabled={refreshChecker.isPending || isRecordsPending}
                                 onClick={() => refreshChecker.mutate()}>
-                                <RefreshCw className={refreshChecker.isPending ? 'animate-spin' : undefined} />
+                                <RefreshCw />
                             </Button>
                         )}
                     </div>
@@ -305,48 +388,10 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
                         </Alert>
                     )}
 
-                    {catalog.charts.length === 0 ? (
-                        <Empty className='checker-empty min-h-64 border-0'>
-                            <EmptyHeader>
-                                <EmptyTitle>{MESSAGES.checker.emptyCatalogTitle}</EmptyTitle>
-                                <EmptyDescription>{MESSAGES.checker.emptyCatalogDescription}</EmptyDescription>
-                            </EmptyHeader>
-                            {canSyncCatalog && (
-                                <Button size='sm' variant='outline' disabled={syncCatalog.isPending} onClick={() => void handleCatalogSync()}>
-                                    {syncCatalog.isPending ? MESSAGES.checker.sourceSyncing : MESSAGES.checker.sourceSync}
-                                </Button>
-                            )}
-                        </Empty>
-                    ) : filteredCharts.length === 0 ? (
-                        <Empty className='checker-empty min-h-64 border-0'>
-                            <EmptyHeader>
-                                <EmptyTitle>{MESSAGES.checker.emptyFilterTitle}</EmptyTitle>
-                                <EmptyDescription>{MESSAGES.checker.emptyFilterDescription}</EmptyDescription>
-                            </EmptyHeader>
-                            <Button
-                                size='sm'
-                                variant='outline'
-                                onClick={() => {
-                                    setSearch('')
-                                    setDifficulty('all')
-                                    setVersion('all')
-                                    setRank('all')
-                                    setPersonalOnly(false)
-                                    setUnplayedOnly(false)
-                                }}>
-                                {MESSAGES.checker.resetFilters}
-                            </Button>
-                        </Empty>
-                    ) : (
-                        <div className='grid min-w-0 gap-3'>
-                            {rankSections.map((section) => (
-                                <ChartRankSection key={section.rank} {...section} records={recordsByChartId} onOpenDetails={setSelectedChart} />
-                            ))}
-                        </div>
-                    )}
+                    {renderChartList()}
                 </div>
 
-                {selectedChart && isSessionAligned && (
+                {selectedChart && isSessionAligned && !isRecordsPending && (
                     <ChartDetails
                         key={(initialUserId ?? 'anonymous') + ':' + selectedChart.id}
                         chart={selectedChart}
