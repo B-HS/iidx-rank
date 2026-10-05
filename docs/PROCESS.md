@@ -49,13 +49,17 @@
 
 ## GitHub·Vercel Production 배포
 
-현재 상태: GitHub 첫 커밋 준비, Turso migration·666곡 수집 완료, Vercel 로그인 대기
+현재 상태: 새 설치 빌드 검증 완료, 수정 커밋·Production 재배포 진행 중
 
 이번 작업은 사용자 선택으로 main이 직접 수행합니다. GitHub B-HS/iidx-rank에 commit/push하고 Vercel에 연결하며 Preview 배포는 끕니다. 사용자께서 .env 값을 Vercel에 등록하도록 명시적으로 요청하셨으므로, 이번 전송에 한하여 도구가 값을 처리하되 대화·로그·Git에는 값을 출력하거나 저장하지 않습니다.
 
 - [x] 원격 Git 준비 및 배포 설정·DB 호환성 확인
-- [ ] 소스·문서·설정 선별 staging 후 commit/push
-- [ ] Vercel 프로젝트와 GitHub 저장소 연결, Production 전용 배포 설정
-- [ ] .env 변수를 Production sensitive 환경변수로 등록
+- [x] 소스·문서·설정 선별 staging 후 commit/push
+- [x] Vercel 프로젝트와 GitHub 저장소 연결, Production 전용 배포 설정
+- [x] .env 변수를 Production sensitive 환경변수로 등록
 - [ ] 원격 DB migration·원본 수집·Production 배포 및 실제 응답 검증
 - [ ] 배포 URL·설정·검증 결과 기록
+
+첫 Production 빌드는 shadcn/tailwind.css 의존성이 manifest에 없어 실패했습니다. package.json과 bun.lock에 shadcn을 추가하고 .env 및 기존 node_modules 없는 임시 복사본에서 frozen install과 build를 검증한 뒤 다시 배포합니다.
+
+.env와 기존 node_modules 없는 임시 복사본에서 bun install --frozen-lockfile 성공(722 packages), bun run build 성공을 확인했습니다. 제한된 실행 환경에서 멈춘 빌드는 중단하고 승인된 정상 실행 환경에서 검증했습니다. Next.js 16.3.8의 Cache Components와 홈 Partial Prerender, 모든 API 동적 경로를 확인했습니다.
