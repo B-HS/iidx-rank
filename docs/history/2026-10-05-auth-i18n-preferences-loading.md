@@ -26,4 +26,9 @@
 
 ## 운영
 
-GitHub commit/push 및 Production 반영을 확인한 뒤 결과를 추가합니다.
+- 구현 커밋 77b23b6d0b667330c06ff9008584aef57a0367ce를 GitHub main에 push했고 Vercel Production iidx-rank-6i574wsed-b-hs-projects.vercel.app의 READY를 확인했습니다.
+- 기본 주소 iidx-rank.vercel.app이 프로젝트 도메인에서 빠져 DEPLOYMENT_NOT_FOUND를 반환했습니다. 최신 Production 별칭과 프로젝트 도메인 등록을 복구해 다음 배포에도 유지되도록 했습니다. iidx.hyns.dev도 정상 연결됩니다.
+- 두 운영 도메인 모두 계정을 생성할 수 없는 짧은 비밀번호 입력으로 400 PASSWORD_TOO_SHORT를 확인했습니다. 허용하지 않은 출처는 403 INVALID_ORIGIN으로 차단됩니다.
+- 운영 KO/JP/EN 페이지 200 및 html lang ko/ja/en, DB catalog 200·666개 보면, 사용자 메뉴의 세 언어 선택과 비로그인 저장 안내를 확인했습니다. 운영 계정 생성·삭제는 수행하지 않았습니다.
+- 검증용 로컬 I18n QA 계정 2개와 연결 기록만 제거했습니다. Production 및 다른 로컬 계정은 보존했습니다.
+- 배포 화면 증거는 현재 대화 outputs/iidx-i18n-production.png에 저장했습니다.

@@ -164,7 +164,7 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 ## 가입 오류·KO/JP/EN·비로그인 설정·로딩 크기
 
-현재 상태: 구현·검증 완료, GitHub 및 Production 반영 중
+현재 상태: 구현·검증·GitHub·Production 및 두 운영 주소 확인 완료 (7/7)
 
 - [x] 가입 오류 코드·운영 응답과 초기 로딩/최종 레이아웃 차이 재현
 - [x] 가입 오류 원인 수정·검증된 오류 코드별 안내 및 두 운영 도메인 인증 확인
@@ -172,6 +172,6 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 - [x] 비로그인 표시 설정 저장/복원·계정 설정 분리 및 초기 표시 동기화
 - [x] 로고/시리즈명 공통 크기 계약·실제 랭크 수/열 수/헤더/사이드바와 일치하는 로딩 적용
 - [x] 빌드·가입/오류·언어·설정 지속·로딩 전후 모바일/데스크톱 크기·CLS 검증
-- [ ] 결과 기록·선별 commit/push·Production 배포/운영 확인
+- [x] 결과 기록·선별 commit/push·Production 배포/운영 확인
 
 사용자가 서브에이전트 없이 직접 진행을 명시했습니다. .env/키 파일을 읽거나 쓰지 않습니다. 개인 UUID 캐시·DB 저장·수집 주기는 유지합니다. 일본어 표시 이름 JP의 실제 표준 locale은 ja입니다. 기준: AGENTS.md와 llm-rules 관련 전문, Next 로컬 Cache Components/authentication/i18n 가이드 및 선택한 i18n·Better Auth 공식 문서.
