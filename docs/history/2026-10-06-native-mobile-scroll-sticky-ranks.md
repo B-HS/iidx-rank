@@ -26,4 +26,4 @@ src/app/[locale]/layout.tsx, src/app/globals.css, AppShell, CheckerWorkspace/Loa
 
 ## 운영
 
-GitHub main 및 Production 배포 결과는 배포 확인 후 기록합니다.
+구현 커밋 da3e6cba964d802dd1d103142fea9066e8d59144를 GitHub main에 push하고 iidx-rank-nd6ik44xk-b-hs-projects.vercel.app의 Production READY 및 두 운영 주소 연결을 확인했습니다. 운영 390px 화면에서 documentTop5,224px, body/list overflow:visible, 콘텐츠 헤더 top0, B 랭크 top48, 가로 넘침0을 확인했습니다. 화면 증거는 현재 대화 outputs/iidx-sticky-mobile-production.png에 저장했습니다.

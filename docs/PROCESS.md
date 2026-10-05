@@ -179,11 +179,11 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 ## 모바일 Safari 문서 스크롤·랭크 sticky
 
-현재 상태: 구현·빌드·모바일/데스크톱 검증 완료, GitHub·Production 반영 중
+현재 상태: 구현·검증·GitHub·Production 화면 확인 완료 (4/4), 실제 iPhone 상태 표시줄 탭은 미검증
 
 - [x] 실제 스크롤 주체·overflow 조상과 공식 CSS/Next 문서 확인
 - [x] 모바일 문서 스크롤 복원 및 콘텐츠 헤더/랭크 헤더 sticky·동일 스켈레톤 구조 적용
 - [x] 모바일/데스크톱 스크롤·랭크 교체·접기·모달 복원·격자·빌드 검증
-- [ ] 결과·실기기 검증 한계 기록 및 선별 commit/push·Production 확인
+- [x] 결과·실기기 검증 한계 기록 및 선별 commit/push·Production 확인
 
 사용자가 서브에이전트 없이 직접 진행을 선택했습니다. 모바일은 문서 스크롤, 데스크톱은 기존 내부 목록 스크롤을 유지하며 CSS sticky를 사용합니다. 모달과 사이드바의 Radix 스크롤 잠금은 유지합니다. 기준: AGENTS.md, llm-rules 관련 전문, llm-rules-process/verify/save-docs, Next 로컬 스타일 가이드, MDN position 문서.
