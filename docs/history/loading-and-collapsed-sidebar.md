@@ -18,4 +18,4 @@
 
 공식 문서: https://nextjs.org/docs/app/api-reference/file-conventions/loading · https://tanstack.com/query/latest/docs/framework/react/guides/background-fetching-indicators
 
-Production 반영 확인은 배포 완료 후 기록합니다.
+구현 commit 6cd126e이 GitHub main에 반영됐습니다. Production 배포 https://iidx-rank-4ksqahqhk-b-hs-projects.vercel.app가 READY이며 https://iidx-rank.vercel.app와 https://iidx.hyns.dev에 연결됐습니다. 운영 응답 HTTP 200, 필터·개인 기록 Skeleton과 접힘 footer 클래스가 포함됩니다. 운영 첫 방문에서도 실제 Suspense의 필터·헤더·랭크 Skeleton을 관찰했습니다. 접힌 메뉴·레일 폭 약48px, 테마·로그인 버튼 각각 약48×48px, 아이콘 가로 중심 약24px·세로 간격 약48px을 확인했습니다. 캡처 iidx-rank-collapsed-sidebar.png와 iidx-rank-skeleton.png를 저장했고 검증용 viewport를 복구했습니다.
