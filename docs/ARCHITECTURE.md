@@ -4,16 +4,18 @@
 
 - catalog 응답: { charts, source }. chart: { id, title, difficulty: 'H'|'A'|'L', version, normalRank, hardRank, normalPersonal, hardPersonal }. rank: 'F'|'E'|'D'|'C'|'B'|'B+'|'A'|'A+'|'S'|'S+'|null. version은 원본 버전 이름 문자열. id는 정규화된 제목+패턴 종류 기반 안정적 식별자(랭크/정렬과 독립).
 - source: { updatedAt: string|null, fetchedAt: ISO string|null, chartCount: number, status: 'ready'|'empty', url: string }. 원본 게시일과 서버 수집시각을 구분합니다. 파싱 실패 시 정상 저장된 데이터를 유지하며 성공으로 표시하지 않습니다.
-- checker 응답: { userId, records }. record: { chartId, lamp: 'NO_PLAY'|'FAILED'|'ASSIST'|'EASY'|'CLEAR'|'HARD'|'EX_HARD'|'FULL_COMBO', memo, updatedAt }. UUID는 서버 세션에서 얻습니다. 요청에서 사용자를 선택하게 하지 않습니다.
-- PATCH /api/records: { chartId, lamp, memo }. 인증·Zod·같은 출처 확인 후 자기 기록만 upsert. DB 반영 후 해당 사용자 서버 태그 만료, 클라이언트 관련 캐시 무효화.
+- checker 응답: { userId, records }. record: { chartId, lamp: 'NO_PLAY'|'FAILED'|'ASSIST'|'EASY'|'CLEAR'|'HARD'|'EX_HARD'|'FULL_COMBO', scoreGrade: 'F'|'E'|'D'|'C'|'B'|'A'|'AA'|'AAA'|null, memo, updatedAt }. UUID는 서버 세션에서 얻습니다. 요청에서 사용자를 선택하게 하지 않습니다. 비활성 곡의 기록도 보존하여 반환하므로 집계는 현재 catalog의 곡 기준으로 계산합니다.
+- PATCH /api/records: { chartId, lamp, memo?, scoreGrade? }. memo와 scoreGrade는 생략하면 기존 값을 보존하고, memo ''와 scoreGrade null은 값을 지웁니다. 카드의 빠른 램프 변경은 chartId와 lamp만 보내며 상세 폼은 전체 필드를 보냅니다. 인증·Zod·같은 출처 확인 후 자기 기록만 upsert. DB 반영 후 해당 사용자 서버 태그 만료, 클라이언트 관련 캐시 무효화.
 - GET /api/catalog, GET /api/records. 모든 도메인 API 응답은 {success:true,data:DTO}, 오류는 {success:false,error:{code,message}}입니다. better-auth API는 라이브러리의 네이티브 응답 계약을 유지합니다. POST /api/cache/refresh는 인증 사용자 자신의 records 캐시만 즉시 만료합니다.
+- GET/PATCH /api/preferences/display: 인증 사용자의 표시 설정 { userId, preferences: { versionDisplay: 'logo'|'title', logoOpacity: 0~100 정수 } }. PATCH는 strict 객체 검증·같은 출처 확인 후 자기 설정만 저장하고 해당 사용자 태그를 만료합니다. 비로그인 설정은 서버에 저장하지 않고 브라우저에 둡니다.
 - POST /api/catalog/sync는 인증과 원본 요청 cooldown을 확인한 뒤 고정 allowlist 원본 URL만 fetch하여 동기화합니다. 사용자 URL 입력 불허. 동시 동기화 중복 방지, 전체 원자적 교체. DB 역할 admin만 수동 갱신 허용. GET은 CRON_SECRET 인증 전용이며 UTC 당일 중복 수집을 생략합니다.
 - /api/auth/[...all]: better-auth. 이메일/비밀번호 회원가입·로그인으로 로컬 사용. UUID 생성. 런타임 secret은 사용자가 제공하며 에이전트는 .env에 접근하지 않습니다.
 
 ## 캐시
 
 - cacheComponents:true로 PPR과 use cache를 함께 활성화합니다. 정적 셸과 요청시간 세션/기록 영역을 Suspense로 분리합니다. 구버전 experimental.ppr/dynamic 옵션은 혼용하지 않습니다.
-- 공개 catalog 'use cache' DB 조회: catalog 태그, 5분 재검증·1시간 만료. 원본 수집은 빌드·페이지·catalog GET에서 하지 않고 하루 1회 Cron과 관리자 수동 동기화 경로에서 수행합니다. snapshot revision을 캐시 키에 포함합니다.
+- 공개 catalog 'use cache' DB 조회: catalog 태그, 5분 재검증·1시간 만료. 원본 수집은 빌드·페이지·catalog GET에서 하지 않고 하루 1회 Cron과 관리자 수동 동기화 경로에서 수행합니다. catalog GET은 snapshot revision을 캐시 키에 포함합니다. 홈 페이지의 정적 셸과 그 값을 넘겨받는 서버 프리페치는 요청시간 값을 읽을 수 없어 revision 없이 catalog 태그 만료와 5분 재검증에 의존합니다.
+- 표시 설정 'use cache' DB 조회: user UUID와 사용자별 revision이 키에 포함되고 user:<uuid>:display-preferences 태그로 분리합니다. 60초 재검증·5분 만료, 변경 직후 revalidateTag(tag,{expire:0}).
 - records 'use cache' DB 조회: 함수 인자 user UUID가 키에 포함되고 user:<uuid>:records 태그로 분리합니다. 세션 인증은 캐시 밖에서 매 요청 검증합니다. 60초 재검증·5분 만료, 변경 직후 revalidateTag(tag,{expire:0}). 사용자별 revision을 함수 인자 키에 포함하여 저장 직후 이전 캐시를 재사용하지 않습니다.
 - 개인 API HTTP 응답은 private,no-store입니다. 서버 내부의 UUID 캐시와 브라우저/CDN 응답 캐시는 다릅니다.
 - 서버 QueryClient는 요청마다 새로 생성, queryOptions를 재사용하여 prefetchQuery. 서버는 DB 캐시 loader를 queryFn으로 제공하고 내부 API loopback 호출은 하지 않습니다.

@@ -199,3 +199,21 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 - [x] 결과 기록·선별 commit/push·Production 확인
 
 사용자가 main 직접 수행을 선택했습니다. 모바일 문서 스크롤과 데스크톱 목록 스크롤을 보존합니다. 일반 조회는 DB에서만 읽고 기존 관리자/일일 원본 갱신 경로는 유지합니다. 기준: AGENTS.md, llm-rules 전문 및 process/verify/save-docs, Next 설치 CSS 가이드, Vercel Cron 공식 문서.
+
+
+## 버그·수정 필요 지점 감사 및 수정
+
+현재 상태: 수정·검증·기록·GitHub 반영 완료 (5/5), 로컬 기존 환경의 build와 브라우저 재현은 미검증
+
+- [x] a. 영역별 읽기 전용 감사 — 서버·데이터·캐시·인증(Opus), 클라이언트 상태·UI(Opus), 기준 검증 typecheck·lint·test·메시지 키 정합(Sonnet) 병렬
+- [x] b. main이 실제 파일로 각 발견을 재확인하고 수정 대상·보류 대상 분류
+- [x] c. 파일 소유권이 겹치지 않는 단위로 수정 위임 및 통합
+    - 작업자 A(Opus): 빠른 램프 변경의 메모·DJ 랭크 덮어쓰기, 비로그인 세션 재조회 시 화면 초기화, 테마 아이콘 하이드레이션 불일치, 슬라이더 키보드 포커스 유실, 기록률 분자의 비활성 곡 포함 — checker.dto.ts, checker.server.ts, checker dto 테스트, checker-workspace.tsx, app-shell.tsx, display-settings.tsx, preferences.query.ts
+    - 작업자 B(Sonnet): 오류 화면 retry, 모바일 로딩 스켈레톤 높이, 카드 키보드 클릭 억제 잔존, 수집 스크립트 DB 연결 종료, typecheck 스크립트의 타입 생성 선행, 현지화 404 경로 — error.tsx, checker-loading.tsx, chart-card.tsx, scripts/sync-source.ts, package.json, [locale]/[...rest]/page.tsx
+    - main: docs/ARCHITECTURE.md·docs/CACHE.md 계약 갱신, docs/bug·docs/quality-assurance 기록
+- [x] d. 변경 위험에 비례한 최소 검증 — typecheck 0, lint 오류 0·기존 경고 3, test 17 pass, 임시 SQLite의 upsertRecord 13개 단언 일치, 임시 SQLite 지정 build 0
+- [x] e. 결과 기록(docs/bug 등)·논리 단위 선별 commit/push — 수정 10개 커밋과 문서 커밋
+
+현지화 404용 [locale]/[...rest]/page.tsx는 Cache Components에서 200 소프트 404가 되어 제거하고 보류 항목으로 옮겼습니다. 로컬 env의 DATABASE_URL이 turso: 스킴이라 기존 환경의 build는 이번 변경과 무관하게 실패했습니다. 수정 내역은 docs/bug/2026-10-06-audit-fixes.md, 보류·결정 필요 항목은 docs/quality-assurance/2026-10-06-audit-deferred.md, 진행 이력은 docs/history/2026-10-06-audit-and-fixes.md에 있습니다.
+
+사용자가 workflow 사용과 Fable 미사용을 명시했습니다. main은 Opus, 하위는 난이도에 따라 Opus(의미적 감사·까다로운 수정)와 Sonnet(범위가 분명한 수정·기계 검증)으로 배정합니다. 하위 에이전트는 Git과 .env에 접근하지 않습니다. 확인된 결함만 최소 변경으로 고치고 요청 밖 리팩토링은 하지 않습니다. 기준: AGENTS.md, llm-rules 전문, docs/ARCHITECTURE.md, docs/CACHE.md, 설치본 Next 문서.
