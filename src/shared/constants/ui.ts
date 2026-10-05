@@ -1,0 +1,13 @@
+export const THEME_STORAGE_KEY = 'iidx-rank-theme'
+export const SHELL_SIDEBAR_WIDTH_PX = 256
+export const SHELL_SIDEBAR_COLLAPSED_WIDTH_PX = 48
+export const SHELL_SIDEBAR_MOBILE_WIDTH_PX = 288
+export const SHELL_CONTEXT_PANEL_WIDTH_PX = 320
+export const SHELL_CONTEXT_PANEL_BREAKPOINT_PX = 1280
+export const SHELL_PANEL_INSET_PX = 12
+export const SHELL_PANEL_GUTTER_PX = 1
+export const SHELL_RAIL_CHROME_HEIGHT_PX = 48
+export const SHELL_NAV_ITEM_HEIGHT_PX = 36
+export const MOTION_FADE_DURATION_MS = 180
+export const MOTION_BAR_DURATION_MS = 240
+export const MOTION_EASE_STANDARD = 'cubic-bezier(0.4, 0, 0.2, 1)'

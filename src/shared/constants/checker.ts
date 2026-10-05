@@ -1,0 +1,1 @@
+export const CHART_MEMO_TEXTAREA_ROWS = 4

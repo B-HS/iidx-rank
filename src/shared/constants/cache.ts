@@ -1,0 +1,4 @@
+export const DEFAULT_QUERY_STALE_TIME_MS = 60_000
+export const CATALOG_QUERY_STALE_TIME_MS = 5 * 60_000
+export const USER_QUERY_STALE_TIME_MS = 60_000
+export const QUERY_CACHE_GC_TIME_MS = 5 * 60_000
