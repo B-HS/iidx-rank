@@ -138,11 +138,11 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 ## 글자 배경 제거·난이도 왼쪽 테두리
 
-현재 상태: 수정·빌드·포맷·데스크톱/모바일 검증 완료, 운영 반영 진행 중
+현재 상태: 글자 배경 제거·왼쪽 2px 난이도 테두리·검증·GitHub·Production 반영 완료
 
 - [x] 카드 글자 배경과 난이도/램프/격자 구조 확인
 - [x] 곡명·시리즈명·DJ 랭크 배경 제거 및 난이도 왼쪽 2px 적용
 - [x] 빌드·데스크톱/모바일 격자·램프 위치 검증
-- [ ] 결과 기록·선별 commit/push·Production 확인
+- [x] 결과 기록·선별 commit/push·Production 확인
 
 사용자가 main 직접 수행을 선택했습니다. 기존 5px 램프 및 중립색 격자 경계는 유지합니다. 기준: AGENTS.md와 llm-rules 관련 전문 및 Next 로컬 CSS 가이드.

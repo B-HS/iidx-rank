@@ -13,4 +13,4 @@ src/app/globals.css의 난이도 색상 테두리는 왼쪽 2px만 적용합니�
 - 카드 글자 span의 backgroundColor는 rgba(0,0,0,0). 램프 너비 5px, 카드 왼쪽 경계로부터 2px 안쪽에 있어 난이도 테두리와 겹치지 않습니다.
 - 모바일 390px: 3열, document width 390px, 모든 그리드의 마지막 행 빈칸 유지 확인. 실제 모바일 화면도 확인했습니다.
 
-운영 배포 결과는 완료 후 기록합니다.
+구현 commit 7ec8274 main push 성공. 자동 Production iidx-rank-40oimup89-b-hs-projects.vercel.app READY. 운영 화면의 카드 666개, 글자 배경 투명, 왼쪽 테두리 2px·나머지 중립색을 확인했습니다. 화면 증거를 저장했고 임시 서버·검증 탭·viewport를 정리했습니다.
