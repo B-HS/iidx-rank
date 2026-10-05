@@ -46,15 +46,15 @@ const FOOTER_MENU_BUTTON_CLASS_NAME =
 const ThemeControl: FC = () => {
     const t = useTranslations()
     const { resolvedTheme, setTheme } = useTheme()
-    const isDark = resolvedTheme === 'dark'
     return (
         <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
             <SidebarMenuButton
                 className={FOOTER_MENU_BUTTON_CLASS_NAME}
                 aria-label={t('navigation.theme')}
                 tooltip={t('navigation.theme')}
-                onClick={() => setTheme(isDark ? 'light' : 'dark')}>
-                {isDark ? <Sun /> : <Moon />}
+                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
+                <Sun className='hidden dark:block' />
+                <Moon className='dark:hidden' />
                 <span className='min-w-0 flex-1 truncate text-left group-data-[collapsible=icon]:hidden'>{t('navigation.theme')}</span>
             </SidebarMenuButton>
         </SidebarMenuItem>
