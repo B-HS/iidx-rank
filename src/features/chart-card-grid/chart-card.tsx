@@ -6,6 +6,7 @@ import { getSeriesLogo } from '@entities/catalog/catalog-series'
 import type { Record as ChartRecord } from '@entities/checker/checker.dto'
 import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
 import { CHART_LONG_PRESS_MS, CHART_PRESS_MOVE_TOLERANCE_PX, CHART_LAMP_WIDTH_PX, CHART_LAMP_BLINK_DURATION_MS } from '@shared/constants/checker'
+import { cn } from '@shared/lib/utils'
 import { MESSAGES } from '@shared/messages/messages'
 import { Card, CardContent } from '@shared/ui/card'
 import { Skeleton } from '@shared/ui/skeleton'
@@ -93,7 +94,10 @@ export const ChartCard: FC<Props> = ({
                         MESSAGES.lamp[lamp] +
                         (record?.scoreGrade ? ' · ' + record.scoreGrade : '')
                     }
-                    className='relative flex h-full min-h-12 w-full min-w-0 touch-pan-y select-none flex-col justify-between gap-1 py-1.5 pr-1.5 pl-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring'
+                    className={cn(
+                        'relative flex w-full min-w-0 touch-pan-y select-none flex-col justify-between gap-1 py-1.5 pr-1.5 pl-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+                        logo ? 'h-10 min-h-10' : 'h-full min-h-12',
+                    )}
                     onPointerDown={(event) => {
                         if (isDisabled || event.button !== 0) return
                         handleCancelPress()
@@ -129,8 +133,18 @@ export const ChartCard: FC<Props> = ({
                             onOpenDetails(chart)
                         }
                     }}>
-                    <span className='line-clamp-2 min-w-0 break-words text-2xs leading-tight font-medium'>{chart.title}</span>
-                    <span className='flex min-w-0 items-center justify-between gap-1 text-2xs leading-tight text-muted-foreground'>
+                    <span
+                        className={cn(
+                            'line-clamp-2 min-w-0 break-words text-2xs leading-tight font-medium',
+                            logo && (record?.scoreGrade || isRecordsPending || isSaving) && 'pr-8',
+                        )}>
+                        {chart.title}
+                    </span>
+                    <span
+                        className={cn(
+                            'flex min-w-0 items-center justify-between gap-1 text-2xs leading-tight text-muted-foreground',
+                            logo && 'absolute right-1.5 bottom-1',
+                        )}>
                         <span className='min-w-0 flex-1 truncate'>{logo ? <span className='sr-only'>{chart.version}</span> : chart.version}</span>
                         {(isRecordsPending || isSaving) && <Skeleton className='h-3 w-8 shrink-0' />}
                         {!isRecordsPending && !isSaving && record?.scoreGrade && (

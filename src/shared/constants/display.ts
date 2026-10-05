@@ -1,5 +1,5 @@
 export const VERSION_DISPLAYS = ['logo', 'title'] as const
-export const DEFAULT_LOGO_OPACITY = 70
+export const DEFAULT_LOGO_OPACITY = 10
 export const MIN_LOGO_OPACITY = 0
 export const MAX_LOGO_OPACITY = 100
 export const LOGO_OPACITY_STEP = 5

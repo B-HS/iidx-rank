@@ -4,6 +4,7 @@ import type { Chart } from '@entities/catalog/catalog.dto'
 import type { Record as ChartRecord } from '@entities/checker/checker.dto'
 import { ChartCard } from '@features/chart-card-grid/chart-card'
 import { CHART_CARD_GRID_CLASS_NAME, CHART_EMPTY_CELL_LAYOUTS } from '@shared/constants/checker'
+import { cn } from '@shared/lib/utils'
 import { Card } from '@shared/ui/card'
 
 type Props = Pick<
@@ -24,7 +25,12 @@ export const ChartCardGrid: FC<Props> = ({ charts, records, label, pendingChartI
             })),
         ).map((cell) => (
             <li key={cell.id} aria-hidden='true' className={cell.className + ' min-w-0'}>
-                <Card className='checker-chart-empty h-full min-h-12 rounded-none bg-card p-0 shadow-none ring-0' />
+                <Card
+                    className={cn(
+                        'checker-chart-empty h-full rounded-none bg-card p-0 shadow-none ring-0',
+                        cardProps.versionDisplay === 'logo' ? 'min-h-10' : 'min-h-12',
+                    )}
+                />
             </li>
         ))}
     </ul>

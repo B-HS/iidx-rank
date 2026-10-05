@@ -3,7 +3,7 @@
 import { type CSSProperties, type FC, useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, SlidersHorizontal } from 'lucide-react'
 
 import { authClient } from '@entities/auth/auth.api'
 import { type Chart, DIFFICULTIES, RANKS } from '@entities/catalog/catalog.dto'
@@ -27,6 +27,7 @@ import { MESSAGES } from '@shared/messages/messages'
 import { AppShell } from '@widgets/app-shell/app-shell'
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert'
 import { Button } from '@shared/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@shared/ui/dialog'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@shared/ui/empty'
 import { Progress } from '@shared/ui/progress'
 import { SidebarTrigger } from '@shared/ui/sidebar'
@@ -52,6 +53,8 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
     const [unplayedOnly, setUnplayedOnly] = useState(false)
     const [selectedChart, setSelectedChart] = useState<Chart | null>(null)
     const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
+    const [isFiltersOpen, setIsFiltersOpen] = useState(false)
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false)
     const { data: session, isPending: isSessionPending } = authClient.useSession()
     const { data: catalog } = useCatalog()
     const isSessionAligned = !identityTransition.isPending && (isSessionPending || (session?.user.id ?? null) === initialUserId)
@@ -218,30 +221,6 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
     const sidebarContent = (
         <div className='grid min-w-0 gap-px bg-border'>
             <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
-                <h2 className='checker-micro-label'>{MESSAGES.checker.filtersTitle}</h2>
-                {renderFilters()}
-            </section>
-            <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
-                <h2 className='checker-micro-label'>{MESSAGES.display.title}</h2>
-                {isPreferencesLoadFailed ? (
-                    <Alert>
-                        <AlertDescription>{MESSAGES.display.loadError}</AlertDescription>
-                        <Button size='sm' variant='outline' onClick={() => void preferencesQuery.refetch()}>
-                            {MESSAGES.common.retry}
-                        </Button>
-                    </Alert>
-                ) : (
-                    <DisplaySettings
-                        value={preferences}
-                        isLoading={isPreferencesPending}
-                        isSaving={savePreferences.isPending}
-                        isAuthenticated={isAuthenticated}
-                        onPreview={handlePreviewPreferences}
-                        onSave={handleSavePreferences}
-                    />
-                )}
-            </section>
-            <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
                 <div className='flex min-w-0 items-center justify-between gap-2'>
                     <h2 className='checker-micro-label'>{MESSAGES.checker.sourceTitle}</h2>
                     {catalog.source.status === 'ready' && (
@@ -320,7 +299,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
     const renderChartList = () => {
         if (isRecordsPending && unplayedOnly) {
             return (
-                <div role='status' aria-label={MESSAGES.checker.loadingRecords} aria-busy='true' className='grid min-w-0 gap-3'>
+                <div role='status' aria-label={MESSAGES.checker.loadingRecords} aria-busy='true' className='grid min-w-0'>
                     <span className='sr-only'>{MESSAGES.checker.loadingRecords}</span>
                     {CHECKER_SKELETON_SECTION_IDS.map((id) => (
                         <ChartRankSkeleton key={id} />
@@ -370,7 +349,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
         }
 
         return (
-            <div className='grid min-w-0 gap-3'>
+            <div className='grid min-w-0'>
                 {rankSections.map((section) => (
                     <ChartRankSection
                         mode={mode}
@@ -409,11 +388,11 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
     }, [identityTransition, initialUserId, isSessionPending, queryClient, router, session?.user.id])
 
     return (
-        <AppShell sidebarContent={sidebarContent}>
+        <AppShell sidebarContent={sidebarContent} onOpenSettings={() => setIsSettingsOpen(true)}>
             <section style={chartDisplayStyle} className='flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden'>
                 <header className='flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3'>
                     <div className='flex min-w-0 items-center gap-2'>
-                        <SidebarTrigger aria-label={MESSAGES.navigation.openFilters} className='shrink-0 md:hidden' />
+                        <SidebarTrigger aria-label={MESSAGES.navigation.openSidebar} className='shrink-0 md:hidden' />
                         <div className='min-w-0'>
                             <h1 className='truncate text-sm font-semibold'>
                                 {mode === 'normal' ? MESSAGES.checker.normalMode : MESSAGES.checker.hardMode} {MESSAGES.checker.title}
@@ -429,6 +408,9 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
                                 MESSAGES.checker.resultCount(filteredCharts.length)
                             )}
                         </div>
+                        <Button variant='ghost' size='icon-sm' aria-label={MESSAGES.navigation.openFilters} onClick={() => setIsFiltersOpen(true)}>
+                            <SlidersHorizontal />
+                        </Button>
                         {isAuthenticated && (
                             <Button
                                 variant='ghost'
@@ -477,6 +459,40 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
                         onRequestSignIn={() => setIsAuthDialogOpen(true)}
                     />
                 )}
+                <Dialog open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
+                    <DialogContent className='max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md'>
+                        <DialogHeader>
+                            <DialogTitle>{MESSAGES.checker.filtersTitle}</DialogTitle>
+                            <DialogDescription>{MESSAGES.checker.filtersDescription}</DialogDescription>
+                        </DialogHeader>
+                        {renderFilters()}
+                    </DialogContent>
+                </Dialog>
+                <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+                    <DialogContent className='max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md'>
+                        <DialogHeader>
+                            <DialogTitle>{MESSAGES.display.title}</DialogTitle>
+                            <DialogDescription>{MESSAGES.display.description}</DialogDescription>
+                        </DialogHeader>
+                        {isPreferencesLoadFailed ? (
+                            <Alert>
+                                <AlertDescription>{MESSAGES.display.loadError}</AlertDescription>
+                                <Button size='sm' variant='outline' onClick={() => void preferencesQuery.refetch()}>
+                                    {MESSAGES.common.retry}
+                                </Button>
+                            </Alert>
+                        ) : (
+                            <DisplaySettings
+                                value={preferences}
+                                isLoading={isPreferencesPending}
+                                isSaving={savePreferences.isPending}
+                                isAuthenticated={isAuthenticated}
+                                onPreview={handlePreviewPreferences}
+                                onSave={handleSavePreferences}
+                            />
+                        )}
+                    </DialogContent>
+                </Dialog>
                 <AuthDialogWidget open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
             </section>
         </AppShell>

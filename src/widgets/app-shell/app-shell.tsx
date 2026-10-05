@@ -1,10 +1,10 @@
 'use client'
 
-import { type CSSProperties, type FC, type PropsWithChildren, type ReactNode } from 'react'
+import { type CSSProperties, type FC, type PropsWithChildren, type ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
-import { LogIn, LogOut, Moon, Music2, Sun, UserRound } from 'lucide-react'
+import { LogIn, LogOut, Moon, Music2, Settings, Sun, UserRound } from 'lucide-react'
 
 import { authClient } from '@entities/auth/auth.api'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
@@ -41,6 +41,7 @@ import { TooltipProvider } from '@shared/ui/tooltip'
 
 type Props = PropsWithChildren<{
     sidebarContent?: ReactNode
+    onOpenSettings?: () => void
 }>
 
 const FOOTER_MENU_ITEM_CLASS_NAME = 'flex h-full min-w-0 items-center'
@@ -65,7 +66,8 @@ const ThemeControl: FC = () => {
     )
 }
 
-const AccountControl: FC = () => {
+const AccountControl: FC<Pick<Props, 'onOpenSettings'>> = ({ onOpenSettings }) => {
+    const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
     const identityTransition = useIdentityTransition()
     const { data: session, isPending } = authClient.useSession()
     const handleSignOut = async () => {
@@ -99,53 +101,49 @@ const AccountControl: FC = () => {
         )
     }
 
-    if (session?.user) {
-        const displayName = session.user.name ?? session.user.email
+    const displayName = session?.user.name ?? session?.user.email ?? MESSAGES.navigation.accountMenu
 
-        return (
-            <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <SidebarMenuButton
-                            className={FOOTER_MENU_BUTTON_CLASS_NAME}
-                            aria-label={MESSAGES.navigation.accountMenu}
-                            tooltip={MESSAGES.navigation.accountMenu}>
-                            <UserRound />
-                            <span className='min-w-0 truncate group-data-[collapsible=icon]:hidden'>{displayName}</span>
-                        </SidebarMenuButton>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align='end' side='top' className='w-60'>
-                        <DropdownMenuLabel className='grid gap-0.5'>
-                            <span className='truncate'>{displayName}</span>
-                            <span className='truncate text-xs font-normal text-muted-foreground'>{session.user.email}</span>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
+    return (
+        <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton
+                        className={FOOTER_MENU_BUTTON_CLASS_NAME}
+                        aria-label={MESSAGES.navigation.accountMenu}
+                        tooltip={MESSAGES.navigation.accountMenu}>
+                        <UserRound />
+                        <span className='min-w-0 truncate group-data-[collapsible=icon]:hidden'>{displayName}</span>
+                    </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align='end' side='top' className='w-60'>
+                    <DropdownMenuLabel className='grid gap-0.5'>
+                        <span className='truncate'>{displayName}</span>
+                        <span className='truncate text-xs font-normal text-muted-foreground'>{session?.user.email ?? MESSAGES.navigation.guest}</span>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem disabled={!onOpenSettings} onSelect={onOpenSettings}>
+                        <Settings />
+                        {MESSAGES.navigation.settings}
+                    </DropdownMenuItem>
+                    {session?.user ? (
                         <DropdownMenuItem onSelect={() => void handleSignOut()}>
                             <LogOut />
                             {MESSAGES.navigation.signOut}
                         </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </SidebarMenuItem>
-        )
-    }
-
-    return (
-        <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
-            <AuthDialogWidget>
-                <SidebarMenuButton
-                    className={FOOTER_MENU_BUTTON_CLASS_NAME}
-                    aria-label={MESSAGES.navigation.signIn}
-                    tooltip={MESSAGES.navigation.signIn}>
-                    <LogIn />
-                    <span className='group-data-[collapsible=icon]:hidden'>{MESSAGES.navigation.signIn}</span>
-                </SidebarMenuButton>
-            </AuthDialogWidget>
+                    ) : (
+                        <DropdownMenuItem onSelect={() => setIsAuthDialogOpen(true)}>
+                            <LogIn />
+                            {MESSAGES.navigation.signIn}
+                        </DropdownMenuItem>
+                    )}
+                </DropdownMenuContent>
+            </DropdownMenu>
+            <AuthDialogWidget open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
         </SidebarMenuItem>
     )
 }
 
-export const AppShell: FC<Props> = ({ children, sidebarContent }) => (
+export const AppShell: FC<Props> = ({ children, sidebarContent, onOpenSettings }) => (
     <TooltipProvider>
         <SidebarProvider
             className='h-full min-h-0 w-full overflow-hidden'
@@ -186,7 +184,7 @@ export const AppShell: FC<Props> = ({ children, sidebarContent }) => (
                     <SidebarFooter className='h-12 shrink-0 gap-0 bg-sidebar p-0 group-data-[collapsible=icon]:h-24'>
                         <SidebarMenu className='grid h-full grid-cols-2 items-stretch gap-0 group-data-[collapsible=icon]:grid-cols-1'>
                             <ThemeControl />
-                            <AccountControl />
+                            <AccountControl onOpenSettings={onOpenSettings} />
                         </SidebarMenu>
                     </SidebarFooter>
                 </Sidebar>
