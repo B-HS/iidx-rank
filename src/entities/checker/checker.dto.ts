@@ -16,7 +16,7 @@ export const RecordSchema = z.object({
 export type Record = z.infer<typeof RecordSchema>
 
 export const RecordInputSchema = RecordSchema.omit({ updatedAt: true }).extend({
-    memo: RecordSchema.shape.memo.default(''),
+    memo: RecordSchema.shape.memo.optional(),
     scoreGrade: RecordSchema.shape.scoreGrade.removeDefault().optional(),
 })
 

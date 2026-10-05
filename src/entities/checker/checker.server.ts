@@ -53,7 +53,7 @@ export const upsertRecord = async (userId: string, input: RecordInput) => {
     const validatedUserId = CheckerSchema.shape.userId.parse(userId)
     const validatedInput = RecordInputSchema.parse(input)
     const database = getDb()
-    const record = RecordSchema.parse({ ...validatedInput, updatedAt: new Date().toISOString() })
+    const record = RecordSchema.parse({ ...validatedInput, memo: validatedInput.memo ?? '', updatedAt: new Date().toISOString() })
 
     return await database.transaction(async (transaction) => {
         const charts = await transaction
@@ -71,8 +71,8 @@ export const upsertRecord = async (userId: string, input: RecordInput) => {
                 target: [userRecord.userId, userRecord.chartId],
                 set: {
                     lamp: record.lamp,
-                    memo: record.memo,
                     updatedAt: record.updatedAt,
+                    ...(validatedInput.memo === undefined ? {} : { memo: record.memo }),
                     ...(validatedInput.scoreGrade === undefined ? {} : { scoreGrade: record.scoreGrade }),
                 },
             })
