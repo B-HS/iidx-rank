@@ -28,7 +28,7 @@ export const ChartCardGrid: FC<Props> = ({ charts, records, label, pendingChartI
                 <Card
                     className={cn(
                         'checker-chart-empty h-full rounded-none bg-card p-0 shadow-none ring-0',
-                        cardProps.versionDisplay === 'logo' ? 'min-h-10' : 'min-h-12',
+                        cardProps.versionDisplay === 'logo' ? 'min-h-10' : 'min-h-14',
                     )}
                 />
             </li>

@@ -26,3 +26,10 @@ export const getCatalog = async () => {
     const { generation } = await readCatalogState()
     return await loadCatalog(generation)
 }
+
+export const getCatalogForShell = async () => {
+    'use cache'
+    cacheTag(CATALOG_CACHE_TAG)
+    cacheLife({ stale: CATALOG_CACHE_STALE_SECONDS, revalidate: CATALOG_CACHE_REVALIDATE_SECONDS, expire: CATALOG_CACHE_EXPIRE_SECONDS })
+    return await getCatalog()
+}

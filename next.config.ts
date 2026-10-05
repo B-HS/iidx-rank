@@ -1,8 +1,6 @@
+import createNextIntlPlugin from 'next-intl/plugin'
 import type { NextConfig } from 'next'
 
-const nextConfig: NextConfig = {
-    cacheComponents: true,
-    reactCompiler: true,
-}
-
-export default nextConfig
+const nextConfig: NextConfig = { cacheComponents: true, reactCompiler: true }
+const withNextIntl = createNextIntlPlugin('./src/shared/i18n/request.ts')
+export default withNextIntl(nextConfig)

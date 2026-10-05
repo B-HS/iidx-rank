@@ -1,6 +1,5 @@
 import { z } from 'zod'
-
-import { MESSAGES } from '@shared/messages/messages'
+import ko from '@shared/messages/ko.json'
 
 const ApiErrorEnvelopeSchema = z.object({
     success: z.literal(false),
@@ -27,7 +26,7 @@ export const apiRequest = async <Output>(endpoint: string, dataSchema: z.ZodType
         response = await fetch(endpoint, { ...init, cache: 'no-store', credentials: 'same-origin', headers })
         payload = await response.json()
     } catch {
-        throw new Error(MESSAGES.common.unknownError)
+        throw new Error(ko.common.unknownError)
     }
 
     const errorEnvelope = ApiErrorEnvelopeSchema.safeParse(payload)
@@ -39,13 +38,13 @@ export const apiRequest = async <Output>(endpoint: string, dataSchema: z.ZodType
     const successEnvelope = ApiSuccessEnvelopeSchema.safeParse(payload)
 
     if (!successEnvelope.success || !response.ok) {
-        throw new Error(MESSAGES.common.unknownError)
+        throw new Error(ko.common.unknownError)
     }
 
     const parsedData = dataSchema.safeParse(successEnvelope.data.data)
 
     if (!parsedData.success) {
-        throw new Error(MESSAGES.common.unknownError)
+        throw new Error(ko.common.unknownError)
     }
 
     return parsedData.data

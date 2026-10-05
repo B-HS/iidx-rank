@@ -1,41 +1,63 @@
-import { type FC } from 'react'
-
+import { useTranslations } from 'next-intl'
+import { SlidersHorizontal } from 'lucide-react'
+import type { FC } from 'react'
+import type { Catalog } from '@entities/catalog/catalog.dto'
+import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
+import { groupChartsByRank } from '@entities/catalog/catalog-ranks'
 import { ChartRankSkeleton } from '@features/checker-skeleton/chart-rank-skeleton'
 import { CheckerSidebarSkeleton } from '@features/checker-skeleton/checker-sidebar-skeleton'
-import { CHECKER_SKELETON_SECTION_IDS } from '@shared/constants/checker'
-import { MESSAGES } from '@shared/messages/messages'
+import { Button } from '@shared/ui/button'
 import { SidebarTrigger } from '@shared/ui/sidebar'
 import { Skeleton } from '@shared/ui/skeleton'
 import { AppShell } from '@widgets/app-shell/app-shell'
 
-type Props = {
-    label: string
-}
-
-export const CheckerLoading: FC<Props> = ({ label }) => (
-    <AppShell sidebarContent={<CheckerSidebarSkeleton />}>
-        <section aria-label={label} aria-busy='true' className='flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden'>
-            <span role='status' className='sr-only'>
-                {label}
-            </span>
-            <header className='flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3'>
-                <div className='flex min-w-0 items-center gap-2'>
-                    <SidebarTrigger aria-label={MESSAGES.navigation.openSidebar} className='shrink-0 md:hidden' />
-                    <div aria-hidden='true' className='grid min-w-0 gap-1'>
-                        <Skeleton className='h-4 w-48 max-w-full' />
-                        <Skeleton className='hidden h-3 w-64 max-w-full sm:block' />
+type Props = { catalog?: Catalog; versionDisplay?: DisplayPreferencesInput['versionDisplay'] }
+export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
+    const t = useTranslations()
+    const sections = catalog ? groupChartsByRank(catalog.charts, 'normal') : []
+    return (
+        <AppShell sidebarContent={<CheckerSidebarSkeleton />}>
+            <section aria-label={t('common.loading')} aria-busy='true' className='flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden'>
+                <span role='status' className='sr-only'>
+                    {t('common.loading')}
+                </span>
+                <header className='flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3'>
+                    <div className='flex min-w-0 items-center gap-2'>
+                        <SidebarTrigger aria-label={t('navigation.openSidebar')} className='shrink-0 md:hidden' />
+                        <div className='min-w-0'>
+                            <h1 className='truncate text-sm font-semibold'>
+                                {t('checker.normalMode')} {t('checker.title')}
+                            </h1>
+                            <p className='hidden truncate text-xs text-muted-foreground sm:block'>{t('checker.description')}</p>
+                        </div>
                     </div>
+                    <div className='flex shrink-0 items-center gap-1'>
+                        <div className='hidden h-4 w-24 text-right text-xs tabular-nums text-muted-foreground sm:block'>
+                            {catalog ? t('checker.resultCount', { count: catalog.charts.length }) : <Skeleton className='h-4 w-full' />}
+                        </div>
+                        <Button disabled variant='ghost' size='icon-sm' aria-label={t('navigation.openFilters')}>
+                            <SlidersHorizontal />
+                        </Button>
+                    </div>
+                </header>
+                <div className='checker-list-scroll min-h-0 flex-1 overflow-auto p-0'>
+                    {versionDisplay ? (
+                        <div className='grid min-w-0'>
+                            {sections.map((section) => (
+                                <ChartRankSkeleton
+                                    key={section.rank ?? 'none'}
+                                    rank={section.rank ?? t('checker.noRank')}
+                                    standardCount={section.standardCharts.length}
+                                    personalCount={section.personalCharts.length}
+                                    versionDisplay={versionDisplay}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <Skeleton aria-hidden='true' className='h-full w-full rounded-none' />
+                    )}
                 </div>
-                <div aria-hidden='true' className='flex shrink-0 items-center gap-1'>
-                    <Skeleton className='hidden h-4 w-20 sm:block' />
-                    <Skeleton className='size-8' />
-                </div>
-            </header>
-            <div className='checker-list-scroll grid min-h-0 flex-1 content-start overflow-auto p-0'>
-                {CHECKER_SKELETON_SECTION_IDS.map((id) => (
-                    <ChartRankSkeleton key={id} />
-                ))}
-            </div>
-        </section>
-    </AppShell>
-)
+            </section>
+        </AppShell>
+    )
+}

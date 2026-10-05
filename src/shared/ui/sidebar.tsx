@@ -1,11 +1,9 @@
 'use client'
 import * as React from 'react'
-
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Slot } from 'radix-ui'
 import { PanelLeftIcon } from 'lucide-react'
-
-import { MESSAGES } from '@shared/messages/messages'
+import { useTranslations } from 'next-intl'
 import { cn } from '@shared/lib/utils'
 import { useIsMobile } from '@shared/hooks/use-mobile'
 import { Button } from '@shared/ui/button'
@@ -72,7 +70,6 @@ const SidebarProvider = ({
     }
     const handleSidebarShortcut = React.useEffectEvent((event: KeyboardEvent) => {
         if (event.key !== SIDEBAR_KEYBOARD_SHORTCUT || (!event.metaKey && !event.ctrlKey)) return
-
         event.preventDefault()
         toggleSidebar()
     })
@@ -89,7 +86,6 @@ const SidebarProvider = ({
     React.useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => handleSidebarShortcut(event)
         window.addEventListener('keydown', handleKeyDown)
-
         return () => window.removeEventListener('keydown', handleKeyDown)
     }, [])
     return (
@@ -123,6 +119,7 @@ const Sidebar = ({
     variant?: 'sidebar' | 'floating' | 'inset'
     collapsible?: 'offcanvas' | 'icon' | 'none'
 }) => {
+    const t = useTranslations()
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
     if (collapsible === 'none') {
         return (
@@ -150,8 +147,8 @@ const Sidebar = ({
                     }
                     side={side}>
                     <SheetHeader className='sr-only'>
-                        <SheetTitle>{MESSAGES.navigation.sidebar}</SheetTitle>
-                        <SheetDescription>{MESSAGES.navigation.sidebarDescription}</SheetDescription>
+                        <SheetTitle>{t('navigation.sidebar')}</SheetTitle>
+                        <SheetDescription>{t('navigation.sidebarDescription')}</SheetDescription>
                     </SheetHeader>
                     <div className='flex h-full w-full flex-col'>{children}</div>
                 </SheetContent>
@@ -199,6 +196,7 @@ const Sidebar = ({
     )
 }
 const SidebarTrigger = ({ className, onClick, ...props }: React.ComponentProps<typeof Button>) => {
+    const t = useTranslations()
     const { toggleSidebar } = useSidebar()
     return (
         <Button
@@ -213,20 +211,21 @@ const SidebarTrigger = ({ className, onClick, ...props }: React.ComponentProps<t
             }}
             {...props}>
             <PanelLeftIcon />
-            <span className='sr-only'>{MESSAGES.navigation.toggleSidebar}</span>
+            <span className='sr-only'>{t('navigation.toggleSidebar')}</span>
         </Button>
     )
 }
 const SidebarRail = ({ className, ...props }: React.ComponentProps<'button'>) => {
+    const t = useTranslations()
     const { toggleSidebar } = useSidebar()
     return (
         <button
             data-sidebar='rail'
             data-slot='sidebar-rail'
-            aria-label={MESSAGES.navigation.toggleSidebar}
+            aria-label={t('navigation.toggleSidebar')}
             tabIndex={-1}
             onClick={toggleSidebar}
-            title={MESSAGES.navigation.toggleSidebar}
+            title={t('navigation.toggleSidebar')}
             className={cn(
                 'absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:start-1/2 after:w-[2px] hover:after:bg-sidebar-border sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2',
                 'in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize',

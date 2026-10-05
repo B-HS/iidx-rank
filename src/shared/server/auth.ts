@@ -1,8 +1,9 @@
+import { headers } from 'next/headers'
 import 'server-only'
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth'
 import { getSessionCookie } from 'better-auth/cookies'
-import { headers } from 'next/headers'
+import { getAuthOrigins } from '@shared/server/auth-origins'
 import { USER_ROLE } from '@shared/constants/user-role'
 import { account, session, user, verification } from '@shared/server/db/auth-schema'
 import { getDb } from '@shared/server/db/get-db'
@@ -12,7 +13,7 @@ const createAuthInstance = (env: ReturnType<typeof getEnv>) =>
     betterAuth({
         baseURL: env.BETTER_AUTH_URL,
         secret: env.BETTER_AUTH_SECRET,
-        trustedOrigins: [new URL(env.BETTER_AUTH_URL).origin],
+        trustedOrigins: getAuthOrigins(),
         database: drizzleAdapter(getDb(), {
             provider: 'sqlite',
             schema: { user, session, account, verification },

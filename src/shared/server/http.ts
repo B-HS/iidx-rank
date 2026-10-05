@@ -1,4 +1,4 @@
-import { getEnv } from '@shared/server/env'
+import { getAuthOrigins } from '@shared/server/auth-origins'
 
 export const API_STATUS = {
     OK: 200,
@@ -14,7 +14,7 @@ export const API_STATUS = {
 
 const PRIVATE_NO_STORE_HEADERS = { 'Cache-Control': 'private, no-store' }
 
-export const isTrustedOrigin = (origin: string | null) => origin === new URL(getEnv().BETTER_AUTH_URL).origin
+export const isTrustedOrigin = (origin: string | null) => origin !== null && getAuthOrigins().includes(origin)
 
 export const successResponse = <T>(data: T, status: number = API_STATUS.OK, headers: HeadersInit = PRIVATE_NO_STORE_HEADERS) =>
     Response.json({ success: true, data }, { status, headers })

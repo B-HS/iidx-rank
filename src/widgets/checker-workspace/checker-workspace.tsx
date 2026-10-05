@@ -1,29 +1,32 @@
 'use client'
-
-import { type CSSProperties, type FC, useEffect, useRef, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { type CSSProperties, type FC, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import { RefreshCw, SlidersHorizontal } from 'lucide-react'
-
+import { hasLocale, useLocale, useTranslations } from 'next-intl'
+import { toast } from 'sonner'
+import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
 import { authClient } from '@entities/auth/auth.api'
 import { type Chart, DIFFICULTIES, RANKS } from '@entities/catalog/catalog.dto'
 import { useCatalog, useSyncCatalog } from '@entities/catalog/catalog.query'
 import { useChecker, useRefreshChecker, useSaveRecord } from '@entities/checker/checker.query'
 import { nextCheckerLamp } from '@entities/checker/checker-lamp'
-import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
 import { useDisplayPreferences, useSaveDisplayPreferences } from '@entities/preferences/preferences.query'
 import { LAMPS, type RecordInput } from '@entities/checker/checker.dto'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
 import { ChartDetails } from '@features/chart-details/chart-details'
 import { DisplaySettings } from '@features/display-settings/display-settings'
-import { DEFAULT_DISPLAY_PREFERENCES, MAX_LOGO_OPACITY } from '@shared/constants/display'
+import { MAX_LOGO_OPACITY } from '@shared/constants/display'
 import { CheckerFilters } from '@features/checker-filters/checker-filters'
 import { CheckerRecordsSkeleton } from '@features/checker-skeleton/checker-records-skeleton'
-import { ChartRankSkeleton } from '@features/checker-skeleton/chart-rank-skeleton'
 import { ChartRankSection } from '@features/chart-rank-section/chart-rank-section'
-import { CHECKER_SKELETON_SECTION_IDS } from '@shared/constants/checker'
 import { useIdentityTransition } from '@shared/hooks/use-identity-transition'
-import { MESSAGES } from '@shared/messages/messages'
+import { useRouter as useLocaleRouter, usePathname } from '@shared/i18n/navigation'
+import { routing } from '@shared/i18n/routing'
+import { LanguageSettings } from '@features/language-settings/language-settings'
+import { useAnonymousPreferences, saveAnonymousPreferences } from '@entities/preferences/anonymous-preferences.client'
+import { groupChartsByRank } from '@entities/catalog/catalog-ranks'
+import { Separator } from '@shared/ui/separator'
 import { AppShell } from '@widgets/app-shell/app-shell'
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert'
 import { Button } from '@shared/ui/button'
@@ -32,18 +35,27 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@shared/ui/emp
 import { Progress } from '@shared/ui/progress'
 import { SidebarTrigger } from '@shared/ui/sidebar'
 import { Skeleton } from '@shared/ui/skeleton'
-
 type Props = {
     initialUserId: string | null
     initialIsAdmin: boolean
+    initialPreferences: DisplayPreferencesInput
+    initialAnonymousPreferences: DisplayPreferencesInput | null
 }
-
-export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) => {
+export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, initialPreferences, initialAnonymousPreferences }) => {
+    const t = useTranslations()
+    const locale = useLocale()
+    const localeRouter = useLocaleRouter()
+    const pathname = usePathname()
+    const [isLocalePending, startLocaleTransition] = useTransition()
+    const anonymousPreferences = useAnonymousPreferences(initialAnonymousPreferences)
     const queryClient = useQueryClient()
     const router = useRouter()
     const identityTransition = useIdentityTransition()
     const previousUserId = useRef(initialUserId)
-    const [displayDraft, setDisplayDraft] = useState<{ userId: string | null; preferences: DisplayPreferencesInput } | null>(null)
+    const [displayDraft, setDisplayDraft] = useState<{
+        userId: string | null
+        preferences: DisplayPreferencesInput
+    } | null>(null)
     const [mode, setMode] = useState<'normal' | 'hard'>('normal')
     const [search, setSearch] = useState('')
     const [difficulty, setDifficulty] = useState('all')
@@ -69,66 +81,48 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
     const pendingChartId = pendingRecordInput?.chartId ?? null
     const preferencesQuery = useDisplayPreferences(initialUserId ?? '', isAuthenticated)
     const savePreferences = useSaveDisplayPreferences(initialUserId ?? '')
-    const isPreferencesPending = isSessionPending || !isSessionAligned || (isAuthenticated && preferencesQuery.isPending)
+    const isPreferencesPending =
+        !isSessionAligned || (isAuthenticated && preferencesQuery.isPending) || (initialUserId === null && !anonymousPreferences.isReady)
     const isPreferencesLoadFailed = isAuthenticated && preferencesQuery.isError
-    const preferences =
-        displayDraft && displayDraft.userId === initialUserId
-            ? displayDraft.preferences
-            : (preferencesQuery.data?.preferences ?? DEFAULT_DISPLAY_PREFERENCES)
+    const storedPreferences = isAuthenticated ? (preferencesQuery.data?.preferences ?? initialPreferences) : anonymousPreferences.preferences
+    const preferences = displayDraft && displayDraft.userId === initialUserId ? displayDraft.preferences : storedPreferences
     const refreshChecker = useRefreshChecker(initialUserId ?? '')
     const syncCatalog = useSyncCatalog()
     const records = isAuthenticated && !isRecordsPending ? (checkerQuery.data?.records ?? []) : []
     const recordsByChartId = new Map(records.map((record) => [record.chartId, record]))
     const rankFor = (chart: Chart) => (mode === 'normal' ? chart.normalRank : chart.hardRank)
     const personalFor = (chart: Chart) => (mode === 'normal' ? chart.normalPersonal : chart.hardPersonal)
-    const versions = [...new Set(catalog.charts.map((chart) => chart.version))].toSorted((left, right) => left.localeCompare(right, 'ko'))
+    const versions = [...new Set(catalog.charts.map((chart) => chart.version))].toSorted((left, right) => left.localeCompare(right, locale))
     const filteredCharts = catalog.charts
         .filter((chart) => {
             const chartRank = rankFor(chart)
             const chartRecord = recordsByChartId.get(chart.id)
-            const normalizedSearch = search.trim().toLocaleLowerCase('ko-KR')
-
-            if (normalizedSearch && !chart.title.toLocaleLowerCase('ko-KR').includes(normalizedSearch)) {
+            const normalizedSearch = search.trim().toLocaleLowerCase(locale)
+            if (normalizedSearch && !chart.title.toLocaleLowerCase(locale).includes(normalizedSearch)) {
                 return false
             }
-
             if (difficulty !== 'all' && !DIFFICULTIES.some((item) => item === difficulty && item === chart.difficulty)) {
                 return false
             }
-
             if (version !== 'all' && chart.version !== version) {
                 return false
             }
-
             if (rank === 'none' && chartRank !== null) {
                 return false
             }
-
             if (rank !== 'all' && rank !== 'none' && chartRank !== rank) {
                 return false
             }
-
             if (personalOnly && !personalFor(chart)) {
                 return false
             }
-
             if (unplayedOnly && chartRecord && chartRecord.lamp !== 'NO_PLAY') {
                 return false
             }
-
             return true
         })
         .toSorted((left, right) => left.title.localeCompare(right.title, 'ja'))
-    const rankSections = [...RANKS.toReversed(), null]
-        .map((sectionRank) => {
-            const charts = filteredCharts.filter((chart) => rankFor(chart) === sectionRank)
-            return {
-                rank: sectionRank ?? MESSAGES.checker.noRank,
-                standardCharts: charts.filter((chart) => !personalFor(chart)),
-                personalCharts: charts.filter(personalFor),
-            }
-        })
-        .filter((section) => section.standardCharts.length + section.personalCharts.length > 0)
+    const rankSections = groupChartsByRank(filteredCharts, mode).map((section) => ({ ...section, rank: section.rank ?? t('checker.noRank') }))
     const recordedCount = records.filter((record) => record.lamp !== LAMPS[0]).length
     const completionPercent = catalog.charts.length === 0 ? 0 : Math.round((recordedCount / catalog.charts.length) * 100)
     const personalCount = catalog.charts.filter(personalFor).length
@@ -136,15 +130,15 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
     const checkerLoadFailed = isAuthenticated && checkerQuery.isError
     const formattedSourceDate = (value: string | null) => {
         if (!value) {
-            return MESSAGES.checker.noTimestamp
+            return t('checker.noTimestamp')
         }
-
-        const dateValue = /^\d{4}-\d{2}-\d{2}$/.test(value) ? value + 'T00:00:00' : value
-
-        return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' }).format(new Date(dateValue))
+        const dateValue = /^\d{4}-\d{2}-\d{2}$/.test(value) ? value + 'T00:00:00Z' : value
+        return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'Asia/Tokyo' }).format(new Date(dateValue))
     }
     const formattedTimestamp = (value: string | null) =>
-        value ? new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : MESSAGES.checker.noTimestamp
+        value
+            ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Tokyo' }).format(new Date(value))
+            : t('checker.noTimestamp')
     const handleDifficultyChange = (value: string) => {
         if (value === 'all' || DIFFICULTIES.some((item) => item === value)) {
             setDifficulty(value)
@@ -162,7 +156,6 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
             }
             return
         }
-
         saveRecord.mutate(input, { onSuccess: () => setSelectedChart(null) })
     }
     const handleAdvanceLamp = (chart: Chart) => {
@@ -183,12 +176,20 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
     const handleSavePreferences = (input: DisplayPreferencesInput) => {
         if (isPreferencesPending || isPreferencesLoadFailed || savePreferences.isPending) return
         handlePreviewPreferences(input)
-        if (!isAuthenticated) return
+        if (!isAuthenticated) {
+            if (!saveAnonymousPreferences(input)) toast.error(t('display.storageError'))
+            setDisplayDraft(null)
+            return
+        }
         savePreferences.mutate(input, { onSuccess: () => setDisplayDraft(null), onError: () => setDisplayDraft(null) })
+    }
+    const handleLocaleChange = (value: string) => {
+        if (!hasLocale(routing.locales, value)) return
+        setIsSettingsOpen(false)
+        startLocaleTransition(() => localeRouter.replace(pathname, { locale: value }))
     }
     const handleCatalogSync = async () => {
         if (!canSyncCatalog) return
-
         try {
             await syncCatalog.mutateAsync()
         } catch {
@@ -217,38 +218,37 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
             resultCount={filteredCharts.length}
         />
     )
-
     const sidebarContent = (
         <div className='grid min-w-0 gap-px bg-border'>
             <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
                 <div className='flex min-w-0 items-center justify-between gap-2'>
-                    <h2 className='checker-micro-label'>{MESSAGES.checker.sourceTitle}</h2>
+                    <h2 className='checker-micro-label'>{t('checker.sourceTitle')}</h2>
                     {catalog.source.status === 'ready' && (
-                        <span className='size-1.5 shrink-0 rounded-full bg-emerald-600' aria-label={MESSAGES.checker.sourceReady} />
+                        <span className='size-1.5 shrink-0 rounded-full bg-emerald-600' aria-label={t('checker.sourceReady')} />
                     )}
                 </div>
-                <p className='text-xs text-muted-foreground'>
-                    {catalog.source.status === 'ready' ? MESSAGES.checker.sourceReady : MESSAGES.checker.sourceEmpty}
+                <p className='h-8 text-xs text-muted-foreground'>
+                    {catalog.source.status === 'ready' ? t('checker.sourceReady') : t('checker.sourceEmpty')}
                 </p>
                 <dl className='grid min-w-0 gap-2 text-xs'>
-                    <div className='flex min-w-0 items-start justify-between gap-2'>
-                        <dt className='shrink-0 text-muted-foreground'>{MESSAGES.checker.sourceUpdatedAt}</dt>
+                    <div className='flex h-8 min-w-0 items-start justify-between gap-2'>
+                        <dt className='shrink-0 text-muted-foreground'>{t('checker.sourceUpdatedAt')}</dt>
                         <dd className='min-w-0 break-words text-right tabular-nums'>{formattedSourceDate(catalog.source.updatedAt)}</dd>
                     </div>
-                    <div className='flex min-w-0 items-start justify-between gap-2'>
-                        <dt className='shrink-0 text-muted-foreground'>{MESSAGES.checker.sourceFetchedAt}</dt>
+                    <div className='flex h-8 min-w-0 items-start justify-between gap-2'>
+                        <dt className='shrink-0 text-muted-foreground'>{t('checker.sourceFetchedAt')}</dt>
                         <dd className='min-w-0 break-words text-right tabular-nums'>{formattedTimestamp(catalog.source.fetchedAt)}</dd>
                     </div>
-                    <div className='flex min-w-0 items-start justify-between gap-2'>
-                        <dt className='shrink-0 text-muted-foreground'>{MESSAGES.checker.sourceCount}</dt>
-                        <dd className='min-w-0 text-right tabular-nums'>{catalog.source.chartCount.toLocaleString('ko-KR')}</dd>
+                    <div className='flex h-8 min-w-0 items-start justify-between gap-2'>
+                        <dt className='shrink-0 text-muted-foreground'>{t('checker.sourceCount')}</dt>
+                        <dd className='min-w-0 text-right tabular-nums'>{catalog.source.chartCount.toLocaleString(locale)}</dd>
                     </div>
                 </dl>
-                <div className='grid min-w-0 grid-cols-2 gap-1'>
+                <div className='grid h-8 min-w-0 grid-cols-2 gap-1'>
                     {catalog.source.url.startsWith('https://') || catalog.source.url.startsWith('http://') ? (
                         <Button variant='outline' size='sm' asChild>
                             <a href={catalog.source.url} target='_blank' rel='noopener noreferrer' className='min-w-0 truncate'>
-                                {MESSAGES.checker.sourceLink}
+                                {t('checker.sourceLink')}
                             </a>
                         </Button>
                     ) : (
@@ -261,75 +261,78 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
                             disabled={syncCatalog.isPending}
                             onClick={() => void handleCatalogSync()}
                             className='min-w-0 px-1 text-2xs'>
-                            <span className='truncate'>{syncCatalog.isPending ? MESSAGES.checker.sourceSyncing : MESSAGES.checker.sourceSync}</span>
+                            <span className='truncate'>{syncCatalog.isPending ? t('checker.sourceSyncing') : t('checker.sourceSync')}</span>
                         </Button>
                     )}
                 </div>
             </section>
             <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
-                <h2 className='checker-micro-label'>{MESSAGES.checker.summaryTitle}</h2>
-                {isRecordsPending && <CheckerRecordsSkeleton />}
-                {!isRecordsPending && isAuthenticated && !checkerLoadFailed && (
-                    <>
-                        <p className='text-xs text-muted-foreground'>{MESSAGES.checker.signedInProgress}</p>
-                        <div className='flex min-w-0 items-center justify-between gap-2 text-xs'>
-                            <span className='min-w-0 truncate'>{MESSAGES.checker.recordsCount(recordedCount, catalog.charts.length)}</span>
-                            <span className='shrink-0 font-medium tabular-nums'>{MESSAGES.checker.completionPercent(completionPercent)}</span>
-                        </div>
-                        <Progress value={completionPercent} aria-label={MESSAGES.checker.completion} />
-                    </>
-                )}
-                {!isRecordsPending && checkerLoadFailed && (
-                    <p className='text-xs text-muted-foreground'>{MESSAGES.checker.recordLoadErrorDescription}</p>
-                )}
-                {!isRecordsPending && !isAuthenticated && (
-                    <p className='text-xs leading-relaxed text-muted-foreground'>{MESSAGES.checker.anonymousProgress}</p>
-                )}
-                <div className='flex items-center justify-between gap-2 text-xs'>
-                    <span className='text-muted-foreground'>{MESSAGES.checker.personalCharts}</span>
-                    <span className='font-medium tabular-nums'>{personalCount.toLocaleString('ko-KR')}</span>
+                <h2 className='checker-micro-label'>{t('checker.summaryTitle')}</h2>
+                <div className='grid h-20 min-w-0 content-start gap-3'>
+                    {isRecordsPending && <CheckerRecordsSkeleton />}
+                    {!isRecordsPending && isAuthenticated && !checkerLoadFailed && (
+                        <>
+                            <p className='h-8 text-xs text-muted-foreground'>{t('checker.signedInProgress')}</p>
+                            <div className='flex h-4 min-w-0 items-center justify-between gap-2 text-xs'>
+                                <span className='min-w-0 truncate'>
+                                    {t('checker.recordsCount', { recorded: recordedCount, total: catalog.charts.length })}
+                                </span>
+                                <span className='shrink-0 font-medium tabular-nums'>
+                                    {t('checker.completionPercent', { percent: completionPercent })}
+                                </span>
+                            </div>
+                            <Progress value={completionPercent} aria-label={t('checker.completion')} />
+                        </>
+                    )}
+                    {!isRecordsPending && checkerLoadFailed && (
+                        <p className='text-xs text-muted-foreground'>{t('checker.recordLoadErrorDescription')}</p>
+                    )}
+                    {!isRecordsPending && !isAuthenticated && (
+                        <p className='text-xs leading-relaxed text-muted-foreground'>{t('checker.anonymousProgress')}</p>
+                    )}
+                </div>
+                <div className='flex h-4 items-center justify-between gap-2 text-xs'>
+                    <span className='text-muted-foreground'>{t('checker.personalCharts')}</span>
+                    <span className='font-medium tabular-nums'>{personalCount.toLocaleString(locale)}</span>
                 </div>
             </section>
         </div>
     )
-
-    const chartDisplayStyle: CSSProperties & { '--checker-logo-opacity': number } = {
+    const chartDisplayStyle: CSSProperties & {
+        '--checker-logo-opacity': number
+    } = {
         '--checker-logo-opacity': preferences.logoOpacity / MAX_LOGO_OPACITY,
     }
     const renderChartList = () => {
-        if (isRecordsPending && unplayedOnly) {
+        if (isPreferencesPending || (isRecordsPending && unplayedOnly)) {
             return (
-                <div role='status' aria-label={MESSAGES.checker.loadingRecords} aria-busy='true' className='grid min-w-0'>
-                    <span className='sr-only'>{MESSAGES.checker.loadingRecords}</span>
-                    {CHECKER_SKELETON_SECTION_IDS.map((id) => (
-                        <ChartRankSkeleton key={id} />
-                    ))}
+                <div role='status' aria-label={t('checker.loadingRecords')} aria-busy='true' className='grid min-w-0'>
+                    <span className='sr-only'>{t('checker.loadingRecords')}</span>
+                    <Skeleton className='h-full min-h-[calc(100dvh-3rem)] w-full rounded-none' />
                 </div>
             )
         }
-
         if (catalog.charts.length === 0) {
             return (
                 <Empty className='checker-empty min-h-64 border-0'>
                     <EmptyHeader>
-                        <EmptyTitle>{MESSAGES.checker.emptyCatalogTitle}</EmptyTitle>
-                        <EmptyDescription>{MESSAGES.checker.emptyCatalogDescription}</EmptyDescription>
+                        <EmptyTitle>{t('checker.emptyCatalogTitle')}</EmptyTitle>
+                        <EmptyDescription>{t('checker.emptyCatalogDescription')}</EmptyDescription>
                     </EmptyHeader>
                     {canSyncCatalog && (
                         <Button size='sm' variant='outline' disabled={syncCatalog.isPending} onClick={() => void handleCatalogSync()}>
-                            {syncCatalog.isPending ? MESSAGES.checker.sourceSyncing : MESSAGES.checker.sourceSync}
+                            {syncCatalog.isPending ? t('checker.sourceSyncing') : t('checker.sourceSync')}
                         </Button>
                     )}
                 </Empty>
             )
         }
-
         if (filteredCharts.length === 0) {
             return (
                 <Empty className='checker-empty min-h-64 border-0'>
                     <EmptyHeader>
-                        <EmptyTitle>{MESSAGES.checker.emptyFilterTitle}</EmptyTitle>
-                        <EmptyDescription>{MESSAGES.checker.emptyFilterDescription}</EmptyDescription>
+                        <EmptyTitle>{t('checker.emptyFilterTitle')}</EmptyTitle>
+                        <EmptyDescription>{t('checker.emptyFilterDescription')}</EmptyDescription>
                     </EmptyHeader>
                     <Button
                         size='sm'
@@ -342,12 +345,11 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
                             setPersonalOnly(false)
                             setUnplayedOnly(false)
                         }}>
-                        {MESSAGES.checker.resetFilters}
+                        {t('checker.resetFilters')}
                     </Button>
                 </Empty>
             )
         }
-
         return (
             <div className='grid min-w-0'>
                 {rankSections.map((section) => (
@@ -368,71 +370,66 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
             </div>
         )
     }
-
     useEffect(() => {
         const userId = session?.user.id ?? null
-
         if (isSessionPending) {
             return
         }
-
         if (previousUserId.current !== userId) {
             previousUserId.current = userId
             queryClient.clear()
             router.refresh()
         }
-
         if (identityTransition.isPending && userId !== identityTransition.previousUserId && userId === initialUserId) {
             identityTransition.end()
         }
     }, [identityTransition, initialUserId, isSessionPending, queryClient, router, session?.user.id])
-
     return (
         <AppShell sidebarContent={sidebarContent} onOpenSettings={() => setIsSettingsOpen(true)}>
             <section style={chartDisplayStyle} className='flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden'>
                 <header className='flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3'>
                     <div className='flex min-w-0 items-center gap-2'>
-                        <SidebarTrigger aria-label={MESSAGES.navigation.openSidebar} className='shrink-0 md:hidden' />
+                        <SidebarTrigger aria-label={t('navigation.openSidebar')} className='shrink-0 md:hidden' />
                         <div className='min-w-0'>
                             <h1 className='truncate text-sm font-semibold'>
-                                {mode === 'normal' ? MESSAGES.checker.normalMode : MESSAGES.checker.hardMode} {MESSAGES.checker.title}
+                                {mode === 'normal' ? t('checker.normalMode') : t('checker.hardMode')} {t('checker.title')}
                             </h1>
-                            <p className='hidden truncate text-xs text-muted-foreground sm:block'>{MESSAGES.checker.description}</p>
+                            <p className='hidden truncate text-xs text-muted-foreground sm:block'>{t('checker.description')}</p>
                         </div>
                     </div>
                     <div className='flex shrink-0 items-center gap-1'>
-                        <div className='hidden text-xs tabular-nums text-muted-foreground sm:block'>
-                            {isRecordsPending && unplayedOnly ? (
-                                <Skeleton className='h-4 w-20' />
-                            ) : (
-                                MESSAGES.checker.resultCount(filteredCharts.length)
-                            )}
-                        </div>
-                        <Button variant='ghost' size='icon-sm' aria-label={MESSAGES.navigation.openFilters} onClick={() => setIsFiltersOpen(true)}>
-                            <SlidersHorizontal />
-                        </Button>
                         {isAuthenticated && (
                             <Button
                                 variant='ghost'
                                 size='icon-sm'
-                                aria-label={MESSAGES.checker.refreshRecords}
+                                aria-label={t('checker.refreshRecords')}
                                 aria-busy={refreshChecker.isPending}
                                 disabled={refreshChecker.isPending || isRecordsPending}
                                 onClick={() => refreshChecker.mutate()}>
                                 <RefreshCw />
                             </Button>
                         )}
+                        <div className='hidden h-4 w-24 text-right text-xs tabular-nums text-muted-foreground sm:block'>
+                            {isRecordsPending && unplayedOnly ? (
+                                <Skeleton className='h-4 w-20' />
+                            ) : (
+                                t('checker.resultCount', { count: filteredCharts.length })
+                            )}
+                        </div>
+                        <Button variant='ghost' size='icon-sm' aria-label={t('navigation.openFilters')} onClick={() => setIsFiltersOpen(true)}>
+                            <SlidersHorizontal />
+                        </Button>
                     </div>
                 </header>
 
                 <div className='checker-list-scroll min-h-0 flex-1 overflow-auto p-0'>
                     {checkerLoadFailed && (
                         <Alert className='mb-2'>
-                            <AlertTitle>{MESSAGES.checker.recordLoadErrorTitle}</AlertTitle>
+                            <AlertTitle>{t('checker.recordLoadErrorTitle')}</AlertTitle>
                             <AlertDescription className='flex flex-wrap items-center justify-between gap-3'>
-                                <span>{MESSAGES.checker.recordLoadErrorDescription}</span>
+                                <span>{t('checker.recordLoadErrorDescription')}</span>
                                 <Button size='sm' variant='outline' onClick={() => void checkerQuery.refetch()}>
-                                    {MESSAGES.common.retry}
+                                    {t('common.retry')}
                                 </Button>
                             </AlertDescription>
                         </Alert>
@@ -462,8 +459,8 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
                 <Dialog open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                     <DialogContent className='max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md'>
                         <DialogHeader>
-                            <DialogTitle>{MESSAGES.checker.filtersTitle}</DialogTitle>
-                            <DialogDescription>{MESSAGES.checker.filtersDescription}</DialogDescription>
+                            <DialogTitle>{t('checker.filtersTitle')}</DialogTitle>
+                            <DialogDescription>{t('checker.filtersDescription')}</DialogDescription>
                         </DialogHeader>
                         {renderFilters()}
                     </DialogContent>
@@ -471,14 +468,16 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
                 <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                     <DialogContent className='max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md'>
                         <DialogHeader>
-                            <DialogTitle>{MESSAGES.display.title}</DialogTitle>
-                            <DialogDescription>{MESSAGES.display.description}</DialogDescription>
+                            <DialogTitle>{t('display.title')}</DialogTitle>
+                            <DialogDescription>{t('display.description')}</DialogDescription>
                         </DialogHeader>
+                        <LanguageSettings value={locale} isPending={isLocalePending} onChange={handleLocaleChange} />
+                        <Separator />
                         {isPreferencesLoadFailed ? (
                             <Alert>
-                                <AlertDescription>{MESSAGES.display.loadError}</AlertDescription>
+                                <AlertDescription>{t('display.loadError')}</AlertDescription>
                                 <Button size='sm' variant='outline' onClick={() => void preferencesQuery.refetch()}>
-                                    {MESSAGES.common.retry}
+                                    {t('common.retry')}
                                 </Button>
                             </Alert>
                         ) : (

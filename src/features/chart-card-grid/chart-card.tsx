@@ -1,16 +1,16 @@
 'use client'
 import { type FC, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import type { Chart } from '@entities/catalog/catalog.dto'
-import { getSeriesLogo } from '@entities/catalog/catalog-series'
 import type { Record as ChartRecord } from '@entities/checker/checker.dto'
 import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
+import { getSeriesLogo } from '@entities/catalog/catalog-series'
 import { CHART_LONG_PRESS_MS, CHART_PRESS_MOVE_TOLERANCE_PX, CHART_LAMP_WIDTH_PX, CHART_LAMP_BLINK_DURATION_MS } from '@shared/constants/checker'
+import { CHART_CARD_BODY_CLASS_NAMES } from '@shared/constants/display'
 import { cn } from '@shared/lib/utils'
-import { MESSAGES } from '@shared/messages/messages'
 import { Card, CardContent } from '@shared/ui/card'
 import { Skeleton } from '@shared/ui/skeleton'
-
 type Props = {
     chart: Chart
     record: ChartRecord | undefined
@@ -35,8 +35,12 @@ export const ChartCard: FC<Props> = ({
     onAdvanceLamp,
     onOpenDetails,
 }) => {
+    const t = useTranslations()
     const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-    const pressOrigin = useRef<{ x: number; y: number } | null>(null)
+    const pressOrigin = useRef<{
+        x: number
+        y: number
+    } | null>(null)
     const shouldSuppressClick = useRef(false)
     const lamp = isSaving && pendingLamp ? pendingLamp : (record?.lamp ?? 'NO_PLAY')
     const logo = versionDisplay === 'logo' ? getSeriesLogo(chart.version) : null
@@ -85,18 +89,18 @@ export const ChartCard: FC<Props> = ({
                     disabled={isDisabled}
                     aria-busy={isSaving}
                     aria-keyshortcuts='Shift+Enter'
-                    title={chart.title + ' · ' + MESSAGES.difficulty[chart.difficulty] + ' · ' + chart.version + ' · ' + MESSAGES.checker.cardHint}
+                    title={chart.title + ' · ' + t(`difficulty.${chart.difficulty}`) + ' · ' + chart.version + ' · ' + t('checker.cardHint')}
                     aria-label={
                         chart.title +
                         ' · ' +
-                        MESSAGES.difficulty[chart.difficulty] +
+                        t(`difficulty.${chart.difficulty}`) +
                         ' · ' +
-                        MESSAGES.lamp[lamp] +
+                        t(`lamp.${lamp}`) +
                         (record?.scoreGrade ? ' · ' + record.scoreGrade : '')
                     }
                     className={cn(
                         'relative flex w-full min-w-0 touch-pan-y select-none flex-col justify-between gap-1 py-1.5 pr-1.5 pl-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
-                        logo ? 'h-10 min-h-10' : 'h-full min-h-12',
+                        CHART_CARD_BODY_CLASS_NAMES[versionDisplay],
                     )}
                     onPointerDown={(event) => {
                         if (isDisabled || event.button !== 0) return
@@ -133,11 +137,7 @@ export const ChartCard: FC<Props> = ({
                             onOpenDetails(chart)
                         }
                     }}>
-                    <span
-                        className={cn(
-                            'line-clamp-2 min-w-0 break-words text-2xs leading-tight font-medium',
-                            logo && (record?.scoreGrade || isRecordsPending || isSaving) && 'pr-8',
-                        )}>
+                    <span className={cn('line-clamp-2 min-w-0 break-words text-2xs leading-tight font-medium', versionDisplay === 'logo' && 'pr-8')}>
                         {chart.title}
                     </span>
                     <span
@@ -150,7 +150,7 @@ export const ChartCard: FC<Props> = ({
                         {!isRecordsPending && !isSaving && record?.scoreGrade && (
                             <span
                                 className='shrink-0 px-0.5 font-semibold tabular-nums text-foreground'
-                                aria-label={MESSAGES.checker.detailScoreGrade + ' ' + record.scoreGrade}>
+                                aria-label={t('checker.detailScoreGrade') + ' ' + record.scoreGrade}>
                                 {record.scoreGrade}
                             </span>
                         )}

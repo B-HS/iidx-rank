@@ -1,0 +1,18 @@
+import type { authClient } from '@entities/auth/auth.api'
+import { AUTH_ERROR_STATUS } from '@shared/constants/auth'
+
+type AuthResponseError = NonNullable<Awaited<ReturnType<typeof authClient.signUp.email>>['error']>
+type AuthError = Pick<AuthResponseError, 'status'> & Partial<Pick<AuthResponseError, 'code'>>
+
+export const getAuthErrorKey = (error: AuthError) => {
+    if (error.status === AUTH_ERROR_STATUS.RATE_LIMITED) return 'auth.rateLimited'
+    if (error.status >= AUTH_ERROR_STATUS.SERVER_ERROR) return 'auth.serviceUnavailable'
+    if (error.code === 'INVALID_ORIGIN' || error.code === 'INVALID_BASE_URL') return 'auth.originRejected'
+    if (error.code === 'USER_ALREADY_EXISTS' || error.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL') return 'auth.emailExists'
+    if (error.code === 'INVALID_EMAIL') return 'auth.emailInvalid'
+    if (error.code === 'PASSWORD_TOO_SHORT') return 'auth.passwordTooShort'
+    if (error.code === 'PASSWORD_TOO_LONG') return 'auth.passwordTooLong'
+    if (error.code === 'INVALID_EMAIL_OR_PASSWORD' || error.code === 'INVALID_PASSWORD') return 'auth.invalidCredentials'
+    if (error.code === 'FAILED_TO_CREATE_USER' || error.code === 'FAILED_TO_CREATE_SESSION') return 'auth.serviceUnavailable'
+    return 'auth.authError'
+}
