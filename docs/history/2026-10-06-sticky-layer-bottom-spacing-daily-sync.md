@@ -28,4 +28,8 @@
 
 ## 운영 반영
 
-GitHub push와 Production 화면 확인 진행 중입니다.
+- 구현 커밋 9e37fb4db050ac988637a46e6dfde7a9af9099fe를 main에 push했습니다.
+- Production iidx-rank-34uj85262-b-hs-projects.vercel.app / dpl_6JcpwSqn5TzdsAd2T1RrggyWFvsf가 Ready이며 iidx-rank.vercel.app과 iidx.hyns.dev에 연결됐습니다.
+- https://iidx-rank.vercel.app/ko 운영 390×844 화면: B sticky top 48px / z-index 30, 목록 padding 144px, 수평 초과 0, body overflow visible. 최하단 마지막 F 섹션 bottom 700px / 목록 bottom 844px로 여백 144px 확인했습니다.
+- 운영 증거: Codex outputs/iidx-sticky-layer-production.png, outputs/iidx-sticky-spacing-production.png.
+- 새 Production에서도 /api/catalog/sync의 0 18 * * * Cron이 활성 상태이고 CRON_SECRET Production 등록이 유지되는 것을 확인했습니다.

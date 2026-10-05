@@ -191,11 +191,11 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 ## Sticky 레이어·하단 여백·일일 갱신 확인
 
-현재 상태: 빌드·모바일/데스크톱 검증 완료, GitHub·Production 반영 중 (3/4)
+현재 상태: 빌드·화면·GitHub·Production 확인 및 자동 갱신 활성 확인 완료 (4/4)
 
 - [x] 카드/헤더 레이어 재현 및 운영 Cron·공식 주기 확인
 - [x] 랭크 헤더 레이어 상향·목록 하단 9rem·공통 스켈레톤 적용
 - [x] 빌드·모바일/데스크톱 겹침·모달·하단 여백 검증
-- [ ] 결과 기록·선별 commit/push·Production 확인
+- [x] 결과 기록·선별 commit/push·Production 확인
 
 사용자가 main 직접 수행을 선택했습니다. 모바일 문서 스크롤과 데스크톱 목록 스크롤을 보존합니다. 일반 조회는 DB에서만 읽고 기존 관리자/일일 원본 갱신 경로는 유지합니다. 기준: AGENTS.md, llm-rules 전문 및 process/verify/save-docs, Next 설치 CSS 가이드, Vercel Cron 공식 문서.
