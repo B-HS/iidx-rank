@@ -85,3 +85,14 @@
 로컬 검증: 666개 묶음 저장, 비활성 곡 기록 보존, 조회 중 원본 fetch 없음, 수집 실패 시 스냅샷 보존. 역할 위조 가입은 user, 역할 변경 요청은 400, 일반 사용자 수집은 403, 관리자 수집은 200, Cron Secret 없거나 틀리면 401. 새 설치 build·typecheck 성공, 변경 ESLint 오류 0(캐시 키 인자 경고 1). 데스크톱 1280px·모바일 390px 가로 넘침 없음, 모바일 3열, 헤더·필터 내부 12px, 콘텐츠 외곽 0px. 冥의 노멀 A → 하드 S+ 섹션 이동 확인.
 
 Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud build에서 db:migrate → db:seed-admins → Next build 성공. catalog 200/666개, 반복 조회 fetchedAt 유지, 개인 기록 GET/PATCH와 원본 수동 POST 및 Secret 없는 Cron GET 모두 401. Vercel Cron native 실행 2026-10-05T10:22:45.819Z, 해당 GET 200 필터 로그 확인. 운영 모바일 CSS 390px에서 3열·document width 390px. 다음 예약 실행 시각의 실제 로그 관찰은 운영 검증 부채로 구분했습니다.
+
+## Vercel Web Analytics·Speed Insights
+
+현재 상태: 두 패키지 전역 적용·빌드 성공, GitHub commit/push와 운영 스크립트 확인 중
+
+- [x] 현재 레이아웃·의존성과 공식 문서 확인
+- [x] 요청된 두 패키지 설치와 root layout 전역 적용
+- [x] 프로젝트 수집 기능 활성 상태 확인 및 최소 빌드 검증
+- [ ] 검증 결과 기록·선별 commit/push·Production 배포와 수집 스크립트 확인
+
+사용자가 이번 작업은 서브에이전트 없이 직접 수행하도록 선택했습니다. Next 전용 컴포넌트를 공통 layout에 적용하고 기본 방문·성능 수집만 사용합니다.

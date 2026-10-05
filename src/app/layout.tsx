@@ -1,3 +1,5 @@
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata } from 'next'
 import type { FC, PropsWithChildren } from 'react'
 
@@ -15,6 +17,8 @@ const RootLayout: FC<PropsWithChildren> = ({ children }) => (
     <html lang='ko' suppressHydrationWarning>
         <body className='h-dvh overflow-hidden bg-background font-sans text-foreground antialiased'>
             <AppProviders>{children}</AppProviders>
+            <Analytics />
+            <SpeedInsights />
         </body>
     </html>
 )
