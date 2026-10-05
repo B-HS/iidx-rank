@@ -100,6 +100,7 @@
     --sidebar-width-mobile: 18rem;
     --context-panel-width: 20rem;
     --rail-chrome-height: 3rem;
+    --checker-list-bottom-padding: 9rem;
     --nav-item-height: 2.25rem;
     --panel-inset: 12px;
     --panel-gutter: 1px;
@@ -110,6 +111,7 @@
     --skeleton-row: 1.5rem;
     --z-rail: 10;
     --z-raised: 20;
+    --z-rank-header: 30;
     --z-overlay: 50;
 }
 
@@ -265,11 +267,12 @@
 }
 
 .checker-rank-header {
-    @apply sticky top-(--rail-chrome-height) z-(--z-rail) md:top-0;
+    @apply sticky top-(--rail-chrome-height) z-(--z-rank-header) md:top-0;
 }
 
 .checker-list-scroll {
     @apply p-0 md:min-h-0 md:flex-1 md:overflow-auto;
+    padding-block-end: var(--checker-list-bottom-padding);
     scrollbar-width: none;
     scroll-padding-block-start: var(--rail-chrome-height);
 }
