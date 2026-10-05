@@ -6,9 +6,9 @@ const NORMAL_NEXT_LAMP = {
     ASSIST: 'EASY',
     EASY: 'CLEAR',
     CLEAR: 'NO_PLAY',
-    HARD: 'EASY',
-    EX_HARD: 'EASY',
-    FULL_COMBO: 'EASY',
+    HARD: 'HARD',
+    EX_HARD: 'EX_HARD',
+    FULL_COMBO: 'FULL_COMBO',
 } as const
 const HARD_NEXT_LAMP = {
     NO_PLAY: 'HARD',
@@ -18,7 +18,7 @@ const HARD_NEXT_LAMP = {
     CLEAR: 'HARD',
     HARD: 'EX_HARD',
     EX_HARD: 'NO_PLAY',
-    FULL_COMBO: 'HARD',
+    FULL_COMBO: 'FULL_COMBO',
 } as const
 export const nextCheckerLamp = (lamp: ChartRecord['lamp'], mode: 'normal' | 'hard') =>
     mode === 'normal' ? NORMAL_NEXT_LAMP[lamp] : HARD_NEXT_LAMP[lamp]

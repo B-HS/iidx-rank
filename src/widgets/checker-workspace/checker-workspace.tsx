@@ -164,8 +164,10 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
             setIsAuthDialogOpen(true)
             return
         }
-        const record = recordsByChartId.get(chart.id)
-        quickSaveRecord.mutate({ chartId: chart.id, lamp: nextCheckerLamp(record?.lamp ?? 'NO_PLAY', mode) })
+        const currentLamp = recordsByChartId.get(chart.id)?.lamp ?? 'NO_PLAY'
+        const nextLamp = nextCheckerLamp(currentLamp, mode)
+        if (nextLamp === currentLamp) return
+        quickSaveRecord.mutate({ chartId: chart.id, lamp: nextLamp })
     }
     const handlePreviewPreferences = (input: DisplayPreferencesInput) => setDisplayDraft({ userId: initialUserId, preferences: input })
     const handleSavePreferences = (input: DisplayPreferencesInput) => {
