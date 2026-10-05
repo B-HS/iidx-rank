@@ -129,15 +129,13 @@ export const ChartCard: FC<Props> = ({
                             onOpenDetails(chart)
                         }
                     }}>
-                    <span className='line-clamp-2 min-w-0 break-words bg-card/85 text-2xs leading-tight font-medium'>{chart.title}</span>
+                    <span className='line-clamp-2 min-w-0 break-words text-2xs leading-tight font-medium'>{chart.title}</span>
                     <span className='flex min-w-0 items-center justify-between gap-1 text-2xs leading-tight text-muted-foreground'>
-                        <span className='min-w-0 flex-1 truncate bg-card/85'>
-                            {logo ? <span className='sr-only'>{chart.version}</span> : chart.version}
-                        </span>
+                        <span className='min-w-0 flex-1 truncate'>{logo ? <span className='sr-only'>{chart.version}</span> : chart.version}</span>
                         {(isRecordsPending || isSaving) && <Skeleton className='h-3 w-8 shrink-0' />}
                         {!isRecordsPending && !isSaving && record?.scoreGrade && (
                             <span
-                                className='shrink-0 bg-card/90 px-0.5 font-semibold tabular-nums text-foreground'
+                                className='shrink-0 px-0.5 font-semibold tabular-nums text-foreground'
                                 aria-label={MESSAGES.checker.detailScoreGrade + ' ' + record.scoreGrade}>
                                 {record.scoreGrade}
                             </span>
