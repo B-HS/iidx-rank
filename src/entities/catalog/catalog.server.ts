@@ -1,7 +1,7 @@
 import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
 import { CATALOG_TAG } from '@shared/server/cache-tags'
-import { ensureCatalogFresh as refreshCatalogIfStale, readCatalog, readCatalogState } from '@entities/catalog/catalog.storage'
+import { readCatalog, readCatalogState } from '@entities/catalog/catalog.storage'
 
 const CATALOG_CACHE_STALE_SECONDS = 300
 const CATALOG_CACHE_REVALIDATE_SECONDS = 300
@@ -26,5 +26,3 @@ export const getCatalog = async () => {
     const { generation } = await readCatalogState()
     return await loadCatalog(generation)
 }
-
-export const ensureCatalogFresh = refreshCatalogIfStale

@@ -1,4 +1,4 @@
-import { and, eq, isNull, lt, or } from 'drizzle-orm'
+import { and, eq, isNull, lt, or, sql } from 'drizzle-orm'
 import { getDb } from '@shared/server/db/get-db'
 import { catalogCharts, catalogSource, type CatalogSourceRow } from '@shared/server/db/catalog-schema'
 import { CatalogSchema, type Catalog, type CatalogSource } from '@entities/catalog/catalog.dto'
@@ -8,7 +8,9 @@ const CATALOG_SOURCE_ID = 'primary'
 const SOURCE_FETCH_TIMEOUT_MS = 10_000
 const MAX_SOURCE_RESPONSE_BYTES = 1_000_000
 const CATALOG_SYNC_COOLDOWN_MS = 60_000
-const CATALOG_FRESHNESS_MS = 5 * 60_000
+const SQLITE_BIND_PARAMETER_LIMIT = 999
+const CATALOG_CHART_COLUMN_COUNT = 9
+const CATALOG_WRITE_BATCH_SIZE = Math.floor(SQLITE_BIND_PARAMETER_LIMIT / CATALOG_CHART_COLUMN_COUNT)
 
 export class CatalogSyncCooldownError extends Error {
     constructor() {
@@ -165,20 +167,23 @@ const writeCatalog = async (catalog: Catalog) => {
         const nextRevision = (state?.revision ?? 0) + 1
         await transaction.update(catalogCharts).set({ isActive: false })
 
-        for (const chart of chartRows) {
+        const batches = Array.from({ length: Math.ceil(chartRows.length / CATALOG_WRITE_BATCH_SIZE) }, (_, index) =>
+            chartRows.slice(index * CATALOG_WRITE_BATCH_SIZE, (index + 1) * CATALOG_WRITE_BATCH_SIZE),
+        )
+        for (const batch of batches) {
             await transaction
                 .insert(catalogCharts)
-                .values(chart)
+                .values(batch)
                 .onConflictDoUpdate({
                     target: catalogCharts.id,
                     set: {
-                        title: chart.title,
-                        difficulty: chart.difficulty,
-                        version: chart.version,
-                        normalRank: chart.normalRank,
-                        hardRank: chart.hardRank,
-                        normalPersonal: chart.normalPersonal,
-                        hardPersonal: chart.hardPersonal,
+                        title: sql`excluded.title`,
+                        difficulty: sql`excluded.difficulty`,
+                        version: sql`excluded.version`,
+                        normalRank: sql`excluded.normal_rank`,
+                        hardRank: sql`excluded.hard_rank`,
+                        normalPersonal: sql`excluded.normal_personal`,
+                        hardPersonal: sql`excluded.hard_personal`,
                         isActive: true,
                     },
                 })
@@ -245,28 +250,5 @@ export const syncCatalogFromSource = async () => {
         if (catalogSyncInFlight === pending) {
             catalogSyncInFlight = undefined
         }
-    }
-}
-
-const isRecent = (value: string | null, windowMs: number) => value !== null && Date.now() - Date.parse(value) <= windowMs
-
-export const ensureCatalogFresh = async () => {
-    const { source, lastAttemptAt } = await readCatalogState()
-    if (source.status === 'ready' && isRecent(source.fetchedAt, CATALOG_FRESHNESS_MS)) {
-        return { didSync: false, isRefreshFailed: false }
-    }
-
-    if (isRecent(lastAttemptAt, CATALOG_SYNC_COOLDOWN_MS)) {
-        return {
-            didSync: false,
-            isRefreshFailed: lastAttemptAt !== null && (source.fetchedAt === null || Date.parse(lastAttemptAt) > Date.parse(source.fetchedAt)),
-        }
-    }
-
-    try {
-        await syncCatalogFromSource()
-        return { didSync: true, isRefreshFailed: false }
-    } catch {
-        return { didSync: false, isRefreshFailed: true }
     }
 }

@@ -1,10 +1,11 @@
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { type FC, Suspense } from 'react'
 
-import { getCatalog, ensureCatalogFresh } from '@entities/catalog/catalog.server'
+import { getCatalog } from '@entities/catalog/catalog.server'
 import { catalogQueryOptions } from '@entities/catalog/catalog.query-options'
 import { getChecker } from '@entities/checker/checker.server'
 import { checkerQueryOptions } from '@entities/checker/checker.query-options'
+import { USER_ROLE } from '@shared/constants/user-role'
 import { getSession } from '@shared/server/auth'
 import { DEFAULT_QUERY_STALE_TIME_MS } from '@shared/constants/cache'
 import { MESSAGES } from '@shared/messages/messages'
@@ -13,7 +14,6 @@ import { CheckerLoading } from '@widgets/checker-workspace/checker-loading'
 
 const CheckerDataBoundary = async () => {
     const session = await getSession()
-    const freshness = await ensureCatalogFresh()
     const userId = session?.user.id ?? null
     const queryClient = new QueryClient({
         defaultOptions: {
@@ -42,7 +42,7 @@ const CheckerDataBoundary = async () => {
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <CheckerWorkspace initialUserId={userId} sourceRefreshFailed={freshness.isRefreshFailed} />
+            <CheckerWorkspace initialUserId={userId} initialIsAdmin={session?.user.role === USER_ROLE.ADMIN} />
         </HydrationBoundary>
     )
 }

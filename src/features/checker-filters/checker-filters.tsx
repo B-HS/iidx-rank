@@ -26,10 +26,6 @@ type Props = {
     onPersonalOnlyChange: (value: boolean) => void
     unplayedOnly: boolean
     onUnplayedOnlyChange: (value: boolean) => void
-    sort: 'rank' | 'title' | 'version'
-    onSortChange: (value: 'rank' | 'title' | 'version') => void
-    direction: 'asc' | 'desc'
-    onDirectionChange: (value: 'asc' | 'desc') => void
     catalogCount: number
     resultCount: number
 }
@@ -50,10 +46,6 @@ export const CheckerFilters: FC<Props> = ({
     onPersonalOnlyChange,
     unplayedOnly,
     onUnplayedOnlyChange,
-    sort,
-    onSortChange,
-    direction,
-    onDirectionChange,
     catalogCount,
     resultCount,
 }) => (
@@ -164,45 +156,6 @@ export const CheckerFilters: FC<Props> = ({
                 <Checkbox checked={unplayedOnly} onCheckedChange={(checked) => onUnplayedOnlyChange(checked === true)} />
                 <span>{MESSAGES.checker.unplayedOnly}</span>
             </label>
-        </div>
-
-        <div className='grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2 border-t border-border pt-4'>
-            <div className='grid gap-1.5'>
-                <Label className='checker-micro-label' htmlFor='checker-sort'>
-                    {MESSAGES.checker.sortLabel}
-                </Label>
-                <Select
-                    value={sort}
-                    onValueChange={(value) => {
-                        if (value === 'rank' || value === 'title' || value === 'version') {
-                            onSortChange(value)
-                        }
-                    }}>
-                    <SelectTrigger id='checker-sort' className='w-full'>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value='rank'>{MESSAGES.checker.sortRank}</SelectItem>
-                        <SelectItem value='title'>{MESSAGES.checker.sortTitle}</SelectItem>
-                        <SelectItem value='version'>{MESSAGES.checker.sortVersion}</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-            <Select
-                value={direction}
-                onValueChange={(value) => {
-                    if (value === 'asc' || value === 'desc') {
-                        onDirectionChange(value)
-                    }
-                }}>
-                <SelectTrigger aria-label={MESSAGES.checker.sortDirection} className='w-28'>
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value='asc'>{MESSAGES.checker.sortAscending}</SelectItem>
-                    <SelectItem value='desc'>{MESSAGES.checker.sortDescending}</SelectItem>
-                </SelectContent>
-            </Select>
         </div>
 
         <p aria-live='polite' className='text-xs text-muted-foreground'>

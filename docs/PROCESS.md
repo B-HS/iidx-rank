@@ -49,7 +49,7 @@
 
 ## GitHub·Vercel Production 배포
 
-현재 상태: 새 설치 빌드 검증 완료, 수정 커밋·Production 재배포 진행 중
+현재 상태: 최초 Production 배포 완료, 일일 수집·역할·랭크 화면 수정 배포 진행 중
 
 이번 작업은 사용자 선택으로 main이 직접 수행합니다. GitHub B-HS/iidx-rank에 commit/push하고 Vercel에 연결하며 Preview 배포는 끕니다. 사용자께서 .env 값을 Vercel에 등록하도록 명시적으로 요청하셨으므로, 이번 전송에 한하여 도구가 값을 처리하되 대화·로그·Git에는 값을 출력하거나 저장하지 않습니다.
 
@@ -63,3 +63,23 @@
 첫 Production 빌드는 shadcn/tailwind.css 의존성이 manifest에 없어 실패했습니다. package.json과 bun.lock에 shadcn을 추가하고 .env 및 기존 node_modules 없는 임시 복사본에서 frozen install과 build를 검증한 뒤 다시 배포합니다.
 
 .env와 기존 node_modules 없는 임시 복사본에서 bun install --frozen-lockfile 성공(722 packages), bun run build 성공을 확인했습니다. 제한된 실행 환경에서 멈춘 빌드는 중단하고 승인된 정상 실행 환경에서 검증했습니다. Next.js 16.3.8의 Cache Components와 홈 Partial Prerender, 모든 API 동적 경로를 확인했습니다.
+
+## 원본 수집 정책 수정
+
+현재 상태: 구현·로컬 권한·DB·반응형 검증 완료, Production 반영 중
+
+사용자 지시: 난이도표는 DB에서 조회하고, 원본 HTML은 하루에 한 번 또는 관리자 수동 갱신 때만 수집합니다. 이번 배포 작업의 후속 수정도 main이 직접 수행합니다.
+
+- [x] 페이지·catalog GET에서 원본 수집 제거
+- [x] Secret으로 보호하는 하루 1회 Vercel Cron과 DB 역할 관리자 수동 갱신·UI 게이트 구현
+- [x] 원격 DB 동기화의 순차 upsert를 제한된 묶음으로 개선하고 원자성 유지
+- [ ] 수집 경로·권한·빌드 검증 후 main commit/push 및 Production 배포 확인
+- [ ] 수집 정책·배포 URL·검증 결과 기록
+
+사용자가 이메일 기반 초기 지정을 명시적으로 허용하고 DB의 admin/user 역할을 요청했습니다. 계정 UUID 추가 확인은 요구하지 않습니다. 두 이메일은 Vercel Secret 초기 지정 설정으로만 등록하고, 권한 검사는 DB 역할을 사용합니다.
+
+사용자 후속 디자인 지시: 헤더·필터 내부 padding 12px, 콘텐츠 외곽 padding 최소화, 선택된 노멀/하드 랭크별 section 및 지력/개인차 카드 배치, 정렬 필터 제거를 같은 작업에 반영합니다.
+
+- [x] 랭크별 section/card·정렬 필터 제거·내부 padding 수정 및 모바일 3열 검증
+
+로컬 검증: 666개 묶음 저장, 비활성 곡 기록 보존, 조회 중 원본 fetch 없음, 수집 실패 시 스냅샷 보존. 역할 위조 가입은 user, 역할 변경 요청은 400, 일반 사용자 수집은 403, 관리자 수집은 200, Cron Secret 없거나 틀리면 401. 새 설치 build·typecheck 성공, 변경 ESLint 오류 0(캐시 키 인자 경고 1). 데스크톱 1280px·모바일 390px 가로 넘침 없음, 모바일 3열, 헤더·필터 내부 12px, 콘텐츠 외곽 0px. 冥의 노멀 A → 하드 S+ 섹션 이동 확인.

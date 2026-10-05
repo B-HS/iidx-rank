@@ -13,7 +13,7 @@ import { LAMPS, type RecordInput } from '@entities/checker/checker.dto'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
 import { ChartDetails } from '@features/chart-details/chart-details'
 import { CheckerFilters } from '@features/checker-filters/checker-filters'
-import { ChartCardGrid } from '@features/chart-card-grid/chart-card-grid'
+import { ChartRankSection } from '@features/chart-rank-section/chart-rank-section'
 import { useIdentityTransition } from '@shared/hooks/use-identity-transition'
 import { MESSAGES } from '@shared/messages/messages'
 import { AppShell } from '@widgets/app-shell/app-shell'
@@ -25,10 +25,10 @@ import { SidebarTrigger } from '@shared/ui/sidebar'
 
 type Props = {
     initialUserId: string | null
-    sourceRefreshFailed: boolean
+    initialIsAdmin: boolean
 }
 
-export const CheckerWorkspace: FC<Props> = ({ initialUserId, sourceRefreshFailed }) => {
+export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) => {
     const queryClient = useQueryClient()
     const router = useRouter()
     const identityTransition = useIdentityTransition()
@@ -40,15 +40,13 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, sourceRefreshFailed
     const [rank, setRank] = useState('all')
     const [personalOnly, setPersonalOnly] = useState(false)
     const [unplayedOnly, setUnplayedOnly] = useState(false)
-    const [sort, setSort] = useState<'rank' | 'title' | 'version'>('rank')
-    const [direction, setDirection] = useState<'asc' | 'desc'>('asc')
     const [selectedChart, setSelectedChart] = useState<Chart | null>(null)
     const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
-    const [hasManualCatalogSync, setHasManualCatalogSync] = useState(false)
     const { data: session, isPending: isSessionPending } = authClient.useSession()
     const { data: catalog } = useCatalog()
     const isSessionAligned = !identityTransition.isPending && (isSessionPending || (session?.user.id ?? null) === initialUserId)
     const isAuthenticated = initialUserId !== null && isSessionAligned
+    const canSyncCatalog = initialIsAdmin && isAuthenticated
     const checkerQuery = useChecker(initialUserId ?? '', isAuthenticated)
     const saveRecord = useSaveRecord(initialUserId ?? '')
     const refreshChecker = useRefreshChecker(initialUserId ?? '')
@@ -94,31 +92,20 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, sourceRefreshFailed
 
             return true
         })
-        .toSorted((left, right) => {
-            let comparison = 0
-
-            if (sort === 'rank') {
-                const leftRank = rankFor(left)
-                const rightRank = rankFor(right)
-                const leftRankIndex = leftRank ? RANKS.indexOf(leftRank) : RANKS.length
-                const rightRankIndex = rightRank ? RANKS.indexOf(rightRank) : RANKS.length
-                comparison = leftRankIndex - rightRankIndex
+        .toSorted((left, right) => left.title.localeCompare(right.title, 'ja'))
+    const rankSections = [...RANKS.toReversed(), null]
+        .map((sectionRank) => {
+            const charts = filteredCharts.filter((chart) => rankFor(chart) === sectionRank)
+            return {
+                rank: sectionRank ?? MESSAGES.checker.noRank,
+                standardCharts: charts.filter((chart) => !personalFor(chart)),
+                personalCharts: charts.filter(personalFor),
             }
-
-            if (sort === 'title') {
-                comparison = left.title.localeCompare(right.title, 'ko')
-            }
-
-            if (sort === 'version') {
-                comparison = left.version.localeCompare(right.version, 'ko') || left.title.localeCompare(right.title, 'ko')
-            }
-
-            return direction === 'asc' ? comparison : comparison * -1
         })
+        .filter((section) => section.standardCharts.length + section.personalCharts.length > 0)
     const recordedCount = records.filter((record) => record.lamp !== LAMPS[0]).length
     const completionPercent = catalog.charts.length === 0 ? 0 : Math.round((recordedCount / catalog.charts.length) * 100)
     const personalCount = catalog.charts.filter(personalFor).length
-    const isSourceStale = sourceRefreshFailed && !hasManualCatalogSync
     const selectedRecord = selectedChart ? recordsByChartId.get(selectedChart.id) : undefined
     const checkerLoadFailed = isAuthenticated && checkerQuery.isError
     const formattedSourceDate = (value: string | null) => {
@@ -153,14 +140,10 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, sourceRefreshFailed
         saveRecord.mutate(input, { onSuccess: () => setSelectedChart(null) })
     }
     const handleCatalogSync = async () => {
-        if (!isAuthenticated) {
-            setIsAuthDialogOpen(true)
-            return
-        }
+        if (!canSyncCatalog) return
 
         try {
             await syncCatalog.mutateAsync()
-            setHasManualCatalogSync(true)
         } catch {
             return
         }
@@ -182,10 +165,6 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, sourceRefreshFailed
             onPersonalOnlyChange={setPersonalOnly}
             unplayedOnly={unplayedOnly}
             onUnplayedOnlyChange={setUnplayedOnly}
-            sort={sort}
-            onSortChange={setSort}
-            direction={direction}
-            onDirectionChange={setDirection}
             catalogCount={catalog.charts.length}
             resultCount={filteredCharts.length}
         />
@@ -193,11 +172,11 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, sourceRefreshFailed
 
     const sidebarContent = (
         <div className='grid min-w-0 gap-px bg-border'>
-            <section className='grid min-w-0 gap-3 bg-sidebar p-0'>
+            <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
                 <h2 className='checker-micro-label'>{MESSAGES.checker.filtersTitle}</h2>
                 {renderFilters()}
             </section>
-            <section className='grid min-w-0 gap-3 bg-sidebar p-0'>
+            <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
                 <div className='flex min-w-0 items-center justify-between gap-2'>
                     <h2 className='checker-micro-label'>{MESSAGES.checker.sourceTitle}</h2>
                     {catalog.source.status === 'ready' && (
@@ -231,17 +210,19 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, sourceRefreshFailed
                     ) : (
                         <span aria-hidden='true' />
                     )}
-                    <Button
-                        variant='outline'
-                        size='sm'
-                        disabled={syncCatalog.isPending}
-                        onClick={() => void handleCatalogSync()}
-                        className='min-w-0 px-1 text-2xs'>
-                        <span className='truncate'>{syncCatalog.isPending ? MESSAGES.checker.sourceSyncing : MESSAGES.checker.sourceSync}</span>
-                    </Button>
+                    {canSyncCatalog && (
+                        <Button
+                            variant='outline'
+                            size='sm'
+                            disabled={syncCatalog.isPending}
+                            onClick={() => void handleCatalogSync()}
+                            className='min-w-0 px-1 text-2xs'>
+                            <span className='truncate'>{syncCatalog.isPending ? MESSAGES.checker.sourceSyncing : MESSAGES.checker.sourceSync}</span>
+                        </Button>
+                    )}
                 </div>
             </section>
-            <section className='grid min-w-0 gap-3 bg-sidebar p-0'>
+            <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
                 <h2 className='checker-micro-label'>{MESSAGES.checker.summaryTitle}</h2>
                 {isAuthenticated ? (
                     <>
@@ -284,11 +265,13 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, sourceRefreshFailed
     return (
         <AppShell sidebarContent={sidebarContent}>
             <section className='flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden'>
-                <header className='flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-0'>
+                <header className='flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3'>
                     <div className='flex min-w-0 items-center gap-2'>
                         <SidebarTrigger aria-label={MESSAGES.navigation.openFilters} className='shrink-0 md:hidden' />
                         <div className='min-w-0'>
-                            <h1 className='truncate text-sm font-semibold'>{MESSAGES.checker.title}</h1>
+                            <h1 className='truncate text-sm font-semibold'>
+                                {MESSAGES.checker.title} · {mode === 'normal' ? MESSAGES.checker.normalMode : MESSAGES.checker.hardMode}
+                            </h1>
                             <p className='hidden truncate text-xs text-muted-foreground sm:block'>{MESSAGES.checker.description}</p>
                         </div>
                     </div>
@@ -310,13 +293,6 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, sourceRefreshFailed
                 </header>
 
                 <div className='checker-list-scroll min-h-0 flex-1 overflow-auto p-0'>
-                    {isSourceStale && (
-                        <Alert className='mb-2 border-0 bg-amber-500/5'>
-                            <AlertTitle>{MESSAGES.checker.sourceStaleTitle}</AlertTitle>
-                            <AlertDescription>{MESSAGES.checker.sourceStale}</AlertDescription>
-                        </Alert>
-                    )}
-
                     {checkerLoadFailed && (
                         <Alert className='mb-2'>
                             <AlertTitle>{MESSAGES.checker.recordLoadErrorTitle}</AlertTitle>
@@ -335,9 +311,11 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, sourceRefreshFailed
                                 <EmptyTitle>{MESSAGES.checker.emptyCatalogTitle}</EmptyTitle>
                                 <EmptyDescription>{MESSAGES.checker.emptyCatalogDescription}</EmptyDescription>
                             </EmptyHeader>
-                            <Button size='sm' variant='outline' disabled={syncCatalog.isPending} onClick={() => void handleCatalogSync()}>
-                                {syncCatalog.isPending ? MESSAGES.checker.sourceSyncing : MESSAGES.checker.sourceSync}
-                            </Button>
+                            {canSyncCatalog && (
+                                <Button size='sm' variant='outline' disabled={syncCatalog.isPending} onClick={() => void handleCatalogSync()}>
+                                    {syncCatalog.isPending ? MESSAGES.checker.sourceSyncing : MESSAGES.checker.sourceSync}
+                                </Button>
+                            )}
                         </Empty>
                     ) : filteredCharts.length === 0 ? (
                         <Empty className='checker-empty min-h-64 border-0'>
@@ -360,7 +338,11 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, sourceRefreshFailed
                             </Button>
                         </Empty>
                     ) : (
-                        <ChartCardGrid charts={filteredCharts} records={recordsByChartId} onOpenDetails={setSelectedChart} />
+                        <div className='grid min-w-0 gap-3'>
+                            {rankSections.map((section) => (
+                                <ChartRankSection key={section.rank} {...section} records={recordsByChartId} onOpenDetails={setSelectedChart} />
+                            ))}
+                        </div>
                     )}
                 </div>
 

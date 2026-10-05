@@ -2,11 +2,17 @@
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "framework": "nextjs",
     "installCommand": "bun install --frozen-lockfile",
-    "buildCommand": "bun run build",
+    "buildCommand": "bun run db:migrate && bun run db:seed-admins && bun run build",
     "git": {
         "deploymentEnabled": {
             "*": false,
             "main": true
         }
-    }
+    },
+    "crons": [
+        {
+            "path": "/api/catalog/sync",
+            "schedule": "0 18 * * *"
+        }
+    ]
 }

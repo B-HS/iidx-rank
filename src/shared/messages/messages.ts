@@ -46,6 +46,8 @@ export const MESSAGES = {
         noRankShort: '없음',
         personalOnly: '개인차만 보기',
         unplayedOnly: '미플레이만 보기',
+        standardGroup: '지력',
+        rankSection: ' 랭크',
         sortLabel: '정렬',
         sortRank: '랭크순',
         sortTitle: '곡명순',

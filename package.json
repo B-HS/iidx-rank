@@ -11,7 +11,8 @@
         "lint": "eslint",
         "db:generate": "bunx drizzle-kit generate",
         "db:migrate": "bun scripts/migrate.ts",
-        "source:sync": "bun scripts/sync-source.ts"
+        "source:sync": "bun scripts/sync-source.ts",
+        "db:seed-admins": "bun scripts/seed-admins.ts"
     },
     "dependencies": {
         "@better-auth/drizzle-adapter": "^1.7.7",

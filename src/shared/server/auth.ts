@@ -3,6 +3,7 @@ import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth'
 import { getSessionCookie } from 'better-auth/cookies'
 import { headers } from 'next/headers'
+import { USER_ROLE } from '@shared/constants/user-role'
 import { account, session, user, verification } from '@shared/server/db/auth-schema'
 import { getDb } from '@shared/server/db/get-db'
 import { getEnv } from '@shared/server/env'
@@ -17,6 +18,18 @@ const createAuthInstance = (env: ReturnType<typeof getEnv>) =>
             schema: { user, session, account, verification },
         }),
         emailAndPassword: { enabled: true },
+        user: {
+            additionalFields: { role: { type: [USER_ROLE.USER, USER_ROLE.ADMIN], required: false, defaultValue: USER_ROLE.USER, input: false } },
+        },
+        databaseHooks: {
+            user: {
+                create: {
+                    before: async (data) => ({
+                        data: { ...data, role: env.ADMIN_BOOTSTRAP_EMAILS.includes(data.email.toLowerCase()) ? USER_ROLE.ADMIN : USER_ROLE.USER },
+                    }),
+                },
+            },
+        },
         rateLimit: { enabled: true },
         advanced: { database: { generateId: 'uuid' } },
     })

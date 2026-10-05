@@ -1,4 +1,5 @@
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { USER_ROLE } from '@shared/constants/user-role'
 
 const timestampMs = (columnName: string) => integer(columnName, { mode: 'timestamp_ms' })
 
@@ -7,6 +8,9 @@ export const user = sqliteTable('user', {
     name: text('name').notNull(),
     email: text('email').notNull().unique(),
     emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
+    role: text('role', { enum: [USER_ROLE.USER, USER_ROLE.ADMIN] })
+        .notNull()
+        .default(USER_ROLE.USER),
     image: text('image'),
     createdAt: timestampMs('created_at').notNull(),
     updatedAt: timestampMs('updated_at').notNull(),
