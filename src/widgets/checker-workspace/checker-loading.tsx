@@ -17,11 +17,11 @@ export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
     const sections = catalog ? groupChartsByRank(catalog.charts, 'normal') : []
     return (
         <AppShell sidebarContent={<CheckerSidebarSkeleton />}>
-            <section aria-label={t('common.loading')} aria-busy='true' className='flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden'>
+            <section aria-label={t('common.loading')} aria-busy='true' className='checker-workspace'>
                 <span role='status' className='sr-only'>
                     {t('common.loading')}
                 </span>
-                <header className='flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3'>
+                <header className='checker-toolbar'>
                     <div className='flex min-w-0 items-center gap-2'>
                         <SidebarTrigger aria-label={t('navigation.openSidebar')} className='shrink-0 md:hidden' />
                         <div className='min-w-0'>
@@ -40,7 +40,7 @@ export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
                         </Button>
                     </div>
                 </header>
-                <div className='checker-list-scroll min-h-0 flex-1 overflow-auto p-0'>
+                <div className='checker-list-scroll'>
                     {versionDisplay ? (
                         <div className='grid min-w-0'>
                             {sections.map((section) => (

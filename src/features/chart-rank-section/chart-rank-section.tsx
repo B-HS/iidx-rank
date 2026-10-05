@@ -26,8 +26,8 @@ export const ChartRankSection: FC<Props> = ({ rank, standardCharts, personalChar
     return (
         <Collapsible defaultOpen asChild>
             <section aria-label={rank + t('checker.rankSection')} className='min-w-0'>
-                <Card className='min-w-0 gap-px rounded-none bg-border p-0 shadow-none ring-0'>
-                    <CardHeader className='block bg-muted p-0'>
+                <Card className='min-w-0 gap-px overflow-visible rounded-none bg-border p-0 shadow-none ring-0'>
+                    <CardHeader className='checker-rank-header block bg-muted p-0'>
                         <h2>
                             <CollapsibleTrigger
                                 className='group flex h-12 w-full items-center justify-between gap-2 p-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring'

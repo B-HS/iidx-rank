@@ -12,8 +12,8 @@ export const ChartRankSkeleton: FC<Props> = ({ rank, standardCount, personalCoun
     const t = useTranslations()
     return (
         <section aria-label={rank + t('checker.rankSection')} className='min-w-0'>
-            <Card aria-hidden='true' className='min-w-0 gap-px rounded-none bg-border p-0 shadow-none ring-0'>
-                <CardHeader className='flex h-12 flex-row items-center justify-between bg-muted px-3 py-0'>
+            <Card aria-hidden='true' className='min-w-0 gap-px overflow-visible rounded-none bg-border p-0 shadow-none ring-0'>
+                <CardHeader className='checker-rank-header flex h-12 flex-row items-center justify-between bg-muted px-3 py-0'>
                     <Skeleton className='h-5 w-12' />
                     <Skeleton className='h-4 w-20' />
                 </CardHeader>

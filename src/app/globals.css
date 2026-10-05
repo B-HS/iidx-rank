@@ -256,8 +256,26 @@
     text-transform: uppercase;
 }
 
+.checker-workspace {
+    @apply flex min-w-0 flex-1 flex-col md:h-full md:min-h-0 md:overflow-hidden;
+}
+
+.checker-toolbar {
+    @apply sticky top-0 z-(--z-raised) flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border bg-background px-3 md:static;
+}
+
+.checker-rank-header {
+    @apply sticky top-(--rail-chrome-height) z-(--z-rail) md:top-0;
+}
+
 .checker-list-scroll {
+    @apply p-0 md:min-h-0 md:flex-1 md:overflow-auto;
     scrollbar-width: none;
+    scroll-padding-block-start: var(--rail-chrome-height);
+}
+
+html {
+    scroll-padding-block-start: calc(var(--rail-chrome-height) * 2);
 }
 
 .checker-list-scroll::-webkit-scrollbar {

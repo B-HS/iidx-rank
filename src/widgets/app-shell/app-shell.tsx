@@ -137,7 +137,7 @@ export const AppShell: FC<Props> = ({ children, sidebarContent, onOpenSettings }
     return (
         <TooltipProvider>
             <SidebarProvider
-                className='h-full min-h-0 w-full overflow-hidden'
+                className='min-h-dvh w-full md:h-full md:min-h-0 md:overflow-hidden'
                 style={
                     {
                         '--sidebar-width': SHELL_SIDEBAR_WIDTH_PX + 'px',
@@ -145,7 +145,7 @@ export const AppShell: FC<Props> = ({ children, sidebarContent, onOpenSettings }
                         '--sidebar-width-mobile': SHELL_SIDEBAR_MOBILE_WIDTH_PX + 'px',
                     } as CSSProperties
                 }>
-                <div className='flex h-full min-h-0 w-full overflow-hidden'>
+                <div className='flex min-h-dvh w-full md:h-full md:min-h-0 md:overflow-hidden'>
                     <Sidebar collapsible='icon' className='border-r-0 group-data-[side=left]:border-r-0'>
                         <SidebarHeader className='flex shrink-0 flex-row items-center gap-2 p-0' style={{ height: SHELL_RAIL_CHROME_HEIGHT_PX }}>
                             <SidebarTrigger aria-label={t('navigation.toggleSidebar')} className='ml-2 size-8 shrink-0' />
@@ -179,8 +179,10 @@ export const AppShell: FC<Props> = ({ children, sidebarContent, onOpenSettings }
                             </SidebarMenu>
                         </SidebarFooter>
                     </Sidebar>
-                    <SidebarInset className='h-full min-h-0 min-w-0 overflow-hidden rounded-none shadow-none'>
-                        <main className='flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background'>{children}</main>
+                    <SidebarInset className='min-h-dvh min-w-0 rounded-none shadow-none md:h-full md:min-h-0 md:overflow-hidden'>
+                        <main className='flex min-h-dvh min-w-0 flex-1 flex-col bg-background md:h-full md:min-h-0 md:overflow-hidden'>
+                            {children}
+                        </main>
                     </SidebarInset>
                 </div>
             </SidebarProvider>

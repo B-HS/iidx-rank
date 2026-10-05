@@ -19,7 +19,7 @@ const RootLayout = async ({ children, params }: LayoutProps<'/[locale]'>) => {
     if (!hasLocale(routing.locales, locale)) notFound()
     return (
         <html lang={locale} suppressHydrationWarning>
-            <body className='h-dvh overflow-hidden bg-background font-sans text-foreground antialiased'>
+            <body className='min-h-dvh bg-background md:h-dvh md:overflow-hidden font-sans text-foreground antialiased'>
                 <NextIntlClientProvider>
                     <AppProviders>{children}</AppProviders>
                 </NextIntlClientProvider>

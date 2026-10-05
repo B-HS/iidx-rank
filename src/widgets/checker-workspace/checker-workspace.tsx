@@ -386,8 +386,8 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
     }, [identityTransition, initialUserId, isSessionPending, queryClient, router, session?.user.id])
     return (
         <AppShell sidebarContent={sidebarContent} onOpenSettings={() => setIsSettingsOpen(true)}>
-            <section style={chartDisplayStyle} className='flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden'>
-                <header className='flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3'>
+            <section style={chartDisplayStyle} className='checker-workspace'>
+                <header className='checker-toolbar'>
                     <div className='flex min-w-0 items-center gap-2'>
                         <SidebarTrigger aria-label={t('navigation.openSidebar')} className='shrink-0 md:hidden' />
                         <div className='min-w-0'>
@@ -422,7 +422,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
                     </div>
                 </header>
 
-                <div className='checker-list-scroll min-h-0 flex-1 overflow-auto p-0'>
+                <div className='checker-list-scroll'>
                     {checkerLoadFailed && (
                         <Alert className='mb-2'>
                             <AlertTitle>{t('checker.recordLoadErrorTitle')}</AlertTitle>
