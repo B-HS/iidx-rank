@@ -1,56 +1,31 @@
 'use client'
+import type { ComponentProps, FC } from 'react'
+import type { Chart } from '@entities/catalog/catalog.dto'
+import type { Record as ChartRecord } from '@entities/checker/checker.dto'
+import { ChartCard } from '@features/chart-card-grid/chart-card'
+import { CHART_CARD_GRID_CLASS_NAME, CHART_EMPTY_CELL_LAYOUTS } from '@shared/constants/checker'
+import { Card } from '@shared/ui/card'
 
-import { type FC } from 'react'
-import { type Chart } from '@entities/catalog/catalog.dto'
-import { type Record as ChartRecord } from '@entities/checker/checker.dto'
-import { CHART_CARD_GRID_CLASS_NAME } from '@shared/constants/checker'
-import { MESSAGES } from '@shared/messages/messages'
-import { Badge } from '@shared/ui/badge'
-import { Card, CardContent } from '@shared/ui/card'
-import { Skeleton } from '@shared/ui/skeleton'
-
-type Props = {
-    charts: Chart[]
-    records: ReadonlyMap<string, ChartRecord>
-    label: string
-    isRecordsPending: boolean
-    onOpenDetails: (chart: Chart) => void
-}
-
-export const ChartCardGrid: FC<Props> = ({ charts, records, label, isRecordsPending, onOpenDetails }) => (
-    <ul aria-label={label} aria-busy={isRecordsPending} className={CHART_CARD_GRID_CLASS_NAME}>
-        {charts.map((chart) => {
-            const lamp = records.get(chart.id)?.lamp ?? 'NO_PLAY'
-            return (
-                <li key={chart.id} className='min-w-0'>
-                    <Card size='sm' className='h-full min-w-0 rounded-none bg-card p-0 shadow-none ring-0'>
-                        <CardContent className='h-full min-w-0 p-1.5'>
-                            <button
-                                type='button'
-                                disabled={isRecordsPending}
-                                title={chart.title}
-                                onClick={() => onOpenDetails(chart)}
-                                className='flex h-full w-full min-w-0 flex-col justify-between gap-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring'>
-                                <span className='line-clamp-2 min-w-0 break-words text-2xs leading-tight font-medium'>{chart.title}</span>
-                                <span className='flex min-w-0 items-center gap-1 text-2xs leading-tight text-muted-foreground'>
-                                    <span className='shrink-0 font-medium text-foreground' title={MESSAGES.difficulty[chart.difficulty]}>
-                                        {chart.difficulty}
-                                    </span>
-                                    <span className='min-w-0 flex-1 truncate'>{chart.version}</span>
-                                    {isRecordsPending && <Skeleton className='h-4 w-10 shrink-0' />}
-                                    {!isRecordsPending && lamp !== 'NO_PLAY' && (
-                                        <Badge
-                                            variant={lamp === 'FAILED' ? 'destructive' : 'secondary'}
-                                            className='h-4 min-w-0 max-w-full truncate px-1 text-2xs leading-none'>
-                                            {MESSAGES.lamp[lamp]}
-                                        </Badge>
-                                    )}
-                                </span>
-                            </button>
-                        </CardContent>
-                    </Card>
-                </li>
-            )
-        })}
+type Props = Pick<
+    ComponentProps<typeof ChartCard>,
+    'mode' | 'versionDisplay' | 'isRecordsPending' | 'isDisabled' | 'onAdvanceLamp' | 'onOpenDetails' | 'pendingLamp'
+> & { charts: Chart[]; records: ReadonlyMap<string, ChartRecord>; label: string; pendingChartId: string | null }
+export const ChartCardGrid: FC<Props> = ({ charts, records, label, pendingChartId, ...cardProps }) => (
+    <ul aria-label={label} aria-busy={cardProps.isRecordsPending} className={CHART_CARD_GRID_CLASS_NAME}>
+        {charts.map((chart) => (
+            <li key={chart.id} className='min-w-0'>
+                <ChartCard {...cardProps} chart={chart} record={records.get(chart.id)} isSaving={pendingChartId === chart.id} />
+            </li>
+        ))}
+        {CHART_EMPTY_CELL_LAYOUTS.flatMap((layout) =>
+            Array.from({ length: (layout.columns - (charts.length % layout.columns)) % layout.columns }, (_, index) => ({
+                id: layout.columns + '-' + index,
+                className: layout.className,
+            })),
+        ).map((cell) => (
+            <li key={cell.id} aria-hidden='true' className={cell.className + ' min-w-0'}>
+                <Card className='checker-chart-empty h-full min-h-12 rounded-none bg-card p-0 shadow-none ring-0' />
+            </li>
+        ))}
     </ul>
 )

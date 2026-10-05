@@ -25,7 +25,7 @@ export const ChartRankSkeleton: FC = () => (
                     </div>
                     <div className={CHART_CARD_GRID_CLASS_NAME}>
                         {Array.from({ length: group.count }, (_, index) => group.id + '-' + index).map((id) => (
-                            <Card key={id} size='sm' className='min-w-0 rounded-none bg-card p-0 shadow-none ring-0'>
+                            <Card key={id} size='sm' className='min-w-0 checker-chart-empty rounded-none bg-card p-0 shadow-none ring-0'>
                                 <CardContent className='flex h-10 min-w-0 flex-col justify-between gap-1 p-1.5'>
                                     <Skeleton className='h-3 w-4/5' />
                                     <Skeleton className='h-3 w-3/5' />

@@ -5,6 +5,8 @@ import { getCatalog } from '@entities/catalog/catalog.server'
 import { catalogQueryOptions } from '@entities/catalog/catalog.query-options'
 import { getChecker } from '@entities/checker/checker.server'
 import { checkerQueryOptions } from '@entities/checker/checker.query-options'
+import { getDisplayPreferences } from '@entities/preferences/preferences.server'
+import { displayPreferencesQueryOptions } from '@entities/preferences/preferences.query-options'
 import { USER_ROLE } from '@shared/constants/user-role'
 import { getSession } from '@shared/server/auth'
 import { DEFAULT_QUERY_STALE_TIME_MS } from '@shared/constants/cache'
@@ -33,7 +35,8 @@ const CheckerDataBoundary = async () => {
     if (userId) {
         const checkerOptions = checkerQueryOptions(userId, () => getChecker(userId))
 
-        await queryClient.prefetchQuery(checkerOptions)
+        const preferencesOptions = displayPreferencesQueryOptions(userId, () => getDisplayPreferences(userId))
+        await Promise.all([queryClient.prefetchQuery(checkerOptions), queryClient.prefetchQuery(preferencesOptions)])
 
         if (queryClient.getQueryState(checkerOptions.queryKey)?.status === 'error') {
             throw queryClient.getQueryState(checkerOptions.queryKey)?.error

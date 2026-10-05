@@ -6,6 +6,7 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import { account, session, user, verification } from '@shared/server/db/auth-schema'
 import { catalogCharts, catalogSource } from '@shared/server/db/catalog-schema'
 import { userRecord, userRecordRevision } from '@shared/server/db/checker-schema'
+import { userDisplayPreference } from '@shared/server/db/preferences-schema'
 import { getEnv } from '@shared/server/env'
 
 const LOCAL_DATABASE_DIRECTORY = 'data'
@@ -17,6 +18,7 @@ const databaseSchema = {
     verification,
     userRecord,
     userRecordRevision,
+    userDisplayPreference,
     catalogCharts,
     catalogSource,
 }

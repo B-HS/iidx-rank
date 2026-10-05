@@ -1,6 +1,6 @@
 'use client'
 
-import { type FC, useEffect, useRef, useState } from 'react'
+import { type CSSProperties, type FC, useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { RefreshCw } from 'lucide-react'
@@ -9,9 +9,14 @@ import { authClient } from '@entities/auth/auth.api'
 import { type Chart, DIFFICULTIES, RANKS } from '@entities/catalog/catalog.dto'
 import { useCatalog, useSyncCatalog } from '@entities/catalog/catalog.query'
 import { useChecker, useRefreshChecker, useSaveRecord } from '@entities/checker/checker.query'
+import { nextCheckerLamp } from '@entities/checker/checker-lamp'
+import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
+import { useDisplayPreferences, useSaveDisplayPreferences } from '@entities/preferences/preferences.query'
 import { LAMPS, type RecordInput } from '@entities/checker/checker.dto'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
 import { ChartDetails } from '@features/chart-details/chart-details'
+import { DisplaySettings } from '@features/display-settings/display-settings'
+import { DEFAULT_DISPLAY_PREFERENCES, MAX_LOGO_OPACITY } from '@shared/constants/display'
 import { CheckerFilters } from '@features/checker-filters/checker-filters'
 import { CheckerRecordsSkeleton } from '@features/checker-skeleton/checker-records-skeleton'
 import { ChartRankSkeleton } from '@features/checker-skeleton/chart-rank-skeleton'
@@ -37,6 +42,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
     const router = useRouter()
     const identityTransition = useIdentityTransition()
     const previousUserId = useRef(initialUserId)
+    const [displayDraft, setDisplayDraft] = useState<{ userId: string | null; preferences: DisplayPreferencesInput } | null>(null)
     const [mode, setMode] = useState<'normal' | 'hard'>('normal')
     const [search, setSearch] = useState('')
     const [difficulty, setDifficulty] = useState('all')
@@ -54,6 +60,18 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
     const checkerQuery = useChecker(initialUserId ?? '', isAuthenticated)
     const isRecordsPending = isSessionPending || !isSessionAligned || (isAuthenticated && checkerQuery.isPending)
     const saveRecord = useSaveRecord(initialUserId ?? '')
+    const quickSaveRecord = useSaveRecord(initialUserId ?? '', false)
+    const isRecordsSaving = saveRecord.isPending || quickSaveRecord.isPending
+    const pendingRecordInput = [saveRecord, quickSaveRecord].find((mutation) => mutation.isPending)?.variables
+    const pendingChartId = pendingRecordInput?.chartId ?? null
+    const preferencesQuery = useDisplayPreferences(initialUserId ?? '', isAuthenticated)
+    const savePreferences = useSaveDisplayPreferences(initialUserId ?? '')
+    const isPreferencesPending = isSessionPending || !isSessionAligned || (isAuthenticated && preferencesQuery.isPending)
+    const isPreferencesLoadFailed = isAuthenticated && preferencesQuery.isError
+    const preferences =
+        displayDraft && displayDraft.userId === initialUserId
+            ? displayDraft.preferences
+            : (preferencesQuery.data?.preferences ?? DEFAULT_DISPLAY_PREFERENCES)
     const refreshChecker = useRefreshChecker(initialUserId ?? '')
     const syncCatalog = useSyncCatalog()
     const records = isAuthenticated && !isRecordsPending ? (checkerQuery.data?.records ?? []) : []
@@ -135,7 +153,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
         }
     }
     const handleSaveRecord = (input: RecordInput) => {
-        if (!isAuthenticated || checkerLoadFailed || isRecordsPending) {
+        if (!isAuthenticated || checkerLoadFailed || isRecordsPending || isRecordsSaving) {
             if (!isAuthenticated) {
                 setIsAuthDialogOpen(true)
             }
@@ -143,6 +161,27 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
         }
 
         saveRecord.mutate(input, { onSuccess: () => setSelectedChart(null) })
+    }
+    const handleAdvanceLamp = (chart: Chart) => {
+        if (isRecordsPending || isRecordsSaving || checkerLoadFailed) return
+        if (!isAuthenticated) {
+            setIsAuthDialogOpen(true)
+            return
+        }
+        const record = recordsByChartId.get(chart.id)
+        quickSaveRecord.mutate({
+            chartId: chart.id,
+            lamp: nextCheckerLamp(record?.lamp ?? 'NO_PLAY', mode),
+            memo: record?.memo ?? '',
+            scoreGrade: record?.scoreGrade ?? null,
+        })
+    }
+    const handlePreviewPreferences = (input: DisplayPreferencesInput) => setDisplayDraft({ userId: initialUserId, preferences: input })
+    const handleSavePreferences = (input: DisplayPreferencesInput) => {
+        if (isPreferencesPending || isPreferencesLoadFailed || savePreferences.isPending) return
+        handlePreviewPreferences(input)
+        if (!isAuthenticated) return
+        savePreferences.mutate(input, { onSuccess: () => setDisplayDraft(null), onError: () => setDisplayDraft(null) })
     }
     const handleCatalogSync = async () => {
         if (!canSyncCatalog) return
@@ -181,6 +220,26 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
             <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
                 <h2 className='checker-micro-label'>{MESSAGES.checker.filtersTitle}</h2>
                 {renderFilters()}
+            </section>
+            <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
+                <h2 className='checker-micro-label'>{MESSAGES.display.title}</h2>
+                {isPreferencesLoadFailed ? (
+                    <Alert>
+                        <AlertDescription>{MESSAGES.display.loadError}</AlertDescription>
+                        <Button size='sm' variant='outline' onClick={() => void preferencesQuery.refetch()}>
+                            {MESSAGES.common.retry}
+                        </Button>
+                    </Alert>
+                ) : (
+                    <DisplaySettings
+                        value={preferences}
+                        isLoading={isPreferencesPending}
+                        isSaving={savePreferences.isPending}
+                        isAuthenticated={isAuthenticated}
+                        onPreview={handlePreviewPreferences}
+                        onSave={handleSavePreferences}
+                    />
+                )}
             </section>
             <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
                 <div className='flex min-w-0 items-center justify-between gap-2'>
@@ -255,6 +314,9 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
         </div>
     )
 
+    const chartDisplayStyle: CSSProperties & { '--checker-logo-opacity': number } = {
+        '--checker-logo-opacity': preferences.logoOpacity / MAX_LOGO_OPACITY,
+    }
     const renderChartList = () => {
         if (isRecordsPending && unplayedOnly) {
             return (
@@ -311,6 +373,12 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
             <div className='grid min-w-0 gap-3'>
                 {rankSections.map((section) => (
                     <ChartRankSection
+                        mode={mode}
+                        versionDisplay={preferences.versionDisplay}
+                        isDisabled={isRecordsPending || isRecordsSaving || checkerLoadFailed}
+                        onAdvanceLamp={handleAdvanceLamp}
+                        pendingChartId={pendingChartId}
+                        pendingLamp={pendingRecordInput?.lamp ?? null}
                         isRecordsPending={isRecordsPending}
                         key={section.rank}
                         {...section}
@@ -342,13 +410,13 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin }) =
 
     return (
         <AppShell sidebarContent={sidebarContent}>
-            <section className='flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden'>
+            <section style={chartDisplayStyle} className='flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden'>
                 <header className='flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-3'>
                     <div className='flex min-w-0 items-center gap-2'>
                         <SidebarTrigger aria-label={MESSAGES.navigation.openFilters} className='shrink-0 md:hidden' />
                         <div className='min-w-0'>
                             <h1 className='truncate text-sm font-semibold'>
-                                {MESSAGES.checker.title} · {mode === 'normal' ? MESSAGES.checker.normalMode : MESSAGES.checker.hardMode}
+                                {mode === 'normal' ? MESSAGES.checker.normalMode : MESSAGES.checker.hardMode} {MESSAGES.checker.title}
                             </h1>
                             <p className='hidden truncate text-xs text-muted-foreground sm:block'>{MESSAGES.checker.description}</p>
                         </div>

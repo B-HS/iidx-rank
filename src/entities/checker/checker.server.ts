@@ -26,6 +26,7 @@ const getCheckerByRevision = async (userId: string, _revision: number) => {
         .select({
             chartId: userRecord.chartId,
             lamp: userRecord.lamp,
+            scoreGrade: userRecord.scoreGrade,
             memo: userRecord.memo,
             updatedAt: userRecord.updatedAt,
         })
@@ -63,12 +64,24 @@ export const upsertRecord = async (userId: string, input: RecordInput) => {
 
         if (!charts[0]) return null
 
-        await transaction
+        const savedRecords = await transaction
             .insert(userRecord)
             .values({ userId: validatedUserId, ...record })
             .onConflictDoUpdate({
                 target: [userRecord.userId, userRecord.chartId],
-                set: { lamp: record.lamp, memo: record.memo, updatedAt: record.updatedAt },
+                set: {
+                    lamp: record.lamp,
+                    memo: record.memo,
+                    updatedAt: record.updatedAt,
+                    ...(validatedInput.scoreGrade === undefined ? {} : { scoreGrade: record.scoreGrade }),
+                },
+            })
+            .returning({
+                chartId: userRecord.chartId,
+                lamp: userRecord.lamp,
+                memo: userRecord.memo,
+                scoreGrade: userRecord.scoreGrade,
+                updatedAt: userRecord.updatedAt,
             })
         await transaction
             .insert(userRecordRevision)
@@ -78,6 +91,6 @@ export const upsertRecord = async (userId: string, input: RecordInput) => {
                 set: { revision: sql`${userRecordRevision.revision} + 1` },
             })
 
-        return record
+        return RecordSchema.parse(savedRecords[0])
     })
 }

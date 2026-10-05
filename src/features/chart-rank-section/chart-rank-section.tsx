@@ -1,6 +1,6 @@
 'use client'
 
-import { type FC } from 'react'
+import { type ComponentProps, type FC } from 'react'
 import { type Chart } from '@entities/catalog/catalog.dto'
 import { type Record as ChartRecord } from '@entities/checker/checker.dto'
 import { ChartCardGrid } from '@features/chart-card-grid/chart-card-grid'
@@ -8,7 +8,10 @@ import { MESSAGES } from '@shared/messages/messages'
 import { Badge } from '@shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card'
 
-type Props = {
+type Props = Pick<
+    ComponentProps<typeof ChartCardGrid>,
+    'mode' | 'versionDisplay' | 'isDisabled' | 'onAdvanceLamp' | 'pendingChartId' | 'pendingLamp'
+> & {
     rank: string
     isRecordsPending: boolean
     standardCharts: Chart[]
@@ -17,7 +20,7 @@ type Props = {
     onOpenDetails: (chart: Chart) => void
 }
 
-export const ChartRankSection: FC<Props> = ({ rank, standardCharts, personalCharts, records, isRecordsPending, onOpenDetails }) => (
+export const ChartRankSection: FC<Props> = ({ rank, standardCharts, personalCharts, records, isRecordsPending, onOpenDetails, ...cardProps }) => (
     <section aria-label={rank + MESSAGES.checker.rankSection} className='min-w-0'>
         <Card className='min-w-0 gap-px rounded-none bg-border p-0 shadow-none ring-0'>
             <CardHeader className='flex flex-row items-center justify-between bg-muted p-3'>
@@ -41,6 +44,7 @@ export const ChartRankSection: FC<Props> = ({ rank, standardCharts, personalChar
                                 <span className='tabular-nums'>{group.charts.length}</span>
                             </h3>
                             <ChartCardGrid
+                                {...cardProps}
                                 isRecordsPending={isRecordsPending}
                                 charts={group.charts}
                                 records={records}

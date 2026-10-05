@@ -37,6 +37,11 @@ export const CheckerSidebarSkeleton: FC = () => (
             </div>
         </section>
         <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
+            <h2 className='checker-micro-label'>{MESSAGES.display.title}</h2>
+            <Skeleton className='h-8 w-full bg-sidebar-accent' />
+            <Skeleton className='h-4 w-full bg-sidebar-accent' />
+        </section>
+        <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
             <h2 className='checker-micro-label'>{MESSAGES.checker.sourceTitle}</h2>
             <div aria-hidden='true' className='grid gap-3'>
                 <Skeleton className='h-3 w-36 bg-sidebar-accent' />

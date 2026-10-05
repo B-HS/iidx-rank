@@ -1,7 +1,7 @@
 'use client'
 
 import { type FC, useState } from 'react'
-import { type Record as ChartRecord, LAMPS, MAX_MEMO_LENGTH, type RecordInput } from '@entities/checker/checker.dto'
+import { type Record as ChartRecord, LAMPS, SCORE_GRADES, MAX_MEMO_LENGTH, type RecordInput } from '@entities/checker/checker.dto'
 import { type Chart } from '@entities/catalog/catalog.dto'
 import { CHART_MEMO_TEXTAREA_ROWS } from '@shared/constants/checker'
 import { MESSAGES } from '@shared/messages/messages'
@@ -36,10 +36,11 @@ export const ChartDetails: FC<Props> = ({
     onRequestSignIn,
 }) => {
     const [lamp, setLamp] = useState<ChartRecord['lamp']>(record?.lamp ?? 'NO_PLAY')
+    const [scoreGrade, setScoreGrade] = useState<ChartRecord['scoreGrade']>(record?.scoreGrade ?? null)
     const [memo, setMemo] = useState(record?.memo ?? '')
     const rank = mode === 'normal' ? chart.normalRank : chart.hardRank
     const isPersonal = mode === 'normal' ? chart.normalPersonal : chart.hardPersonal
-    const handleSave = () => onSave({ chartId: chart.id, lamp, memo })
+    const handleSave = () => onSave({ chartId: chart.id, lamp, memo, scoreGrade })
 
     return (
         <Dialog open={Boolean(chart)} onOpenChange={onOpenChange}>
@@ -62,6 +63,31 @@ export const ChartDetails: FC<Props> = ({
                 </div>
 
                 <div className='grid gap-4'>
+                    <div className='grid gap-1.5'>
+                        <Label htmlFor='chart-score-grade'>{MESSAGES.checker.detailScoreGrade}</Label>
+                        <Select
+                            value={scoreGrade ?? 'none'}
+                            onValueChange={(value) => {
+                                if (value === 'none') {
+                                    setScoreGrade(null)
+                                    return
+                                }
+                                const grade = SCORE_GRADES.find((item) => item === value)
+                                if (grade) setScoreGrade(grade)
+                            }}>
+                            <SelectTrigger id='chart-score-grade' className='w-full'>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value='none'>{MESSAGES.checker.noScoreGrade}</SelectItem>
+                                {SCORE_GRADES.map((grade) => (
+                                    <SelectItem key={grade} value={grade}>
+                                        {grade}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                     <div className='grid gap-1.5'>
                         <Label htmlFor='chart-record-lamp'>{MESSAGES.checker.detailLamp}</Label>
                         <Select

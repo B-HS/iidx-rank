@@ -11,14 +11,14 @@ import { MESSAGES } from '@shared/messages/messages'
 
 export const useChecker = (userId: string, enabled: boolean) => useQuery({ ...checkerQueryOptions(userId), enabled })
 
-export const useSaveRecord = (userId: string) => {
+export const useSaveRecord = (userId: string, shouldNotifySuccess = true) => {
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: (input: RecordInput) => saveRecord(input),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: QUERY_KEY.CHECKER.RECORDS(userId) })
-            toast.success(MESSAGES.checker.recordSaveSuccess)
+            if (shouldNotifySuccess) toast.success(MESSAGES.checker.recordSaveSuccess)
         },
         onError: (error) => toast.error(error instanceof Error ? error.message : MESSAGES.checker.recordSaveError),
     })

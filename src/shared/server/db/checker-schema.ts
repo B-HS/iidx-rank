@@ -9,6 +9,7 @@ export const userRecord = sqliteTable(
             .references(() => user.id, { onDelete: 'cascade' }),
         chartId: text('chart_id').notNull(),
         lamp: text('lamp').notNull(),
+        scoreGrade: text('score_grade'),
         memo: text('memo').notNull().default(''),
         updatedAt: text('updated_at').notNull(),
     },
