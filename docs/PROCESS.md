@@ -150,13 +150,13 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 ## 카드 밀도·접기·필터와 설정 모달
 
-현재 상태: 구현·빌드·migration 및 화면 검증 완료, Production 반영 중
+현재 상태: 구현·검증·GitHub·Production 반영 완료 (6/6)
 
 - [x] 기존 카드·사이드바·설정 저장 구조와 공식 Collapsible 문서 확인
 - [x] 로고 카드 두 줄 높이·기본 불투명도 10% 및 기존 설정 보존 migration 적용
 - [x] 랭크 간 gap 제거·shadcn Collapsible 헤더 적용
 - [x] 사용자 메뉴 설정 모달·헤더 곡 필터 모달·사이드바 및 스켈레톤 정리
 - [x] 빌드·migration 보존·모달/접기/반응형 및 설정 저장 검증
-- [ ] 결과 기록·선별 commit/push·Production 반영 확인
+- [x] 결과 기록·선별 commit/push·Production 반영 확인
 
 사용자가 workflow 없이 main 직접 수행을 명시했습니다. 기존 저장 설정은 보존하고 미설정 계정과 비로그인 기본값만 10%로 변경합니다. 램프·DJ 랭크·UUID 캐시 계약은 유지합니다. 기준: AGENTS.md, llm-rules 관련 전문, Next 로컬 가이드, Radix Collapsible 및 shadcn 공식 registry.

@@ -26,4 +26,10 @@ Next.js 로컬 Server and Client Components 가이드, Radix 공식 Collapsible 
 
 390×844 모바일: 130px 3열·모든 로고 카드 42px, document width 390px로 가로 넘침 없음. 곡 필터 모달 bounds x16..374 / y155.65..688.35, 모바일 사이드바에서 설정 모달 열기·닫기 성공. 데스크톱 접힌 메뉴 너비 48px·가로 넘침 없음·설정 모달 접근 성공.
 
-Production 결과는 배포 확인 후 기록합니다.
+## Production 완료
+
+구현 commit b5f7e4942cf5b1a173fb22e7852a764d915c11e9, 배포 https://iidx-rank-nxh32d7p4-b-hs-projects.vercel.app READY. 운영 https://iidx-rank.vercel.app/에서 카드 666개·42px·opacity 0.1·랭크 간 간격 0px, 사이드바 원본/진행만 표시, 접기와 설정·필터 모달 확인했습니다. 설정 모달 기본값 10. 모바일 390px 3열·가로 넘침 없음·곡 필터 모달 너비 358px 확인했습니다.
+
+Vercel inspect --logs: db:migrate → db:seed-admins → build 모두 성공. Cache Components 및 홈 PPR 유지. 새 운영 계정을 만들거나 기존 사용자의 설정을 변경하지 않았습니다.
+
+운영 캡처: iidx-rank-compact-controls.png, iidx-rank-compact-mobile.png (대화 outputs). 테스트 서버와 임시 브라우저 탭을 종료하고 viewport를 복원했습니다.
