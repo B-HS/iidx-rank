@@ -73,7 +73,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
     const isAuthenticated = initialUserId !== null && isSessionAligned
     const canSyncCatalog = initialIsAdmin && isAuthenticated && !isSessionPending
     const checkerQuery = useChecker(initialUserId ?? '', isAuthenticated)
-    const isRecordsPending = isSessionPending || !isSessionAligned || (isAuthenticated && checkerQuery.isPending)
+    const isRecordsPending = !isSessionAligned || (initialUserId !== null && (isSessionPending || checkerQuery.isPending))
     const saveRecord = useSaveRecord(initialUserId ?? '')
     const quickSaveRecord = useSaveRecord(initialUserId ?? '', false)
     const isRecordsSaving = saveRecord.isPending || quickSaveRecord.isPending

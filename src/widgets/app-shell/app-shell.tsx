@@ -78,9 +78,10 @@ const AccountControl: FC<Pick<Props, 'onOpenSettings'>> = ({ onOpenSettings }) =
             toast.error(t('auth.signOutError'))
         }
     }
-    if (isPending || identityTransition.isPending) {
-        return (
-            <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
+    const displayName = session?.user.name ?? session?.user.email ?? t('navigation.accountMenu')
+    return (
+        <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
+            {isPending || identityTransition.isPending ? (
                 <div
                     role='status'
                     aria-label={t('auth.loadingSession')}
@@ -89,45 +90,41 @@ const AccountControl: FC<Pick<Props, 'onOpenSettings'>> = ({ onOpenSettings }) =
                     <Skeleton className='size-4' />
                     <Skeleton className='h-3 min-w-0 flex-1 group-data-[collapsible=icon]:hidden' />
                 </div>
-            </SidebarMenuItem>
-        )
-    }
-    const displayName = session?.user.name ?? session?.user.email ?? t('navigation.accountMenu')
-    return (
-        <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton
-                        className={FOOTER_MENU_BUTTON_CLASS_NAME}
-                        aria-label={t('navigation.accountMenu')}
-                        tooltip={t('navigation.accountMenu')}>
-                        <UserRound />
-                        <span className='min-w-0 flex-1 truncate text-left group-data-[collapsible=icon]:hidden'>{displayName}</span>
-                    </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align='end' side='top' className='w-60'>
-                    <DropdownMenuLabel className='grid gap-0.5'>
-                        <span className='truncate'>{displayName}</span>
-                        <span className='truncate text-xs font-normal text-muted-foreground'>{session?.user.email ?? t('navigation.guest')}</span>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem disabled={!onOpenSettings} onSelect={onOpenSettings}>
-                        <Settings />
-                        {t('navigation.settings')}
-                    </DropdownMenuItem>
-                    {session?.user ? (
-                        <DropdownMenuItem onSelect={() => void handleSignOut()}>
-                            <LogOut />
-                            {t('navigation.signOut')}
+            ) : (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <SidebarMenuButton
+                            className={FOOTER_MENU_BUTTON_CLASS_NAME}
+                            aria-label={t('navigation.accountMenu')}
+                            tooltip={t('navigation.accountMenu')}>
+                            <UserRound />
+                            <span className='min-w-0 flex-1 truncate text-left group-data-[collapsible=icon]:hidden'>{displayName}</span>
+                        </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end' side='top' className='w-60'>
+                        <DropdownMenuLabel className='grid gap-0.5'>
+                            <span className='truncate'>{displayName}</span>
+                            <span className='truncate text-xs font-normal text-muted-foreground'>{session?.user.email ?? t('navigation.guest')}</span>
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem disabled={!onOpenSettings} onSelect={onOpenSettings}>
+                            <Settings />
+                            {t('navigation.settings')}
                         </DropdownMenuItem>
-                    ) : (
-                        <DropdownMenuItem onSelect={() => setIsAuthDialogOpen(true)}>
-                            <LogIn />
-                            {t('navigation.signIn')}
-                        </DropdownMenuItem>
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
+                        {session?.user ? (
+                            <DropdownMenuItem onSelect={() => void handleSignOut()}>
+                                <LogOut />
+                                {t('navigation.signOut')}
+                            </DropdownMenuItem>
+                        ) : (
+                            <DropdownMenuItem onSelect={() => setIsAuthDialogOpen(true)}>
+                                <LogIn />
+                                {t('navigation.signIn')}
+                            </DropdownMenuItem>
+                        )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )}
             <AuthDialogWidget open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
         </SidebarMenuItem>
     )
