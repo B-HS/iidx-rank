@@ -43,18 +43,23 @@ type Props = PropsWithChildren<{
     sidebarContent?: ReactNode
 }>
 
+const FOOTER_MENU_ITEM_CLASS_NAME = 'flex h-full min-w-0 items-center'
+const FOOTER_MENU_BUTTON_CLASS_NAME =
+    'h-full justify-center rounded-none px-3 group-data-[collapsible=icon]:size-6! group-data-[collapsible=icon]:p-1!'
+
 const ThemeControl: FC = () => {
     const { resolvedTheme, setTheme } = useTheme()
     const isDark = resolvedTheme === 'dark'
 
     return (
-        <SidebarMenuItem className='min-w-0 flex-1'>
+        <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
             <SidebarMenuButton
-                className='group-data-[collapsible=icon]:size-6! group-data-[collapsible=icon]:p-1!'
+                className={FOOTER_MENU_BUTTON_CLASS_NAME}
+                aria-label={MESSAGES.navigation.theme}
                 tooltip={MESSAGES.navigation.theme}
                 onClick={() => setTheme(isDark ? 'light' : 'dark')}>
                 {isDark ? <Sun /> : <Moon />}
-                <span>{MESSAGES.navigation.theme}</span>
+                <span className='group-data-[collapsible=icon]:hidden'>{MESSAGES.navigation.theme}</span>
             </SidebarMenuButton>
         </SidebarMenuItem>
     )
@@ -81,10 +86,10 @@ const AccountControl: FC = () => {
 
     if (isPending) {
         return (
-            <SidebarMenuItem className='min-w-0 flex-1'>
-                <div className='flex h-9 items-center gap-2 px-2'>
+            <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
+                <div className='flex h-full w-full items-center justify-center gap-2 px-3 group-data-[collapsible=icon]:px-1'>
                     <Skeleton className='size-4' />
-                    <Skeleton className='h-3 w-20' />
+                    <Skeleton className='h-3 w-20 group-data-[collapsible=icon]:hidden' />
                 </div>
             </SidebarMenuItem>
         )
@@ -94,14 +99,15 @@ const AccountControl: FC = () => {
         const displayName = session.user.name ?? session.user.email
 
         return (
-            <SidebarMenuItem className='min-w-0 flex-1'>
+            <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
-                            className='group-data-[collapsible=icon]:size-6! group-data-[collapsible=icon]:p-1!'
+                            className={FOOTER_MENU_BUTTON_CLASS_NAME}
+                            aria-label={MESSAGES.navigation.accountMenu}
                             tooltip={MESSAGES.navigation.accountMenu}>
                             <UserRound />
-                            <span className='min-w-0 flex-1 truncate'>{displayName}</span>
+                            <span className='min-w-0 truncate group-data-[collapsible=icon]:hidden'>{displayName}</span>
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end' side='top' className='w-60'>
@@ -121,13 +127,14 @@ const AccountControl: FC = () => {
     }
 
     return (
-        <SidebarMenuItem className='min-w-0 flex-1'>
+        <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
             <AuthDialogWidget>
                 <SidebarMenuButton
-                    className='group-data-[collapsible=icon]:size-6! group-data-[collapsible=icon]:p-1!'
+                    className={FOOTER_MENU_BUTTON_CLASS_NAME}
+                    aria-label={MESSAGES.navigation.signIn}
                     tooltip={MESSAGES.navigation.signIn}>
                     <LogIn />
-                    <span>{MESSAGES.navigation.signIn}</span>
+                    <span className='group-data-[collapsible=icon]:hidden'>{MESSAGES.navigation.signIn}</span>
                 </SidebarMenuButton>
             </AuthDialogWidget>
         </SidebarMenuItem>
@@ -169,7 +176,7 @@ export const AppShell: FC<Props> = ({ children, sidebarContent }) => (
                         <div className='min-w-0 group-data-[collapsible=icon]:hidden'>{sidebarContent}</div>
                     </SidebarContent>
                     <SidebarFooter className='gap-0 bg-sidebar p-0' style={{ height: SHELL_RAIL_CHROME_HEIGHT_PX }}>
-                        <SidebarMenu className='h-full flex-row items-center gap-0'>
+                        <SidebarMenu className='grid h-full grid-cols-2 items-stretch gap-0'>
                             <ThemeControl />
                             <AccountControl />
                         </SidebarMenu>
