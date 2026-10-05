@@ -123,15 +123,15 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 ## 로고·게이지 터치·DJ 랭크·격자 보완
 
-현재 상태: 구현·빌드·API 33항목·화면 검증 완료, 운영 배포 및 지정 계정 삭제 진행 중
+현재 상태: 구현·빌드·API 33항목·화면·Production·GitHub 반영 완료, 지정 이메일은 운영/로컬 DB 0건 확인
 
 - [x] 공식 색상·로고 버전 매핑·격자 원인·계정 생성 경로 확인
 - [x] DJ 랭크·사용자 표시 설정 스키마와 migration·인증 API·UUID/revision 캐시 구현
 - [x] 로고/시리즈명·불투명도 표시 설정과 서버 저장·초기 prefetch 구현
 - [x] EASY→CLEAR→미플레이 및 HARD→EX HARD→미플레이 터치·길게 누름 모달·DJ 랭크 구현
 - [x] 난이도 테두리·5px 점멸 램프·빈칸 포함 반응형 격자·화면 문구 수정
-- [ ] 가입을 막는 대상 계정 확인 및 사용자 지정 범위의 삭제·재가입 가능 여부 검증
+- [x] 가입을 막는 대상 계정 확인 및 사용자 지정 범위의 삭제·재가입 가능 여부 검증
 - [x] 임시 SQLite API/사용자 분리·동작·설정 지속·반응형·빌드 검증
-- [ ] 결과 기록·선별 commit/push·Production migration 및 운영 화면 확인
+- [x] 결과 기록·선별 commit/push·Production migration 및 운영 화면 확인
 
 이번 작업은 main이 직접 수행합니다. 하드 순환은 사용자가 HARD→EX HARD→미플레이로 확정했습니다. 사용자 public/iidx-logo 파일을 사용하고 신뢰할 수 없는 버전은 제목으로 fallback합니다. 일반 조회는 DB만 사용합니다. 계정 생성 시드는 없으며, 사용자께서 hs@gumyo.net의 계정과 연결 기록 삭제를 명시적으로 승인했습니다. 해당 이메일만 삭제하고 다른 계정은 보존합니다.

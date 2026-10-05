@@ -15,3 +15,10 @@ Konami 공식 안내 https://p.eagate.573.jp/game/2dx/26/howto/epass/play_data.h
 ## 계정 유지보수
 
 scripts/seed-admins.ts는 기존 사용자 역할만 지정하고 계정을 만들지 않습니다. 사용자가 삭제 대상으로 지정한 이메일은 hs@gumyo.net입니다. scripts/reset-user.ts는 exact 이메일 조회, 기본 audit, 명시적인 delete일 때만 트랜잭션으로 해당 사용자·세션·인증 계정·기록·설정·revision·이메일 검증을 지웁니다. 다른 사용자는 조회/수정하지 않습니다. 로컬 임시 DB 검증에서 삭제 대상 remaining 0 및 별도 계정 보존을 확인했습니다. 운영 삭제 결과는 배포 완료 후 별도 기록합니다.
+
+## 운영 결과
+
+- 구현 commit cef024d, GitHub main push 성공. Git 자동 정상 Production iidx-rank-9ndi7jt9r-b-hs-projects.vercel.app READY. 일반 buildCommand는 db:migrate → db:seed-admins → build이며 계정 삭제를 포함하지 않습니다.
+- 일회성 별도 cloud 실행에서 지정 이메일 matches 0으로 이미 계정이 없었습니다. 로컬 SQLite도 matches 0입니다. 실제 사용자의 계정을 삭제했다고 주장하지 않습니다. 두 환경에 새 migration을 적용했고 다른 계정은 보존했습니다.
+- CLI 외부 local-config만 바꾼 첫 배포는 업로드된 vercel.json이 우선되어 삭제 명령이 실행되지 않았습니다. 임시 배포 복사본의 vercel.json에만 명령을 넣어 실행 여부를 로그로 확인한 뒤, 원본의 정상 설정을 Git 자동 배포했습니다. 원본 설정과 .env는 변경/조회하지 않았습니다.
+- 운영 홈/카탈로그/로고 200, 개인 API 401, 666개 보면, 모바일 390px 3열·가로 넘침 없음, 실제 로고 로딩·opacity 0.7·슬라이더 이름을 확인했습니다.

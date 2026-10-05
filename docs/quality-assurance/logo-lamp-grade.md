@@ -11,11 +11,13 @@
 - [x] ANOTHER rgb(255,0,0), LEGGENDARIA rgb(176,0,255)의 1px 전체 테두리와 HARD 램프 5px·점멸 애니메이션 확인. 다크 테마 화면 저장.
 - [x] 임시 SQLite에서 한 계정 삭제 remaining 0, 두 번째 계정 audit matches 1 확인 후 검증 계정 정리.
 
-## 운영 확인 대기
+## 운영 확인 완료
 
-- [ ] Production migration 및 홈/새 API/로고 파일 응답 확인.
-- [ ] 사용자 지정 계정 삭제 cloud 실행 remaining 0 확인.
+- [x] Production migration과 홈/카탈로그/로고 200, 666개 보면, 비로그인 개인 기록·표시 설정 API 401 확인. 운영 슬라이더 접근성 이름과 로고 70% 및 모바일 3열 확인.
+- [x] Production cloud 유지보수 실행에서 hs@gumyo.net matches 0, 프로젝트 로컬 SQLite에서도 matches 0 확인. 삭제할 계정이 없어 실제 계정 삭제는 발생하지 않았습니다. 로컬 SQLite에 새 migration도 적용했습니다.
 
 ## 검증 범위
 
 실제 Konami 기기의 개별 화면 픽셀과 완전 동일한 HEX는 공개 명세가 없어 검증하지 않았습니다. 모든 실제 모바일 OS의 터치/컨텍스트 메뉴 차이는 출시 후 기기 검증 대상으로 남습니다. 기존 날짜 표시의 React hydration 경고는 이번 변경 범위 밖입니다. 검사 스크립트와 임시 계정은 운영에 배포하지 않습니다.
+
+변경 파일 ESLint 오류 0, 경고 2는 use cache의 revision 키 인자입니다. 포맷 확인과 staged diff 검사도 완료했습니다.
