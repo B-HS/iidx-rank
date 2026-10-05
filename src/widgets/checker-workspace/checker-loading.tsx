@@ -54,7 +54,7 @@ export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
                             ))}
                         </div>
                     ) : (
-                        <Skeleton aria-hidden='true' className='h-full w-full rounded-none' />
+                        <Skeleton aria-hidden='true' className='h-full min-h-[calc(100dvh-3rem)] w-full rounded-none' />
                     )}
                 </div>
             </section>
