@@ -5,9 +5,9 @@ import { Button } from '@shared/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@shared/ui/empty'
 type Props = {
     error: Error
-    reset: () => void
+    retry: () => void
 }
-const ErrorPage: FC<Props> = ({ reset }) => {
+const ErrorPage: FC<Props> = ({ retry }) => {
     const t = useTranslations()
     return (
         <main className='flex min-h-0 flex-1 items-center justify-center p-3 sm:p-4'>
@@ -16,7 +16,7 @@ const ErrorPage: FC<Props> = ({ reset }) => {
                     <EmptyTitle>{t('errors.genericTitle')}</EmptyTitle>
                     <EmptyDescription>{t('errors.genericDescription')}</EmptyDescription>
                 </EmptyHeader>
-                <Button variant='outline' onClick={() => reset()}>
+                <Button variant='outline' onClick={() => retry()}>
                     {t('common.retry')}
                 </Button>
             </Empty>
