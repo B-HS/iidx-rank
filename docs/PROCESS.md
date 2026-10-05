@@ -1,12 +1,12 @@
 # IIDX Rank 구현
 
-현재 상태: 구현·화면 수정·검증 완료, localhost:3100 미리보기 실행 중
+현재 상태: 구현·화면·수집 정책·관리자 역할 검증 완료, GitHub main 및 Production 반영 완료
 
 ## 요청과 범위
 
 - 기준 경로: /Users/hyunseokbyun/development/iidx-rank
 - 디자인: 기존 docs:/DESIGN.md를 보존하고 docs/DESIGN.md에 복사하여 참조합니다. 문서의 시각 규칙을 적용하며, 그 안의 원본 제품·스택·외부 경로는 구현 명령으로 취급하지 않습니다.
-- Next.js App Router와 /api Route Handlers, Bun, React Compiler, Tailwind + shadcn, better-auth, Drizzle + local SQLite(libSQL)를 사용합니다. 배포와 Turso 전환은 이번 범위에서 제외합니다.
+- Next.js App Router와 /api Route Handlers, Bun, React Compiler, Tailwind + shadcn, better-auth, Drizzle + local SQLite(libSQL)를 사용합니다. 최초 구현은 로컬 SQLite였으며 이후 사용자 배포 지시에 따라 Production Turso와 Vercel을 적용했습니다.
 - 최신 공개 Google Sheets HTML에서 노말/하드 랭크, 개인차, 패턴 종류, 수록 버전, 원본 갱신 정보를 수집합니다.
 - 인증 사용자별 기록 저장·필터·달성률과 사용자 UUID로 분리한 서버 캐시 및 TanStack Query 캐시를 구현합니다.
 - 사용자 최신 지시로 현재 구현에는 서브에이전트를 사용합니다. 새로 시작하는 서브에이전트는 gpt-6-luna, max effort로 명시합니다. 도구에는 Fast 전환 파라미터가 없으므로 Fast 설정 적용을 주장하지 않습니다. 메인 세션 모델을 변경하지 않습니다.
@@ -49,7 +49,7 @@
 
 ## GitHub·Vercel Production 배포
 
-현재 상태: 최초 Production 배포 완료, 일일 수집·역할·랭크 화면 수정 배포 진행 중
+현재 상태: GitHub 연결·Production 배포·Secret 등록·DB migration·API 검증 완료
 
 이번 작업은 사용자 선택으로 main이 직접 수행합니다. GitHub B-HS/iidx-rank에 commit/push하고 Vercel에 연결하며 Preview 배포는 끕니다. 사용자께서 .env 값을 Vercel에 등록하도록 명시적으로 요청하셨으므로, 이번 전송에 한하여 도구가 값을 처리하되 대화·로그·Git에는 값을 출력하거나 저장하지 않습니다.
 
@@ -57,8 +57,8 @@
 - [x] 소스·문서·설정 선별 staging 후 commit/push
 - [x] Vercel 프로젝트와 GitHub 저장소 연결, Production 전용 배포 설정
 - [x] .env 변수를 Production sensitive 환경변수로 등록
-- [ ] 원격 DB migration·원본 수집·Production 배포 및 실제 응답 검증
-- [ ] 배포 URL·설정·검증 결과 기록
+- [x] 원격 DB migration·원본 수집·Production 배포 및 실제 응답 검증
+- [x] 배포 URL·설정·검증 결과 기록
 
 첫 Production 빌드는 shadcn/tailwind.css 의존성이 manifest에 없어 실패했습니다. package.json과 bun.lock에 shadcn을 추가하고 .env 및 기존 node_modules 없는 임시 복사본에서 frozen install과 build를 검증한 뒤 다시 배포합니다.
 
@@ -66,15 +66,15 @@
 
 ## 원본 수집 정책 수정
 
-현재 상태: 구현·로컬 권한·DB·반응형 검증 완료, Production 반영 중
+현재 상태: 일일 Cron·관리자 역할·랭크 화면 Production 반영 및 검증 완료
 
 사용자 지시: 난이도표는 DB에서 조회하고, 원본 HTML은 하루에 한 번 또는 관리자 수동 갱신 때만 수집합니다. 이번 배포 작업의 후속 수정도 main이 직접 수행합니다.
 
 - [x] 페이지·catalog GET에서 원본 수집 제거
 - [x] Secret으로 보호하는 하루 1회 Vercel Cron과 DB 역할 관리자 수동 갱신·UI 게이트 구현
 - [x] 원격 DB 동기화의 순차 upsert를 제한된 묶음으로 개선하고 원자성 유지
-- [ ] 수집 경로·권한·빌드 검증 후 main commit/push 및 Production 배포 확인
-- [ ] 수집 정책·배포 URL·검증 결과 기록
+- [x] 수집 경로·권한·빌드 검증 후 main commit/push 및 Production 배포 확인
+- [x] 수집 정책·배포 URL·검증 결과 기록
 
 사용자가 이메일 기반 초기 지정을 명시적으로 허용하고 DB의 admin/user 역할을 요청했습니다. 계정 UUID 추가 확인은 요구하지 않습니다. 두 이메일은 Vercel Secret 초기 지정 설정으로만 등록하고, 권한 검사는 DB 역할을 사용합니다.
 
@@ -83,3 +83,5 @@
 - [x] 랭크별 section/card·정렬 필터 제거·내부 padding 수정 및 모바일 3열 검증
 
 로컬 검증: 666개 묶음 저장, 비활성 곡 기록 보존, 조회 중 원본 fetch 없음, 수집 실패 시 스냅샷 보존. 역할 위조 가입은 user, 역할 변경 요청은 400, 일반 사용자 수집은 403, 관리자 수집은 200, Cron Secret 없거나 틀리면 401. 새 설치 build·typecheck 성공, 변경 ESLint 오류 0(캐시 키 인자 경고 1). 데스크톱 1280px·모바일 390px 가로 넘침 없음, 모바일 3열, 헤더·필터 내부 12px, 콘텐츠 외곽 0px. 冥의 노멀 A → 하드 S+ 섹션 이동 확인.
+
+Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud build에서 db:migrate → db:seed-admins → Next build 성공. catalog 200/666개, 반복 조회 fetchedAt 유지, 개인 기록 GET/PATCH와 원본 수동 POST 및 Secret 없는 Cron GET 모두 401. Vercel Cron native 실행 2026-10-05T10:22:45.819Z, 해당 GET 200 필터 로그 확인. 운영 모바일 CSS 390px에서 3열·document width 390px. 다음 예약 실행 시각의 실제 로그 관찰은 운영 검증 부채로 구분했습니다.

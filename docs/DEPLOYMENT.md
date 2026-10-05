@@ -24,7 +24,7 @@ DATABASE_URL, TURSO_AUTH_TOKEN, BETTER_AUTH_URL, BETTER_AUTH_SECRET, ADMIN_BOOTS
 
 ## 검증
 
-새 설치 frozen install·Next build, 역할·Cron 인증·DB 보존·모바일 3열 검증을 완료했습니다. 수정 버전의 Production 배포와 Cron 수동 실행 결과는 docs/quality-assurance/deployment.md에 기록합니다. 자동 일일 실행의 다음 실제 시각 관찰은 별도 운영 항목입니다.
+새 설치 frozen install·Next build, 역할·Cron 인증·DB 보존·모바일 3열 검증을 완료했습니다. 수정 구현 commit 7f7166c의 GitHub 자동 Production 배포가 READY이며 migration·seed·build 성공을 확인했습니다. catalog 200/666개, 비인증 보호 API 401과 운영 모바일 3열을 확인했습니다. Vercel Cron native 수동 실행의 GET 200 로그를 확인했습니다. 상세 결과는 docs/quality-assurance/deployment.md에 기록했습니다. 자동 일일 실행의 다음 실제 시각 관찰은 별도 운영 항목입니다.
 
 ## 공식 근거
 
