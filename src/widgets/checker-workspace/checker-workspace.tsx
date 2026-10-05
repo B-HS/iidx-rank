@@ -123,7 +123,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
         })
         .toSorted((left, right) => left.title.localeCompare(right.title, 'ja'))
     const rankSections = groupChartsByRank(filteredCharts, mode).map((section) => ({ ...section, rank: section.rank ?? t('checker.noRank') }))
-    const recordedCount = records.filter((record) => record.lamp !== LAMPS[0]).length
+    const recordedCount = catalog.charts.filter((chart) => (recordsByChartId.get(chart.id)?.lamp ?? LAMPS[0]) !== LAMPS[0]).length
     const completionPercent = catalog.charts.length === 0 ? 0 : Math.round((recordedCount / catalog.charts.length) * 100)
     const personalCount = catalog.charts.filter(personalFor).length
     const selectedRecord = selectedChart ? recordsByChartId.get(selectedChart.id) : undefined
