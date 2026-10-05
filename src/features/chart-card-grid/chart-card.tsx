@@ -120,9 +120,10 @@ export const ChartCard: FC<Props> = ({
                     onPointerCancel={handleCancelPress}
                     onPointerLeave={handleCancelPress}
                     onClick={(event) => {
-                        if (shouldSuppressClick.current) {
+                        const isSuppressed = shouldSuppressClick.current && event.detail > 0
+                        shouldSuppressClick.current = false
+                        if (isSuppressed) {
                             event.preventDefault()
-                            shouldSuppressClick.current = false
                             return
                         }
                         onAdvanceLamp(chart)
