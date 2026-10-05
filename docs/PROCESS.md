@@ -99,11 +99,11 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 ## 사이드바 하단 버튼 정렬
 
-현재 상태: 공통 하단 정렬 적용·빌드·데스크톱 펼침/접힘·모바일 확인 완료, 배포 중
+현재 상태: 하단 정렬·빌드·반응형·Production 화면 검증 및 GitHub 반영 완료
 
 - [x] 화면과 실제 footer 버튼 스타일 확인
 - [x] 테마·로그인·계정·로딩 상태의 공통 정렬 적용
 - [x] 빌드 및 펼침·접힘·모바일 표시 확인
-- [ ] 결과 기록·선별 commit/push·Production 배포 확인
+- [x] 결과 기록·선별 commit/push·Production 배포 확인
 
 이번 작업은 사용자 선택으로 main이 직접 수행합니다. 각 버튼의 아이콘·문구 묶음을 같은 기준으로 중앙 정렬하고 기존 최소 외곽 padding을 유지합니다.
