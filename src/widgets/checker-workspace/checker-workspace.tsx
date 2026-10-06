@@ -1,7 +1,5 @@
 'use client'
-import { type CSSProperties, type FC, useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useQueryClient } from '@tanstack/react-query'
+import { type CSSProperties, type FC, useState } from 'react'
 import { RefreshCw, Settings, SlidersHorizontal } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -41,10 +39,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
     const t = useTranslations()
     const locale = useLocale()
     const anonymousPreferences = useAnonymousPreferences(initialAnonymousPreferences)
-    const queryClient = useQueryClient()
-    const router = useRouter()
     const identityTransition = useIdentityTransition()
-    const previousUserId = useRef(initialUserId)
     const [displayDraft, setDisplayDraft] = useState<{
         userId: string | null
         preferences: DisplayPreferencesInput
@@ -355,20 +350,6 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
             </div>
         )
     }
-    useEffect(() => {
-        const userId = session?.user.id ?? null
-        if (isSessionPending) {
-            return
-        }
-        if (previousUserId.current !== userId) {
-            previousUserId.current = userId
-            queryClient.clear()
-            router.refresh()
-        }
-        if (identityTransition.isPending && userId !== identityTransition.previousUserId && userId === initialUserId) {
-            identityTransition.end()
-        }
-    }, [identityTransition, initialUserId, isSessionPending, queryClient, router, session?.user.id])
     return (
         <>
             <ShellSidebarPortal>{sidebarContent}</ShellSidebarPortal>
