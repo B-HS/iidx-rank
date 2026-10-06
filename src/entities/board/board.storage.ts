@@ -184,3 +184,11 @@ export const countRecentComments = async (authorId: string, since: string) => {
 
     return rows[0]?.total ?? 0
 }
+
+export const readSitemapPostRows = async (limit: number) =>
+    await getDb()
+        .select({ id: boardPost.id, updatedAt: boardPost.updatedAt })
+        .from(boardPost)
+        .innerJoin(userProfile, eq(userProfile.userId, boardPost.authorId))
+        .orderBy(desc(boardPost.updatedAt), desc(boardPost.id))
+        .limit(limit)

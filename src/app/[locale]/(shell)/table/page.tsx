@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { cookies } from 'next/headers'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import type { Catalog } from '@entities/catalog/catalog.dto'
 import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
 import { getCatalogForShell } from '@entities/catalog/catalog.server'
@@ -11,9 +11,11 @@ import { checkerQueryOptions } from '@entities/checker/checker.query-options'
 import { getDisplayPreferences } from '@entities/preferences/preferences.server'
 import { parseAnonymousPreferences } from '@entities/preferences/anonymous-preferences.dto'
 import { displayPreferencesQueryOptions } from '@entities/preferences/preferences.query-options'
+import { TableJsonLd } from '@features/json-ld/table-json-ld'
 import { ANONYMOUS_PREFERENCES_COOKIE_NAME, DEFAULT_DISPLAY_PREFERENCES } from '@shared/constants/display'
 import { DEFAULT_QUERY_STALE_TIME_MS } from '@shared/constants/cache'
 import { USER_ROLE } from '@shared/constants/user-role'
+import { createPageMetadata } from '@shared/lib/seo'
 import { getSession } from '@shared/server/auth'
 import { CheckerWorkspace } from '@widgets/checker-workspace/checker-workspace'
 import { CheckerLoading } from '@widgets/checker-workspace/checker-loading'
@@ -67,15 +69,25 @@ const CheckerAppearanceBoundary = async ({ catalog }: Pick<DataProps, 'catalog'>
 const TablePage = async () => {
     const catalog = await getCatalogForShell()
     return (
-        <Suspense fallback={<CheckerLoading catalog={catalog} />}>
-            <CheckerAppearanceBoundary catalog={catalog} />
-        </Suspense>
+        <>
+            <TableJsonLd />
+            <Suspense fallback={<CheckerLoading catalog={catalog} />}>
+                <CheckerAppearanceBoundary catalog={catalog} />
+            </Suspense>
+        </>
     )
 }
 
 export const generateMetadata = async () => {
-    const t = await getTranslations('navigation')
-    return { title: t('checker') }
+    const [locale, t] = await Promise.all([getLocale(), getTranslations()])
+
+    return createPageMetadata({
+        locale,
+        pathname: '/table',
+        title: t('navigation.checker'),
+        description: t('checker.description'),
+        siteName: t('app.name'),
+    })
 }
 
 export default TablePage

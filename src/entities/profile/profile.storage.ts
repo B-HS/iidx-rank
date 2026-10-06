@@ -187,3 +187,12 @@ export const readRecentUsers = async () => {
 
     return RecentUsersSchema.parse({ users: rows.map(({ updatedAt, ...summary }) => ({ ...toUserSummary(summary), updatedAt })) })
 }
+
+export const readSitemapProfileRows = async (limit: number) =>
+    await getDb()
+        .select({ handle: userProfile.handle, updatedAt: userProfile.updatedAt, recordsUpdatedAt: userRecordRevision.updatedAt })
+        .from(userProfile)
+        .leftJoin(userRecordRevision, eq(userRecordRevision.userId, userProfile.userId))
+        .where(eq(userProfile.isPublic, true))
+        .orderBy(desc(userProfile.updatedAt), asc(userProfile.handle))
+        .limit(limit)

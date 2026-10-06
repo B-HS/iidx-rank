@@ -10,12 +10,14 @@ import {
     readProfile,
     readProfileRecords,
     readRecentUsers,
+    readSitemapProfileRows,
     readVisibleProfileOwner,
     writeMyProfile,
 } from '@entities/profile/profile.storage'
-import { HandleSchema } from '@entities/profile/user-summary.dto'
+import { HANDLE_PATTERN, HandleSchema } from '@entities/profile/user-summary.dto'
 import { createDefaultHandle, ensureUserProfile } from '@entities/profile/user-summary.server'
 import { RECENT_USERS_TAG } from '@shared/server/cache-tags'
+import { SITEMAP_CACHE_LIFE, SITEMAP_ENTITY_LIMIT } from '@shared/server/sitemap-cache'
 
 const RECENT_USERS_CACHE_STALE_SECONDS = 60
 const RECENT_USERS_CACHE_REVALIDATE_SECONDS = 60
@@ -109,4 +111,19 @@ export const getRecentUsers = async () => {
     cacheTag(RECENT_USERS_TAG)
 
     return await readRecentUsers()
+}
+
+export const getSitemapProfiles = async () => {
+    'use cache'
+
+    cacheLife(SITEMAP_CACHE_LIFE)
+
+    const rows = await readSitemapProfileRows(SITEMAP_ENTITY_LIMIT)
+
+    return rows
+        .filter((row) => HANDLE_PATTERN.test(row.handle))
+        .map(({ handle, updatedAt, recordsUpdatedAt }) => ({
+            handle,
+            updatedAt: recordsUpdatedAt !== null && Date.parse(recordsUpdatedAt) > Date.parse(updatedAt) ? recordsUpdatedAt : updatedAt,
+        }))
 }

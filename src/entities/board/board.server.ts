@@ -1,4 +1,5 @@
 import 'server-only'
+import { cacheLife } from 'next/cache'
 import {
     BOARD_COMMENTS_PAGE_SIZE,
     BOARD_COMMENT_RATE_LIMIT_MAX,
@@ -34,12 +35,14 @@ import {
     readNoticeRows,
     readPostAccessRow,
     readPostRow,
+    readSitemapPostRows,
     updatePost,
 } from '@entities/board/board.storage'
 import { parseRichTextDocument } from '@entities/board/rich-text'
 import { ensureUserProfile, toUserSummary } from '@entities/profile/user-summary.server'
 import { USER_ROLE } from '@shared/constants/user-role'
 import { getSession } from '@shared/server/auth'
+import { SITEMAP_CACHE_LIFE, SITEMAP_ENTITY_LIMIT } from '@shared/server/sitemap-cache'
 
 export const getBoardViewer = async () => {
     const session = await getSession()
@@ -201,4 +204,12 @@ export const removeBoardComment = async (viewer: BoardViewer, commentId: string)
     if (!canDeleteContent(viewer, existing.authorId)) return failure('FORBIDDEN')
 
     return (await deleteComment(commentId)) ? { ok: true as const } : failure('NOT_FOUND')
+}
+
+export const getSitemapPosts = async () => {
+    'use cache'
+
+    cacheLife(SITEMAP_CACHE_LIFE)
+
+    return await readSitemapPostRows(SITEMAP_ENTITY_LIMIT)
 }

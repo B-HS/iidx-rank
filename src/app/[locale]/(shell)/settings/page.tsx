@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server'
 import { myProfileQueryOptions } from '@entities/profile/profile.query-options'
 import { getMyProfile } from '@entities/profile/profile.server'
 import { DEFAULT_QUERY_STALE_TIME_MS } from '@shared/constants/cache'
+import { NO_INDEX_ROBOTS } from '@shared/lib/seo'
 import { getSession } from '@shared/server/auth'
 import { ProfileSettings } from '@widgets/profile-settings/profile-settings'
 import { ProfileSettingsFrame } from '@widgets/profile-settings/profile-settings-frame'
@@ -34,7 +35,7 @@ const SettingsPage = () => (
 
 export const generateMetadata = async () => {
     const t = await getTranslations('settings')
-    return { title: t('title') }
+    return { title: t('title'), robots: NO_INDEX_ROBOTS }
 }
 
 export default SettingsPage

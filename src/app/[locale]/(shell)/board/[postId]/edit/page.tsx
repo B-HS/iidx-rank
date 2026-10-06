@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server'
 import { boardPostQueryOptions } from '@entities/board/board.query-options'
 import { getBoardPost, getBoardViewer } from '@entities/board/board.server'
 import { DEFAULT_QUERY_STALE_TIME_MS } from '@shared/constants/cache'
+import { NO_INDEX_ROBOTS } from '@shared/lib/seo'
 import { BoardEditorSkeleton } from '@widgets/board-editor/board-editor-skeleton'
 import { BoardPostEdit } from '@widgets/board-editor/board-post-edit'
 import { BoardFrame } from '@widgets/board-list/board-frame'
@@ -44,7 +45,7 @@ const BoardPostEditPage = ({ params }: BoardPostEditRouteProps) => {
 
 export const generateMetadata = async () => {
     const t = await getTranslations('board')
-    return { title: t('editTitle') }
+    return { title: t('editTitle'), robots: NO_INDEX_ROBOTS }
 }
 
 export default BoardPostEditPage
