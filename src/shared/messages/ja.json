@@ -8,7 +8,9 @@
         "boardDescription": "beatmania IIDXのプレーヤーがお知らせや投稿を共有するIIDX Rankの掲示板です。",
         "boardPagedTitle": "掲示板 {page, number}ページ",
         "postFallbackDescription": "{author}さんがIIDX Rankの掲示板に投稿した記事です。",
-        "profileFallbackDescription": "{name}(@{handle})さんのbeatmania IIDXのプレー記録とランプ状況です。"
+        "profileFallbackDescription": "{name}(@{handle})さんのbeatmania IIDXのプレー記録とランプ状況です。",
+        "usersDescription": "beatmania IIDXの難易度表の記録を公開しているIIDX Rankのユーザー一覧です。",
+        "usersPagedTitle": "ユーザー {page, number}ページ"
     },
     "common": {
         "cancel": "キャンセル",
@@ -21,6 +23,7 @@
     },
     "navigation": {
         "home": "ホーム",
+        "users": "ユーザー",
         "checker": "難易度表",
         "toggleSidebar": "サイドバーを開閉",
         "sidebar": "ナビゲーション",
@@ -108,10 +111,17 @@
         "followSuccess": "フォローしました。",
         "unfollowSuccess": "フォローを解除しました。",
         "followError": "フォロー状態を変更できませんでした。",
-        "recentUsersTitle": "最近更新したユーザー",
-        "recentUsersLoading": "最近更新したユーザーを読み込み中です。",
-        "recentUsersEmpty": "表示できるユーザーがまだいません。",
-        "recentUsersError": "一覧を読み込めませんでした。"
+        "usersDescription": "プロフィールを公開しているユーザーを、記録の更新が新しい順に表示します。",
+        "usersLoading": "ユーザー一覧を読み込み中です。",
+        "usersLoadErrorTitle": "ユーザー一覧を読み込めませんでした。",
+        "usersLoadErrorDescription": "一時的なエラーの可能性があります。しばらくしてからもう一度お試しください。",
+        "usersEmptyTitle": "表示できるユーザーがまだいません。",
+        "usersEmptyDescription": "プロフィールを公開して難易度表に記録を残すと、この一覧に表示されます。",
+        "usersPageEmptyTitle": "このページにはユーザーがいません。",
+        "usersPageEmptyDescription": "指定されたページは一覧の範囲外です。",
+        "usersFirstPage": "最初のページへ",
+        "usersUpdatedAt": "最終更新",
+        "usersPaginationLabel": "ユーザー一覧のページ"
     },
     "board": {
         "postCreateSuccess": "投稿を作成しました。",

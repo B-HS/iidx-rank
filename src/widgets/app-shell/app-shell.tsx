@@ -45,9 +45,8 @@ import {
 import { ScrollIndicator } from '@shared/ui/scroll-indicator'
 import { Skeleton } from '@shared/ui/skeleton'
 import { TooltipProvider } from '@shared/ui/tooltip'
-import { SHELL_PRIMARY_NAV_ITEMS, SHELL_SECONDARY_NAV_ITEMS } from '@widgets/app-shell/shell-nav'
+import { SHELL_NAV_ITEMS } from '@widgets/app-shell/shell-nav'
 import { ShellNavMenu } from '@widgets/app-shell/shell-nav-menu'
-import { RecentUsers } from '@widgets/recent-users/recent-users'
 type LanguageMenuProps = {
     startTransition: TransitionStartFunction
 }
@@ -237,11 +236,7 @@ export const AppShell: FC<PropsWithChildren> = ({ children }) => {
                             </SidebarHeader>
                             <SidebarContent className='min-h-0 p-0'>
                                 <nav aria-label={t('navigation.primaryNav')} className='min-w-0'>
-                                    <ShellNavMenu items={SHELL_PRIMARY_NAV_ITEMS} />
-                                    <div className='min-w-0 group-data-[collapsible=icon]:hidden'>
-                                        <RecentUsers />
-                                    </div>
-                                    <ShellNavMenu items={SHELL_SECONDARY_NAV_ITEMS} />
+                                    <ShellNavMenu items={SHELL_NAV_ITEMS} />
                                 </nav>
                                 <div
                                     ref={setSidebarSlotElement}

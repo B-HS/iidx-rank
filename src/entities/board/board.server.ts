@@ -41,6 +41,7 @@ import {
 import { parseRichTextDocument } from '@entities/board/rich-text'
 import { ensureUserProfile, toUserSummary } from '@entities/profile/user-summary.server'
 import { USER_ROLE } from '@shared/constants/user-role'
+import { createPagination } from '@shared/lib/pagination'
 import { getSession } from '@shared/server/auth'
 import { SITEMAP_CACHE_LIFE, SITEMAP_ENTITY_LIMIT } from '@shared/server/sitemap-cache'
 
@@ -70,8 +71,6 @@ const canDeletePost = (viewer: BoardViewer | null, post: { authorId: string; kin
     post.kind === BOARD_POST_KIND.NOTICE ? isAdmin(viewer) : canDeleteContent(viewer, post.authorId)
 
 const getRateLimitWindowStart = () => new Date(Date.now() - BOARD_RATE_LIMIT_WINDOW_MS).toISOString()
-
-const createPagination = (page: number, limit: number, total: number) => ({ page, limit, total, totalPages: Math.ceil(total / limit) })
 
 const toPostSummary = (row: PostSummaryRow) => ({ ...row, author: toUserSummary(row.author) })
 

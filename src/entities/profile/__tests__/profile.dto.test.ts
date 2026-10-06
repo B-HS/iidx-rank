@@ -5,6 +5,7 @@ import {
     ProfileBioSchema,
     ProfileNameSchema,
     ProfileUpdateInputSchema,
+    UserListPageQuerySchema,
 } from '@entities/profile/profile.dto'
 import { HandleSchema } from '@entities/profile/user-summary.dto'
 
@@ -67,5 +68,16 @@ describe('기본 핸들', () => {
     })
     test('임의로 생성한 UUID의 기본 핸들도 핸들 패턴을 만족합니다', () => {
         expect(HandleSchema.safeParse(createDefaultHandle(crypto.randomUUID())).success).toBe(true)
+    })
+})
+
+describe('사용자 목록 페이지 번호', () => {
+    test('문자열 페이지 번호를 숫자로 바꾸고 생략하면 1페이지입니다', () => {
+        expect(UserListPageQuerySchema.parse({ page: '3' }).page).toBe(3)
+        expect(UserListPageQuerySchema.parse({}).page).toBe(1)
+    })
+    test('0 이하이거나 숫자가 아니면 실패합니다', () => {
+        expect(UserListPageQuerySchema.safeParse({ page: '0' }).success).toBe(false)
+        expect(UserListPageQuerySchema.safeParse({ page: 'abc' }).success).toBe(false)
     })
 })

@@ -19,7 +19,7 @@ export const QUERY_KEY = {
     },
     USERS: {
         ALL: ['users'] as const,
-        RECENT: ['users', 'recent'] as const,
+        LIST: (page: number) => ['users', 'list', page] as const,
     },
     BOARD: {
         ALL: ['board'] as const,

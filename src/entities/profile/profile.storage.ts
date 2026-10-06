@@ -1,14 +1,7 @@
 import 'server-only'
 import { and, asc, count, desc, eq, isNotNull, ne } from 'drizzle-orm'
 import type { ProfileUpdateInput } from '@entities/profile/profile.dto'
-import {
-    MyProfileSchema,
-    NO_PLAY_LAMP,
-    ProfileRecordsSchema,
-    ProfileSchema,
-    RECENT_USERS_LIMIT,
-    RecentUsersSchema,
-} from '@entities/profile/profile.dto'
+import { MyProfileSchema, NO_PLAY_LAMP, ProfileRecordsSchema, ProfileSchema, USER_LIST_PAGE_SIZE } from '@entities/profile/profile.dto'
 import { toUserSummary, userSummaryColumns } from '@entities/profile/user-summary.server'
 import { user } from '@shared/server/db/auth-schema'
 import { catalogCharts } from '@shared/server/db/catalog-schema'
@@ -175,17 +168,30 @@ export const deleteFollow = async (followerId: string, followeeId: string) => {
         .where(and(eq(userFollow.followerId, followerId), eq(userFollow.followeeId, followeeId)))
 }
 
-export const readRecentUsers = async () => {
+const listedUserCondition = and(eq(userProfile.isPublic, true), isNotNull(userRecordRevision.updatedAt))
+
+export const readListedUsers = async (page: number) => {
     const rows = await getDb()
         .select({ ...userSummaryColumns, updatedAt: userRecordRevision.updatedAt })
         .from(userRecordRevision)
         .innerJoin(userProfile, eq(userProfile.userId, userRecordRevision.userId))
         .innerJoin(user, eq(user.id, userProfile.userId))
-        .where(and(eq(userProfile.isPublic, true), isNotNull(userRecordRevision.updatedAt)))
+        .where(listedUserCondition)
         .orderBy(desc(userRecordRevision.updatedAt), asc(userProfile.handle))
-        .limit(RECENT_USERS_LIMIT)
+        .limit(USER_LIST_PAGE_SIZE)
+        .offset((page - 1) * USER_LIST_PAGE_SIZE)
 
-    return RecentUsersSchema.parse({ users: rows.map(({ updatedAt, ...summary }) => ({ ...toUserSummary(summary), updatedAt })) })
+    return rows.map(({ updatedAt, ...summary }) => ({ ...toUserSummary(summary), updatedAt }))
+}
+
+export const countListedUsers = async () => {
+    const rows = await getDb()
+        .select({ total: count() })
+        .from(userRecordRevision)
+        .innerJoin(userProfile, eq(userProfile.userId, userRecordRevision.userId))
+        .where(listedUserCondition)
+
+    return rows[0]?.total ?? 0
 }
 
 export const readSitemapProfileRows = async (limit: number) =>

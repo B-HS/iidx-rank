@@ -2,20 +2,28 @@ import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
 import { deleteUploadedFile, isOwnedFile } from '@entities/file/file.server'
 import type { ProfileUpdateInput } from '@entities/profile/profile.dto'
-import { MyProfileSchema, ProfileUpdateInputSchema } from '@entities/profile/profile.dto'
 import {
+    MyProfileSchema,
+    ProfileUpdateInputSchema,
+    USER_LIST_PAGE_SIZE,
+    UserListPageQuerySchema,
+    UserListSchema,
+} from '@entities/profile/profile.dto'
+import {
+    countListedUsers,
     deleteFollow,
     insertFollow,
+    readListedUsers,
     readMyProfile,
     readProfile,
     readProfileRecords,
-    readRecentUsers,
     readSitemapProfileRows,
     readVisibleProfileOwner,
     writeMyProfile,
 } from '@entities/profile/profile.storage'
 import { HANDLE_PATTERN, HandleSchema } from '@entities/profile/user-summary.dto'
 import { createDefaultHandle, ensureUserProfile } from '@entities/profile/user-summary.server'
+import { createPagination } from '@shared/lib/pagination'
 import { RECENT_USERS_TAG } from '@shared/server/cache-tags'
 import { SITEMAP_CACHE_LIFE, SITEMAP_ENTITY_LIMIT } from '@shared/server/sitemap-cache'
 
@@ -100,7 +108,7 @@ export const setProfileFollow = async (viewerId: string, handle: string, shouldF
     return { status: 'UPDATED' as const, profile }
 }
 
-export const getRecentUsers = async () => {
+export const getUserList = async (page: number) => {
     'use cache'
 
     cacheLife({
@@ -110,7 +118,10 @@ export const getRecentUsers = async () => {
     })
     cacheTag(RECENT_USERS_TAG)
 
-    return await readRecentUsers()
+    const validatedPage = UserListPageQuerySchema.shape.page.parse(page)
+    const [users, total] = await Promise.all([readListedUsers(validatedPage), countListedUsers()])
+
+    return UserListSchema.parse({ users, pagination: createPagination(validatedPage, USER_LIST_PAGE_SIZE, total) })
 }
 
 export const getSitemapProfiles = async () => {

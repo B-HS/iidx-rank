@@ -3,7 +3,7 @@ import {
     ProfileRecordsSchema,
     ProfileSchema,
     ProfileUpdateInputSchema,
-    RecentUsersSchema,
+    UserListSchema,
     type ProfileUpdateInput,
 } from '@entities/profile/profile.dto'
 import { apiRequest } from '@shared/lib/api-client'
@@ -23,4 +23,4 @@ export const followProfile = (handle: string) => apiRequest(`${profileEndpoint(h
 
 export const unfollowProfile = (handle: string) => apiRequest(`${profileEndpoint(handle)}/follow`, ProfileSchema, { method: 'DELETE' })
 
-export const fetchRecentUsers = () => apiRequest('/api/users/recent', RecentUsersSchema)
+export const fetchUserList = (page: number) => apiRequest(`/api/users?page=${page}`, UserListSchema)

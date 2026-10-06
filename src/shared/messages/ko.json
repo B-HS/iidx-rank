@@ -8,7 +8,9 @@
         "boardDescription": "beatmania IIDX 플레이어가 공지와 글을 나누는 IIDX Rank 게시판입니다.",
         "boardPagedTitle": "게시판 {page, number}페이지",
         "postFallbackDescription": "{author} 님이 IIDX Rank 게시판에 올린 글입니다.",
-        "profileFallbackDescription": "{name}(@{handle}) 님의 beatmania IIDX 플레이 기록과 램프 현황입니다."
+        "profileFallbackDescription": "{name}(@{handle}) 님의 beatmania IIDX 플레이 기록과 램프 현황입니다.",
+        "usersDescription": "beatmania IIDX 난이도표 기록을 공개한 IIDX Rank 사용자 목록입니다.",
+        "usersPagedTitle": "사용자 {page, number}페이지"
     },
     "common": {
         "cancel": "취소",
@@ -21,6 +23,7 @@
     },
     "navigation": {
         "home": "홈",
+        "users": "사용자",
         "checker": "난이도표",
         "toggleSidebar": "사이드바 접기 또는 펼치기",
         "sidebar": "탐색 메뉴",
@@ -108,10 +111,17 @@
         "followSuccess": "팔로우했습니다.",
         "unfollowSuccess": "팔로우를 취소했습니다.",
         "followError": "팔로우 상태를 변경하지 못했습니다.",
-        "recentUsersTitle": "최근 갱신 사용자",
-        "recentUsersLoading": "최근 갱신 사용자를 불러오는 중입니다.",
-        "recentUsersEmpty": "아직 표시할 사용자가 없습니다.",
-        "recentUsersError": "목록을 불러오지 못했습니다."
+        "usersDescription": "프로필을 공개한 사용자를 최근 기록 갱신순으로 보여 줍니다.",
+        "usersLoading": "사용자 목록을 불러오는 중입니다.",
+        "usersLoadErrorTitle": "사용자 목록을 불러오지 못했습니다.",
+        "usersLoadErrorDescription": "일시적인 오류일 수 있습니다. 잠시 후 다시 시도해 주세요.",
+        "usersEmptyTitle": "아직 표시할 사용자가 없습니다.",
+        "usersEmptyDescription": "프로필을 공개하고 난이도표에 기록을 남기면 이 목록에 표시됩니다.",
+        "usersPageEmptyTitle": "이 페이지에는 사용자가 없습니다.",
+        "usersPageEmptyDescription": "요청한 페이지가 목록 범위를 벗어났습니다.",
+        "usersFirstPage": "첫 페이지로 이동",
+        "usersUpdatedAt": "최근 갱신",
+        "usersPaginationLabel": "사용자 목록 페이지"
     },
     "board": {
         "postCreateSuccess": "게시글을 작성했습니다.",

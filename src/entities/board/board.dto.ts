@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { UserSummarySchema } from '@entities/profile/user-summary.dto'
 import { BOARD_POST_KINDS } from '@shared/constants/board'
+import { PaginationSchema } from '@shared/lib/pagination'
 
 const BYTES_PER_KILOBYTE = 1024
 const RICH_TEXT_MAX_KILOBYTES = 200
@@ -32,14 +33,6 @@ export const BoardCommentsPageSchema = z.coerce.number().int().positive().catch(
 
 export const AuthorSchema = UserSummarySchema
 export type Author = z.infer<typeof AuthorSchema>
-
-export const PaginationSchema = z.object({
-    page: z.number().int().positive(),
-    limit: z.number().int().positive(),
-    total: z.number().int().nonnegative(),
-    totalPages: z.number().int().nonnegative(),
-})
-export type Pagination = z.infer<typeof PaginationSchema>
 
 export const PostTitleSchema = z.string().trim().min(1).max(BOARD_POST_TITLE_MAX_LENGTH)
 export const RichTextContentSchema = z.record(z.string(), z.unknown())

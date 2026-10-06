@@ -8,7 +8,9 @@
         "boardDescription": "The IIDX Rank board, where beatmania IIDX players share notices and posts.",
         "boardPagedTitle": "Board, page {page, number}",
         "postFallbackDescription": "A post by {author} on the IIDX Rank board.",
-        "profileFallbackDescription": "beatmania IIDX play records and clear lamps of {name} (@{handle})."
+        "profileFallbackDescription": "beatmania IIDX play records and clear lamps of {name} (@{handle}).",
+        "usersDescription": "IIDX Rank players who share their beatmania IIDX difficulty table records.",
+        "usersPagedTitle": "Users, page {page, number}"
     },
     "common": {
         "cancel": "Cancel",
@@ -21,6 +23,7 @@
     },
     "navigation": {
         "home": "Home",
+        "users": "Users",
         "checker": "Difficulty table",
         "toggleSidebar": "Expand or collapse sidebar",
         "sidebar": "Navigation",
@@ -108,10 +111,17 @@
         "followSuccess": "Followed.",
         "unfollowSuccess": "Unfollowed.",
         "followError": "Could not change the follow state.",
-        "recentUsersTitle": "Recently updated users",
-        "recentUsersLoading": "Loading recently updated users.",
-        "recentUsersEmpty": "No users to show yet.",
-        "recentUsersError": "Could not load the list."
+        "usersDescription": "Players with a public profile, ordered by most recent record update.",
+        "usersLoading": "Loading users.",
+        "usersLoadErrorTitle": "Could not load the user list.",
+        "usersLoadErrorDescription": "This may be a temporary error. Please try again shortly.",
+        "usersEmptyTitle": "No users to show yet.",
+        "usersEmptyDescription": "Make your profile public and record a lamp on the difficulty table to appear here.",
+        "usersPageEmptyTitle": "There are no users on this page.",
+        "usersPageEmptyDescription": "The requested page is outside the range of the list.",
+        "usersFirstPage": "Go to the first page",
+        "usersUpdatedAt": "Last updated",
+        "usersPaginationLabel": "User list pages"
     },
     "board": {
         "postCreateSuccess": "Post published.",

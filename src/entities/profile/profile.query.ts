@@ -3,12 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { followProfile, unfollowProfile, updateMyProfile } from '@entities/profile/profile.api'
-import {
-    myProfileQueryOptions,
-    profileQueryOptions,
-    profileRecordsQueryOptions,
-    recentUsersQueryOptions,
-} from '@entities/profile/profile.query-options'
+import { myProfileQueryOptions, profileQueryOptions, profileRecordsQueryOptions, userListQueryOptions } from '@entities/profile/profile.query-options'
 import { QUERY_KEY } from '@shared/constants/query-key'
 
 const PROFILE_SAVE_SCOPE_ID = 'profile-save'
@@ -21,7 +16,7 @@ export const useProfile = (handle: string, enabled: boolean) => useQuery({ ...pr
 
 export const useProfileRecords = (handle: string) => useQuery(profileRecordsQueryOptions(handle))
 
-export const useRecentUsers = () => useQuery(recentUsersQueryOptions())
+export const useUserList = (page: number) => useQuery(userListQueryOptions(page))
 
 export const useUpdateMyProfile = () => {
     const t = useTranslations()
