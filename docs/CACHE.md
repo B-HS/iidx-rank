@@ -18,7 +18,7 @@
 
 기록 변경 시 저장·revision 증가를 같은 DB 트랜잭션으로 처리합니다. Route Handler는 인증 사용자의 태그만 revalidateTag(tag,{expire:0})로 만료합니다. 클라이언트는 이어서 해당 query key를 invalidateQueries합니다. 로그인·로그아웃·계정 변경 시 기존 QueryClient를 clear하고 라우터를 새로고침합니다. 로그아웃 완료 직후 identity-transition UI gate를 닫고, 클라이언트 세션 UUID와 서버 초기 UUID가 일치할 때까지 이전 기록과 상세 메모를 숨깁니다. 상세 폼은 사용자 UUID와 곡 ID로 구분합니다.
 
-POST /api/cache/refresh는 로그인한 사용자 자신의 기록 캐시를 갱신합니다. POST /api/catalog/sync는 DB 역할이 admin인 사용자만 원본을 수집한 후 공개 캐시를 만료합니다. GET /api/catalog/sync는 CRON_SECRET Bearer 인증 후 UTC 당일 수집 여부를 확인해 중복 일일 수집을 생략합니다. 관리자 수동 수집에는 60초 쿨다운이 적용됩니다. 공개 DB 캐시의 5분 재검증은 HTML 수집 주기가 아닙니다. 홈 페이지의 정적 셸과 서버 프리페치가 쓰는 catalog 조회는 snapshot revision을 키에 넣지 않으므로, 태그를 만료하지 않는 CLI 수집(bun run source:sync) 직후에는 홈 첫 화면이 최대 약 5분 동안 이전 스냅샷일 수 있습니다. Cron과 관리자 수동 수집은 태그를 즉시 만료합니다. 사용자가 임의 사용자 ID·태그·원본 URL을 지정할 수 없습니다.
+POST /api/cache/refresh는 로그인한 사용자 자신의 기록 캐시를 갱신합니다. POST /api/catalog/sync는 DB 역할이 admin인 사용자만 원본을 수집한 후 공개 캐시를 만료합니다. GET /api/catalog/sync는 CRON_SECRET Bearer 인증 후 UTC 당일 수집 여부를 확인해 중복 일일 수집을 생략합니다. 관리자 수동 수집에는 60초 쿨다운이 적용됩니다. 공개 DB 캐시의 5분 재검증은 HTML 수집 주기가 아닙니다. 난이도표 페이지(/table)의 정적 셸과 서버 프리페치가 쓰는 catalog 조회는 snapshot revision을 키에 넣지 않으므로, 태그를 만료하지 않는 CLI 수집(bun run source:sync) 직후에는 난이도표 첫 화면이 최대 약 5분 동안 이전 스냅샷일 수 있습니다. Cron과 관리자 수동 수집은 태그를 즉시 만료합니다. 사용자가 임의 사용자 ID·태그·원본 URL을 지정할 수 없습니다.
 
 ## 범위와 운영 경계
 

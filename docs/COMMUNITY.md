@@ -123,3 +123,15 @@ playedCount는 활성 곡 중 lamp가 NO_PLAY가 아닌 기록 수입니다.
 - 사용자 페이지 머리: 프로필 사진, 닉네임, @핸들 · 팔로워 수 · 플레이한 보면 수, 소개, 버튼(본인은 프로필 설정, 타인은 팔로우/언팔로우). 그 아래 탭. 탭은 배열 레지스트리로 정의해 항목 추가만으로 확장합니다. 초기 탭은 개요와 플레이 기록입니다.
 - 게시판에서 사용자 이름을 클릭하면 메뉴가 열립니다: 프로필 보기(공개 프로필일 때만), 차단(로그인했고 본인이 아닐 때).
 - 문구는 ko·ja·en 메시지 카탈로그에 넣습니다. 네임스페이스: home, profile, settings, social, board, navigation.
+
+## 구현 후 확정 사항
+
+- 계정 전환 동기화(QueryClient.clear, router.refresh, identity-transition gate 종료)는 (shell) 레이아웃의 ViewerIdentitySync 한 곳에서 처리합니다. 페이지 위젯은 src/entities/auth/use-viewer-identity.ts의 useViewerIdentity로 정렬 여부만 읽습니다.
+- 내비게이션 활성 판정은 / 만 정확 일치, 나머지는 접두 일치입니다. labelKey는 navigation 네임스페이스 안의 키입니다.
+- 없는 글과 없는·비공개 프로필은 페이지 안의 안내 화면으로 표시합니다(상태 코드 200). 형식이 틀린 id·핸들도 같습니다.
+- 대문자 핸들은 소문자로 바꾸지 않고 검증 실패로 처리합니다. 최근 갱신 목록은 기록 갱신 시각이 없는 공개 사용자를 제외합니다. 비공개 프로필에 대한 언팔로우도 404입니다.
+- 공지 삭제는 관리자만 할 수 있습니다. 차단한 작성자의 글도 주소로 직접 열면 보입니다(목록과 댓글에서만 숨김). 남용 제한은 공지와 관리자에게도 적용됩니다. total이 0이면 totalPages는 0입니다.
+- 리치 텍스트 검증은 JSON 중첩 깊이 100 이하를 먼저 확인하고, 표시용 attrs(link의 target·rel·class, codeBlock language 등)는 안전값으로 정규화합니다. 붙여넣은 HTML의 외부 이미지는 에디터가 제거합니다.
+- 클라이언트 요청 헬퍼는 서버 오류 code를 Error의 cause로 전달합니다(getApiErrorCode). 화면은 code를 번역 키로 바꿔 표시하고 서버의 한국어 메시지를 직접 쓰지 않습니다.
+- 페이지별 문서 제목은 레이아웃의 title template("%s | IIDX Rank")과 각 페이지의 generateMetadata로 정합니다.
+- /api/users/recent는 connection()으로 요청 시점 실행을 고정했습니다. 파일 조회 핸들러는 R2 오류 응답의 본문을 cancel하지 않고 소진합니다(docs/bug/2026-10-06-community-rollout.md).

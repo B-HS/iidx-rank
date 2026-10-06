@@ -14,7 +14,7 @@
 ## 캐시
 
 - cacheComponents:true로 PPR과 use cache를 함께 활성화합니다. 정적 셸과 요청시간 세션/기록 영역을 Suspense로 분리합니다. 구버전 experimental.ppr/dynamic 옵션은 혼용하지 않습니다.
-- 공개 catalog 'use cache' DB 조회: catalog 태그, 5분 재검증·1시간 만료. 원본 수집은 빌드·페이지·catalog GET에서 하지 않고 하루 1회 Cron과 관리자 수동 동기화 경로에서 수행합니다. catalog GET은 snapshot revision을 캐시 키에 포함합니다. 홈 페이지의 정적 셸과 그 값을 넘겨받는 서버 프리페치는 요청시간 값을 읽을 수 없어 revision 없이 catalog 태그 만료와 5분 재검증에 의존합니다.
+- 공개 catalog 'use cache' DB 조회: catalog 태그, 5분 재검증·1시간 만료. 원본 수집은 빌드·페이지·catalog GET에서 하지 않고 하루 1회 Cron과 관리자 수동 동기화 경로에서 수행합니다. catalog GET은 snapshot revision을 캐시 키에 포함합니다. 난이도표 페이지(/table)의 정적 셸과 그 값을 넘겨받는 서버 프리페치는 요청시간 값을 읽을 수 없어 revision 없이 catalog 태그 만료와 5분 재검증에 의존합니다.
 - 표시 설정 'use cache' DB 조회: user UUID와 사용자별 revision이 키에 포함되고 user:<uuid>:display-preferences 태그로 분리합니다. 60초 재검증·5분 만료, 변경 직후 revalidateTag(tag,{expire:0}).
 - records 'use cache' DB 조회: 함수 인자 user UUID가 키에 포함되고 user:<uuid>:records 태그로 분리합니다. 세션 인증은 캐시 밖에서 매 요청 검증합니다. 60초 재검증·5분 만료, 변경 직후 revalidateTag(tag,{expire:0}). 사용자별 revision을 함수 인자 키에 포함하여 저장 직후 이전 캐시를 재사용하지 않습니다.
 - 개인 API HTTP 응답은 private,no-store입니다. 서버 내부의 UUID 캐시와 브라우저/CDN 응답 캐시는 다릅니다.

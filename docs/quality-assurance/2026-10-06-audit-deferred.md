@@ -64,3 +64,11 @@
 - 메시지 카탈로그에 코드가 참조하지 않는 키 47개가 3개 언어에 남아 있습니다(auth 7, checker 35, common 4, navigation 1). 표 레이아웃·정렬 필터 제거 이전의 문구입니다.
 - 컨벤션 불일치: Props 타입명이 컴포넌트명Props가 아닌 Props, features/auth-dialog가 인증 네트워크 호출과 toast를 직접 수행하고 이름이 AuthDialogWidget, shared/lib/api-client.ts가 ko 메시지를 직접 import, 'Asia/Tokyo' 리터럴 3곳 중복, src/app/[locale]/page.tsx의 한 파일 3컴포넌트.
 - ESLint 경고 3건(_generation, _revision 2곳)은 Next 캐시 키용 인자로 의도된 것이며 docs/quality-assurance/implementation.md에 기록된 기존 결정입니다.
+
+## 커뮤니티 기능 구현 후 추가된 항목
+
+- [ ] 원본 수집의 응답 본문 cancel 대기 — src/entities/catalog/catalog.storage.ts의 decodeBoundedResponse가 실패 경로에서 await response.body?.cancel()과 await reader.cancel()을 호출합니다. 파일 조회 API에서 같은 패턴이 Next의 fetch 본문 분기 때문에 끝나지 않는 것을 확인했습니다(docs/bug/2026-10-06-community-rollout.md). 수집은 10초 AbortSignal이 있어 무한 대기는 아닐 것으로 보이나 실행 확인은 하지 않았습니다. 실행 시점: 원본 서버가 오류나 과대 응답을 돌려줄 때 Cron이 503 대신 타임아웃으로 끝나는지 확인이 필요해질 때.
+- [ ] /settings 하이드레이션 오류 1회 — 통합 검증 중 390px 폭에서 /u/<핸들> → /settings 이동 시 React 오류 #418이 한 번 발생했고 같은 이동과 새로고침에서 재현되지 않았습니다. 원인 미확인.
+- [ ] 저장하지 않고 버린 업로드와 삭제된 글의 이미지 — 프로필 사진을 올린 뒤 저장하지 않거나 글을 삭제하면 uploaded_file 행과 R2 객체가 남습니다. 정리 작업이 없습니다.
+- [ ] 로그인이 필요한 UI 감사 항목의 브라우저 확인 — 핸들 중복 시 필드 포커스, 상위 램프 안내 toast, 언어 전환 시 쿼리 유지, 포커스 링, 다크 테마 toast는 코드와 빌드로만 확인했습니다.
+- [ ] 게시판·프로필의 없는 대상 응답 코드 — Cache Components에서는 스트리밍 시작 후 상태 코드를 바꿀 수 없어 없는 글·프로필이 200과 안내 화면으로 응답합니다. 실제 404가 필요하면 proxy에서 먼저 검사해야 합니다.
