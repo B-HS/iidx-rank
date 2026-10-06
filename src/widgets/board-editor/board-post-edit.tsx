@@ -2,8 +2,10 @@
 import type { FC } from 'react'
 import { useTranslations } from 'next-intl'
 import { useViewerIdentity } from '@entities/auth/use-viewer-identity'
+import { getBoardErrorKey } from '@entities/board/board-error'
 import { useBoardPost, useUpdatePost } from '@entities/board/board.query'
 import { Link, useRouter } from '@shared/i18n/navigation'
+import { getApiErrorCode } from '@shared/lib/api-client'
 import { Button } from '@shared/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@shared/ui/empty'
 import { BoardEditorSkeleton } from '@widgets/board-editor/board-editor-skeleton'
@@ -62,7 +64,7 @@ export const BoardPostEdit: FC<BoardPostEditProps> = ({ postId, initialUserId })
             defaultValues={{ kind: post.kind, title: post.title, content: post.content }}
             canSelectKind={false}
             isSubmitting={updatePost.isPending || updatePost.isSuccess}
-            errorMessage={updatePost.error?.message}
+            errorMessage={updatePost.error ? t(getBoardErrorKey(getApiErrorCode(updatePost.error)) ?? 'board.postUpdateError') : undefined}
             submitLabel={t('board.postUpdateSubmit')}
             submittingLabel={t('board.postSubmitting')}
             cancelHref={postPath}

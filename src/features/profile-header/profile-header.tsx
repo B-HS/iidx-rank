@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from 'react'
 import { Lock } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import type { Profile } from '@entities/profile/profile.dto'
 import { UserAvatar } from '@features/user-avatar/user-avatar'
 import { Badge } from '@shared/ui/badge'
@@ -12,7 +12,6 @@ type ProfileHeaderProps = {
 
 export const ProfileHeader: FC<ProfileHeaderProps> = ({ profile, action }) => {
     const t = useTranslations('profile')
-    const locale = useLocale()
 
     return (
         <div className='flex min-w-0 items-start gap-3 border-b border-border p-3'>
@@ -32,9 +31,9 @@ export const ProfileHeader: FC<ProfileHeaderProps> = ({ profile, action }) => {
                         <p className='min-w-0 text-xs break-words text-muted-foreground'>
                             <span className='break-all'>@{profile.handle}</span>
                             {' · '}
-                            {t('followerCount', { count: profile.followerCount.toLocaleString(locale) })}
+                            {t('followerCount', { count: profile.followerCount })}
                             {' · '}
-                            {t('playedCount', { count: profile.playedCount.toLocaleString(locale) })}
+                            {t('playedCount', { count: profile.playedCount })}
                         </p>
                     </div>
                     <div className='shrink-0'>{action}</div>

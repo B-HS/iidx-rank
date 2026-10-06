@@ -7,11 +7,11 @@ import { cn } from '@shared/lib/utils'
 import { Card, CardContent, CardHeader } from '@shared/ui/card'
 import { Skeleton } from '@shared/ui/skeleton'
 
-type Props = { rank: string; standardCount: number; personalCount: number; versionDisplay: DisplayPreferencesInput['versionDisplay'] }
-export const ChartRankSkeleton: FC<Props> = ({ rank, standardCount, personalCount, versionDisplay }) => {
+type Props = { label: string; standardCount: number; personalCount: number; versionDisplay: DisplayPreferencesInput['versionDisplay'] }
+export const ChartRankSkeleton: FC<Props> = ({ label, standardCount, personalCount, versionDisplay }) => {
     const t = useTranslations()
     return (
-        <section aria-label={rank + t('checker.rankSection')} className='min-w-0'>
+        <section aria-label={label} className='min-w-0'>
             <Card aria-hidden='true' className='min-w-0 gap-px overflow-visible rounded-none bg-border p-0 shadow-none ring-0'>
                 <CardHeader className='checker-rank-header flex h-12 flex-row items-center justify-between bg-muted px-3 py-0'>
                     <Skeleton className='h-5 w-12' />

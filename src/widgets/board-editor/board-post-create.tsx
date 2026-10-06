@@ -2,9 +2,11 @@
 import type { FC } from 'react'
 import { useTranslations } from 'next-intl'
 import { useViewerIdentity } from '@entities/auth/use-viewer-identity'
+import { getBoardErrorKey } from '@entities/board/board-error'
 import { BOARD_POST_KIND, type PostCreateInput } from '@entities/board/board.dto'
 import { useCreatePost } from '@entities/board/board.query'
 import { useRouter } from '@shared/i18n/navigation'
+import { getApiErrorCode } from '@shared/lib/api-client'
 import { BoardEditorSkeleton } from '@widgets/board-editor/board-editor-skeleton'
 import { BoardPostForm } from '@widgets/board-editor/board-post-form'
 import { BoardSignInPrompt } from '@widgets/board-editor/board-sign-in-prompt'
@@ -17,7 +19,7 @@ type BoardPostCreateProps = {
 const EMPTY_POST: PostCreateInput = { kind: BOARD_POST_KIND.GENERAL, title: '', content: { type: 'doc', content: [{ type: 'paragraph' }] } }
 
 export const BoardPostCreate: FC<BoardPostCreateProps> = ({ initialUserId, initialIsAdmin }) => {
-    const t = useTranslations('board')
+    const t = useTranslations()
     const router = useRouter()
     const { isAligned, viewerId } = useViewerIdentity(initialUserId)
     const createPost = useCreatePost()
@@ -30,9 +32,9 @@ export const BoardPostCreate: FC<BoardPostCreateProps> = ({ initialUserId, initi
             defaultValues={EMPTY_POST}
             canSelectKind={initialIsAdmin}
             isSubmitting={createPost.isPending || createPost.isSuccess}
-            errorMessage={createPost.error?.message}
-            submitLabel={t('postSubmit')}
-            submittingLabel={t('postSubmitting')}
+            errorMessage={createPost.error ? t(getBoardErrorKey(getApiErrorCode(createPost.error)) ?? 'board.postCreateError') : undefined}
+            submitLabel={t('board.postSubmit')}
+            submittingLabel={t('board.postSubmitting')}
             cancelHref='/board'
             onSubmit={(values) => createPost.mutate(values, { onSuccess: (post) => router.push(`/board/${post.id}`) })}
         />

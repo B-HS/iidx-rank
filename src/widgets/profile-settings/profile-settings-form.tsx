@@ -15,9 +15,10 @@ import {
     PROFILE_NAME_MIN_LENGTH,
     ProfileUpdateInputSchema,
 } from '@entities/profile/profile.dto'
-import { useUpdateMyProfile } from '@entities/profile/profile.query'
+import { HANDLE_TAKEN_ERROR_CODE, useUpdateMyProfile } from '@entities/profile/profile.query'
 import { ProfileSettingsSection } from '@features/profile-settings-section/profile-settings-section'
 import { UserAvatar } from '@features/user-avatar/user-avatar'
+import { getApiErrorCode } from '@shared/lib/api-client'
 import { Button } from '@shared/ui/button'
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@shared/ui/field'
 import { Input } from '@shared/ui/input'
@@ -34,6 +35,7 @@ const BYTES_PER_MEGABYTE = 1024 * 1024
 const AVATAR_UPLOAD_RULE = FILE_UPLOAD_RULES.avatar
 const AVATAR_MAX_MEGABYTES = AVATAR_UPLOAD_RULE.maxBytes / BYTES_PER_MEGABYTE
 const BIO_TEXTAREA_ROWS = 4
+const HANDLE_TAKEN_ERROR_TYPE = 'taken'
 
 const toFormValues = ({ name, handle, bio, isPublic, avatarKey }: MyProfile) => ({ name, handle, bio, isPublic, avatarKey })
 
@@ -80,6 +82,10 @@ export const ProfileSettingsForm: FC<ProfileSettingsFormProps> = ({ profile }) =
             onSuccess: (saved) => {
                 form.reset(toFormValues(saved))
                 void refetchSession()
+            },
+            onError: (error) => {
+                if (getApiErrorCode(error) === HANDLE_TAKEN_ERROR_CODE)
+                    form.setError('handle', { type: HANDLE_TAKEN_ERROR_TYPE }, { shouldFocus: true })
             },
         }),
     )
@@ -155,7 +161,9 @@ export const ProfileSettingsForm: FC<ProfileSettingsFormProps> = ({ profile }) =
                         <FieldDescription id={`${fieldId}-handle-hint`} className='text-xs'>
                             {t('settings.handleHint')}
                         </FieldDescription>
-                        <FieldError id={`${fieldId}-handle-error`}>{errors.handle && t('settings.handleError')}</FieldError>
+                        <FieldError id={`${fieldId}-handle-error`}>
+                            {errors.handle && t(errors.handle.type === HANDLE_TAKEN_ERROR_TYPE ? 'settings.handleTaken' : 'settings.handleError')}
+                        </FieldError>
                     </Field>
                     <Field data-invalid={Boolean(errors.bio)}>
                         <FieldLabel htmlFor={`${fieldId}-bio`}>{t('settings.bioLabel')}</FieldLabel>

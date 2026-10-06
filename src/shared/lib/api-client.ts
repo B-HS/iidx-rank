@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import ko from '@shared/messages/ko.json'
 
 const ApiErrorEnvelopeSchema = z.object({
     success: z.literal(false),
@@ -10,6 +9,20 @@ const ApiSuccessEnvelopeSchema = z.object({
     success: z.literal(true),
     data: z.unknown(),
 })
+
+const ApiErrorCauseSchema = z.object({ code: z.string() })
+
+export const API_REQUEST_FAILED_CODE = 'REQUEST_FAILED'
+
+const createRequestFailedError = () => new Error(API_REQUEST_FAILED_CODE, { cause: { code: API_REQUEST_FAILED_CODE } })
+
+export const getApiErrorCode = (error: unknown) => {
+    if (!(error instanceof Error)) return API_REQUEST_FAILED_CODE
+
+    const cause = ApiErrorCauseSchema.safeParse(error.cause)
+
+    return cause.success ? cause.data.code : API_REQUEST_FAILED_CODE
+}
 
 export const apiRequest = async <Output>(endpoint: string, dataSchema: z.ZodType<Output>, init: RequestInit = {}) => {
     const headers = new Headers(init.headers)
@@ -26,25 +39,25 @@ export const apiRequest = async <Output>(endpoint: string, dataSchema: z.ZodType
         response = await fetch(endpoint, { ...init, cache: 'no-store', credentials: 'same-origin', headers })
         payload = await response.json()
     } catch {
-        throw new Error(ko.common.unknownError)
+        throw createRequestFailedError()
     }
 
     const errorEnvelope = ApiErrorEnvelopeSchema.safeParse(payload)
 
     if (errorEnvelope.success) {
-        throw new Error(errorEnvelope.data.error.message)
+        throw new Error(errorEnvelope.data.error.message, { cause: { code: errorEnvelope.data.error.code } })
     }
 
     const successEnvelope = ApiSuccessEnvelopeSchema.safeParse(payload)
 
     if (!successEnvelope.success || !response.ok) {
-        throw new Error(ko.common.unknownError)
+        throw createRequestFailedError()
     }
 
     const parsedData = dataSchema.safeParse(successEnvelope.data.data)
 
     if (!parsedData.success) {
-        throw new Error(ko.common.unknownError)
+        throw createRequestFailedError()
     }
 
     return parsedData.data

@@ -52,7 +52,7 @@ export const CheckerFilters: FC<Props> = ({
     return (
         <div className='grid gap-5'>
             <div className='grid gap-2'>
-                <span className='checker-micro-label'>{t('checker.rankLabel')}</span>
+                <span className='checker-micro-label'>{t('checker.modeLabel')}</span>
                 <ToggleGroup
                     type='single'
                     value={mode}
@@ -65,7 +65,7 @@ export const CheckerFilters: FC<Props> = ({
                     variant='outline'
                     size='sm'
                     spacing={0}
-                    aria-label={t('checker.rankLabel')}>
+                    aria-label={t('checker.modeLabel')}>
                     <ToggleGroupItem value='normal' className='flex-1'>
                         {t('checker.normalMode')}
                     </ToggleGroupItem>

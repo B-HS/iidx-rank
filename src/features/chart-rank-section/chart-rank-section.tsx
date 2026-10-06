@@ -15,23 +15,33 @@ type Props = Pick<
     'mode' | 'versionDisplay' | 'isDisabled' | 'onAdvanceLamp' | 'pendingChartId' | 'pendingLamp'
 > & {
     rank: string
+    label: string
     isRecordsPending: boolean
     standardCharts: Chart[]
     personalCharts: Chart[]
     records: ReadonlyMap<string, ChartRecord>
     onOpenDetails: (chart: Chart) => void
 }
-export const ChartRankSection: FC<Props> = ({ rank, standardCharts, personalCharts, records, isRecordsPending, onOpenDetails, ...cardProps }) => {
+export const ChartRankSection: FC<Props> = ({
+    rank,
+    label,
+    standardCharts,
+    personalCharts,
+    records,
+    isRecordsPending,
+    onOpenDetails,
+    ...cardProps
+}) => {
     const t = useTranslations()
     return (
         <Collapsible defaultOpen asChild>
-            <section aria-label={rank + t('checker.rankSection')} className='min-w-0'>
+            <section aria-label={label} className='min-w-0'>
                 <Card className='min-w-0 gap-px overflow-visible rounded-none bg-border p-0 shadow-none ring-0'>
                     <CardHeader className='checker-rank-header block bg-muted p-0'>
                         <h2>
                             <CollapsibleTrigger
                                 className='group flex h-12 w-full items-center justify-between gap-2 p-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring'
-                                aria-label={t('checker.toggleRankSection', { rank: rank })}>
+                                aria-label={t('checker.toggleRankSection', { label })}>
                                 <span className='flex min-w-0 items-center gap-2 text-sm font-semibold'>
                                     <ChevronDown className='size-4 shrink-0 transition-transform group-data-[state=closed]:-rotate-90' />
                                     {rank}

@@ -19,6 +19,7 @@ import { FILE_UPLOAD_RULES, FILE_URL_PREFIX, type FilePurpose } from '@entities/
 import { getRichTextImageSources, isRichTextEmpty } from '@features/rich-text-editor/rich-text-document'
 import { RichTextEditor } from '@features/rich-text-editor/rich-text-editor'
 import { Link } from '@shared/i18n/navigation'
+import { getApiErrorCode } from '@shared/lib/api-client'
 import { Badge } from '@shared/ui/badge'
 import { Button } from '@shared/ui/button'
 import { FieldError } from '@shared/ui/field'
@@ -54,6 +55,10 @@ const KIND_LABEL_ID = 'board-post-kind-label'
 const CONTENT_LABEL_ID = 'board-post-content-label'
 const TOO_LONG_ERROR_TYPE = 'too_big'
 const IMAGE_UPLOAD_ERROR_TOAST_ID = 'board-image-upload-error'
+const UPLOAD_ERROR_REJECT_REASONS = new Map<string, ImageRejectReason>([
+    ['PAYLOAD_TOO_LARGE', 'size'],
+    ['UNSUPPORTED_MEDIA_TYPE', 'type'],
+])
 
 export const BoardPostForm: FC<BoardPostFormProps> = ({
     defaultValues,
@@ -90,9 +95,11 @@ export const BoardPostForm: FC<BoardPostFormProps> = ({
         try {
             return (await uploadImage(file, BOARD_FILE_PURPOSE)).url
         } catch (error) {
+            const rejectReason = UPLOAD_ERROR_REJECT_REASONS.get(getApiErrorCode(error))
+
             toast.error(t('board.imageUploadError'), {
                 id: IMAGE_UPLOAD_ERROR_TOAST_ID,
-                description: error instanceof Error ? error.message : undefined,
+                description: rejectReason ? imageRejectMessages[rejectReason] : undefined,
             })
             return null
         } finally {
@@ -191,7 +198,7 @@ export const BoardPostForm: FC<BoardPostFormProps> = ({
                 <Button variant='ghost' size='sm' asChild>
                     <Link href={cancelHref}>{t('common.cancel')}</Link>
                 </Button>
-                <Button type='submit' variant='outline' size='sm' disabled={isSubmitting || isUploading}>
+                <Button type='submit' size='sm' disabled={isSubmitting || isUploading}>
                     {isSubmitting ? submittingLabel : submitLabel}
                 </Button>
             </div>

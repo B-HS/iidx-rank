@@ -1,11 +1,13 @@
 'use client'
 import { type FC, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { getBoardErrorKey } from '@entities/board/board-error'
 import { BOARD_COMMENTS_PAGE_SIZE, type CommentCreateInput } from '@entities/board/board.dto'
 import { useBoardComments, useCreateComment, useDeleteComment } from '@entities/board/board.query'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
 import { BoardCommentForm } from '@features/board-comment-form/board-comment-form'
 import { BoardPagination } from '@features/board-pagination/board-pagination'
+import { getApiErrorCode } from '@shared/lib/api-client'
 import { Button } from '@shared/ui/button'
 import { Skeleton } from '@shared/ui/skeleton'
 import { BoardCommentItem } from '@widgets/board-post/board-comment-item'
@@ -106,7 +108,9 @@ export const BoardComments: FC<BoardCommentsProps> = ({ postId, viewerId }) => {
                     <BoardCommentForm
                         key={submittedCount}
                         isSubmitting={createComment.isPending}
-                        errorMessage={createComment.error?.message}
+                        errorMessage={
+                            createComment.error ? t(getBoardErrorKey(getApiErrorCode(createComment.error)) ?? 'board.commentCreateError') : undefined
+                        }
                         onSubmit={handleCreate}
                     />
                 )}

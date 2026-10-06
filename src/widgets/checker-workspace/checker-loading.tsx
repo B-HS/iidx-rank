@@ -28,9 +28,7 @@ export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
                     <div className='flex min-w-0 items-center gap-2'>
                         <SidebarTrigger aria-label={t('navigation.openSidebar')} className='shrink-0 md:hidden' />
                         <div className='min-w-0'>
-                            <h1 className='truncate text-sm font-semibold'>
-                                {t('checker.normalMode')} {t('checker.title')}
-                            </h1>
+                            <h1 className='truncate text-sm font-semibold'>{t('checker.headingWithMode', { mode: t('checker.normalMode') })}</h1>
                             <p className='hidden truncate text-xs text-muted-foreground sm:block'>{t('checker.description')}</p>
                         </div>
                     </div>
@@ -52,7 +50,7 @@ export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
                             {sections.map((section) => (
                                 <ChartRankSkeleton
                                     key={section.rank ?? 'none'}
-                                    rank={section.rank ?? t('checker.noRank')}
+                                    label={section.rank ? t('checker.rankSectionLabel', { rank: section.rank }) : t('checker.noRank')}
                                     standardCount={section.standardCharts.length}
                                     personalCount={section.personalCharts.length}
                                     versionDisplay={versionDisplay}

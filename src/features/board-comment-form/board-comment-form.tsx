@@ -48,7 +48,7 @@ export const BoardCommentForm: FC<BoardCommentFormProps> = ({ isSubmitting, erro
                 <span className={cn('text-xs text-muted-foreground tabular-nums', isTooLong && 'text-destructive')}>
                     {t('characterCount', { count: contentLength, max: BOARD_COMMENT_MAX_LENGTH })}
                 </span>
-                <Button type='submit' variant='outline' size='sm' disabled={isSubmitting || contentLength === 0 || isTooLong}>
+                <Button type='submit' size='sm' disabled={isSubmitting || contentLength === 0 || isTooLong}>
                     {isSubmitting ? t('commentSubmitting') : t('commentSubmit')}
                 </Button>
             </div>

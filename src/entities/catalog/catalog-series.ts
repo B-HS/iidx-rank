@@ -34,10 +34,20 @@ const SERIES_LOGOS = new Map([
     ['sparkleshower', '/iidx-logo/33-sparkle-shower.png'],
     ['zinrai', '/iidx-logo/34-zinrai.png'],
 ])
-export const getSeriesLogo = (version: string) =>
-    SERIES_LOGOS.get(
-        version
-            .toLowerCase()
-            .replace(/[\s_-]/g, '')
-            .replace(/style$/, ''),
-    ) ?? null
+const SERIES_ORDERS = new Map([...SERIES_LOGOS.keys()].map((series, order) => [series, order]))
+const UNREGISTERED_SERIES_ORDER = SERIES_ORDERS.size
+
+const normalizeSeriesVersion = (version: string) =>
+    version
+        .toLowerCase()
+        .replace(/[\s_-]/g, '')
+        .replace(/style$/, '')
+
+export const getSeriesLogo = (version: string) => SERIES_LOGOS.get(normalizeSeriesVersion(version)) ?? null
+
+export const compareSeriesVersions = (left: string, right: string, locale: string) => {
+    const leftOrder = SERIES_ORDERS.get(normalizeSeriesVersion(left)) ?? UNREGISTERED_SERIES_ORDER
+    const rightOrder = SERIES_ORDERS.get(normalizeSeriesVersion(right)) ?? UNREGISTERED_SERIES_ORDER
+
+    return leftOrder === rightOrder ? left.localeCompare(right, locale) : leftOrder - rightOrder
+}

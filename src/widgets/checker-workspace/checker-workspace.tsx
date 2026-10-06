@@ -21,6 +21,7 @@ import { ChartRankSection } from '@features/chart-rank-section/chart-rank-sectio
 import { useIdentityTransition } from '@shared/hooks/use-identity-transition'
 import { useAnonymousPreferences, saveAnonymousPreferences } from '@entities/preferences/anonymous-preferences.client'
 import { groupChartsByRank } from '@entities/catalog/catalog-ranks'
+import { compareSeriesVersions } from '@entities/catalog/catalog-series'
 import { ShellSidebarPortal } from '@widgets/app-shell/shell-sidebar-portal'
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert'
 import { Button } from '@shared/ui/button'
@@ -29,6 +30,9 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@shared/ui/emp
 import { Progress } from '@shared/ui/progress'
 import { SidebarTrigger } from '@shared/ui/sidebar'
 import { Skeleton } from '@shared/ui/skeleton'
+
+const LAMP_LOCKED_TOAST_ID = 'checker-lamp-locked'
+
 type Props = {
     initialUserId: string | null
     initialIsAdmin: boolean
@@ -80,7 +84,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
     const recordsByChartId = new Map(records.map((record) => [record.chartId, record]))
     const rankFor = (chart: Chart) => (mode === 'normal' ? chart.normalRank : chart.hardRank)
     const personalFor = (chart: Chart) => (mode === 'normal' ? chart.normalPersonal : chart.hardPersonal)
-    const versions = [...new Set(catalog.charts.map((chart) => chart.version))].toSorted((left, right) => left.localeCompare(right, locale))
+    const versions = [...new Set(catalog.charts.map((chart) => chart.version))].toSorted((left, right) => compareSeriesVersions(left, right, locale))
     const filteredCharts = catalog.charts
         .filter((chart) => {
             const chartRank = rankFor(chart)
@@ -110,7 +114,11 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
             return true
         })
         .toSorted((left, right) => left.title.localeCompare(right.title, 'ja'))
-    const rankSections = groupChartsByRank(filteredCharts, mode).map((section) => ({ ...section, rank: section.rank ?? t('checker.noRank') }))
+    const rankSections = groupChartsByRank(filteredCharts, mode).map((section) => ({
+        ...section,
+        rank: section.rank ?? t('checker.noRank'),
+        label: section.rank ? t('checker.rankSectionLabel', { rank: section.rank }) : t('checker.noRank'),
+    }))
     const recordedCount = catalog.charts.filter((chart) => (recordsByChartId.get(chart.id)?.lamp ?? LAMPS[0]) !== LAMPS[0]).length
     const completionPercent = catalog.charts.length === 0 ? 0 : Math.round((recordedCount / catalog.charts.length) * 100)
     const personalCount = catalog.charts.filter(personalFor).length
@@ -154,7 +162,10 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
         }
         const currentLamp = recordsByChartId.get(chart.id)?.lamp ?? 'NO_PLAY'
         const nextLamp = nextCheckerLamp(currentLamp, mode)
-        if (nextLamp === currentLamp) return
+        if (nextLamp === currentLamp) {
+            toast.info(t('checker.lampLocked'), { id: LAMP_LOCKED_TOAST_ID })
+            return
+        }
         quickSaveRecord.mutate({ chartId: chart.id, lamp: nextLamp })
     }
     const handlePreviewPreferences = (input: DisplayPreferencesInput) => setDisplayDraft({ userId: initialUserId, preferences: input })
@@ -203,9 +214,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
             <section className='grid min-w-0 gap-3 bg-sidebar p-3'>
                 <div className='flex min-w-0 items-center justify-between gap-2'>
                     <h2 className='checker-micro-label'>{t('checker.sourceTitle')}</h2>
-                    {catalog.source.status === 'ready' && (
-                        <span className='size-1.5 shrink-0 rounded-full bg-emerald-600' aria-label={t('checker.sourceReady')} />
-                    )}
+                    {catalog.source.status === 'ready' && <span className='size-1.5 shrink-0 rounded-full bg-emerald-600' aria-hidden='true' />}
                 </div>
                 <p className='h-8 text-xs text-muted-foreground'>
                     {catalog.source.status === 'ready' ? t('checker.sourceReady') : t('checker.sourceEmpty')}
@@ -359,7 +368,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
                         <SidebarTrigger aria-label={t('navigation.openSidebar')} className='shrink-0 md:hidden' />
                         <div className='min-w-0'>
                             <h1 className='truncate text-sm font-semibold'>
-                                {mode === 'normal' ? t('checker.normalMode') : t('checker.hardMode')} {t('checker.title')}
+                                {t('checker.headingWithMode', { mode: mode === 'normal' ? t('checker.normalMode') : t('checker.hardMode') })}
                             </h1>
                             <p className='hidden truncate text-xs text-muted-foreground sm:block'>{t('checker.description')}</p>
                         </div>

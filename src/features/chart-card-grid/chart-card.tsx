@@ -89,7 +89,17 @@ export const ChartCard: FC<Props> = ({
                     disabled={isDisabled}
                     aria-busy={isSaving}
                     aria-keyshortcuts='Shift+Enter'
-                    title={chart.title + ' · ' + t(`difficulty.${chart.difficulty}`) + ' · ' + chart.version + ' · ' + t('checker.cardHint')}
+                    title={
+                        chart.title +
+                        ' · ' +
+                        t(`difficulty.${chart.difficulty}`) +
+                        ' · ' +
+                        chart.version +
+                        ' · ' +
+                        t(`lamp.${lamp}`) +
+                        ' · ' +
+                        t('checker.cardHint')
+                    }
                     aria-label={
                         chart.title +
                         ' · ' +
