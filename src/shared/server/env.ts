@@ -20,6 +20,9 @@ const envSchema = z.object({
         ),
     CRON_SECRET: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(32).optional()),
     TURSO_AUTH_TOKEN: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
+    R2_ACCESS_KEY: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
+    R2_SECRET_KEY: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
+    R2_URL: z.preprocess((value) => (value === '' ? undefined : value), z.url().optional()),
 })
 
 let environment: z.infer<typeof envSchema> | undefined
@@ -34,6 +37,9 @@ export const getEnv = () => {
         TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN,
         ADMIN_BOOTSTRAP_EMAILS: process.env.ADMIN_BOOTSTRAP_EMAILS,
         CRON_SECRET: process.env.CRON_SECRET,
+        R2_ACCESS_KEY: process.env.R2_ACCESS_KEY,
+        R2_SECRET_KEY: process.env.R2_SECRET_KEY,
+        R2_URL: process.env.R2_URL,
     })
 
     return environment
