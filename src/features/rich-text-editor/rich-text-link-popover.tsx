@@ -1,6 +1,7 @@
 'use client'
 import { type FC, type KeyboardEvent, useState } from 'react'
 import { Link as LinkIcon } from 'lucide-react'
+import { Toolbar } from 'radix-ui'
 import { useTranslations } from 'next-intl'
 import { RICH_TEXT_LINK_HREF_PATTERN } from '@entities/board/rich-text.extensions'
 import { Button } from '@shared/ui/button'
@@ -57,9 +58,11 @@ export const RichTextLinkPopover: FC<RichTextLinkPopoverProps> = ({ currentHref,
             <Tooltip>
                 <TooltipTrigger asChild>
                     <PopoverTrigger asChild>
-                        <Toggle size='sm' aria-label={t('editorLink')} pressed={currentHref !== null} disabled={isDisabled} className='px-1.5'>
-                            <LinkIcon aria-hidden='true' />
-                        </Toggle>
+                        <Toolbar.Button asChild disabled={isDisabled}>
+                            <Toggle size='sm' aria-label={t('editorLink')} pressed={currentHref !== null} className='px-1.5'>
+                                <LinkIcon aria-hidden='true' />
+                            </Toggle>
+                        </Toolbar.Button>
                     </PopoverTrigger>
                 </TooltipTrigger>
                 <TooltipContent>{t('editorLink')}</TooltipContent>

@@ -2,15 +2,13 @@
 import { type FC } from 'react'
 import { useTranslations } from 'next-intl'
 import { DIFFICULTIES, RANKS } from '@entities/catalog/catalog.dto'
+import { Button } from '@shared/ui/button'
 import { Checkbox } from '@shared/ui/checkbox'
 import { Input } from '@shared/ui/input'
 import { Label } from '@shared/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select'
 import { Skeleton } from '@shared/ui/skeleton'
-import { ToggleGroup, ToggleGroupItem } from '@shared/ui/toggle-group'
 type Props = {
-    mode: 'normal' | 'hard'
-    onModeChange: (value: 'normal' | 'hard') => void
     search: string
     onSearchChange: (value: string) => void
     difficulty: string
@@ -27,10 +25,10 @@ type Props = {
     isRecordsPending: boolean
     catalogCount: number
     resultCount: number
+    hasActiveFilters: boolean
+    onReset: () => void
 }
 export const CheckerFilters: FC<Props> = ({
-    mode,
-    onModeChange,
     search,
     onSearchChange,
     difficulty,
@@ -47,34 +45,12 @@ export const CheckerFilters: FC<Props> = ({
     isRecordsPending,
     catalogCount,
     resultCount,
+    hasActiveFilters,
+    onReset,
 }) => {
     const t = useTranslations()
     return (
         <div className='grid gap-5'>
-            <div className='grid gap-2'>
-                <span className='checker-micro-label'>{t('checker.modeLabel')}</span>
-                <ToggleGroup
-                    type='single'
-                    value={mode}
-                    onValueChange={(value) => {
-                        if (value === 'normal' || value === 'hard') {
-                            onModeChange(value)
-                        }
-                    }}
-                    className='w-full'
-                    variant='outline'
-                    size='sm'
-                    spacing={0}
-                    aria-label={t('checker.modeLabel')}>
-                    <ToggleGroupItem value='normal' className='flex-1'>
-                        {t('checker.normalMode')}
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value='hard' className='flex-1'>
-                        {t('checker.hardMode')}
-                    </ToggleGroupItem>
-                </ToggleGroup>
-            </div>
-
             <div className='grid gap-4'>
                 <div className='grid gap-1.5'>
                     <Label htmlFor='checker-search' className='checker-micro-label'>
@@ -163,9 +139,14 @@ export const CheckerFilters: FC<Props> = ({
                 </label>
             </div>
 
-            <div aria-live='polite' aria-busy={isRecordsPending && unplayedOnly} className='text-xs text-muted-foreground'>
-                {isRecordsPending && unplayedOnly && <Skeleton aria-label={t('checker.loadingRecords')} className='h-4 w-36 bg-sidebar-accent' />}
-                {(!isRecordsPending || !unplayedOnly) && t('checker.resultSummary', { visible: resultCount, total: catalogCount })}
+            <div className='flex min-w-0 items-center justify-between gap-3'>
+                <div aria-live='polite' aria-busy={isRecordsPending && unplayedOnly} className='min-w-0 text-xs text-muted-foreground'>
+                    {isRecordsPending && unplayedOnly && <Skeleton aria-label={t('checker.loadingRecords')} className='h-4 w-36 bg-sidebar-accent' />}
+                    {(!isRecordsPending || !unplayedOnly) && t('checker.resultSummary', { visible: resultCount, total: catalogCount })}
+                </div>
+                <Button variant='outline' size='sm' disabled={!hasActiveFilters} className='shrink-0' onClick={onReset}>
+                    {t('checker.resetFilters')}
+                </Button>
             </div>
         </div>
     )

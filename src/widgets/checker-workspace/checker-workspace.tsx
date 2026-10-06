@@ -16,10 +16,13 @@ import { ChartDetails } from '@features/chart-details/chart-details'
 import { DisplaySettings } from '@features/display-settings/display-settings'
 import { MAX_LOGO_OPACITY } from '@shared/constants/display'
 import { CheckerFilters } from '@features/checker-filters/checker-filters'
+import { CheckerModeToggle } from '@features/checker-mode-toggle/checker-mode-toggle'
+import { CheckerTouchHint } from '@features/checker-touch-hint/checker-touch-hint'
 import { CheckerRecordsSkeleton } from '@features/checker-skeleton/checker-records-skeleton'
 import { ChartRankSection } from '@features/chart-rank-section/chart-rank-section'
 import { useIdentityTransition } from '@shared/hooks/use-identity-transition'
 import { useAnonymousPreferences, saveAnonymousPreferences } from '@entities/preferences/anonymous-preferences.client'
+import { dismissCheckerTouchHint, useIsCheckerTouchHintVisible } from '@entities/preferences/checker-touch-hint.client'
 import { groupChartsByRank } from '@entities/catalog/catalog-ranks'
 import { compareSeriesVersions } from '@entities/catalog/catalog-series'
 import { ShellSidebarPortal } from '@widgets/app-shell/shell-sidebar-portal'
@@ -28,10 +31,12 @@ import { Button } from '@shared/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@shared/ui/dialog'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@shared/ui/empty'
 import { Progress } from '@shared/ui/progress'
+import { ScrollContainer } from '@shared/ui/scroll-container'
 import { SidebarTrigger } from '@shared/ui/sidebar'
 import { Skeleton } from '@shared/ui/skeleton'
 
 const LAMP_LOCKED_TOAST_ID = 'checker-lamp-locked'
+const TOOLBAR_ICON_BUTTON_CLASS_NAME = 'pointer-coarse:after:-inset-x-1'
 
 type Props = {
     initialUserId: string | null
@@ -44,6 +49,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
     const locale = useLocale()
     const anonymousPreferences = useAnonymousPreferences(initialAnonymousPreferences)
     const identityTransition = useIdentityTransition()
+    const isTouchHintVisible = useIsCheckerTouchHintVisible()
     const [displayDraft, setDisplayDraft] = useState<{
         userId: string | null
         preferences: DisplayPreferencesInput
@@ -114,6 +120,10 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
             return true
         })
         .toSorted((left, right) => left.title.localeCompare(right.title, 'ja'))
+    const activeFilterCount = [search.trim() !== '', difficulty !== 'all', version !== 'all', rank !== 'all', personalOnly, unplayedOnly].filter(
+        Boolean,
+    ).length
+    const isResultCountPending = isRecordsPending && unplayedOnly
     const rankSections = groupChartsByRank(filteredCharts, mode).map((section) => ({
         ...section,
         rank: section.rank ?? t('checker.noRank'),
@@ -144,6 +154,14 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
         if (value === 'all' || value === 'none' || RANKS.some((item) => item === value)) {
             setRank(value)
         }
+    }
+    const handleResetFilters = () => {
+        setSearch('')
+        setDifficulty('all')
+        setVersion('all')
+        setRank('all')
+        setPersonalOnly(false)
+        setUnplayedOnly(false)
     }
     const handleSaveRecord = (input: RecordInput) => {
         if (!isAuthenticated || checkerLoadFailed || isRecordsPending || isRecordsSaving) {
@@ -189,8 +207,6 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
     }
     const renderFilters = () => (
         <CheckerFilters
-            mode={mode}
-            onModeChange={setMode}
             search={search}
             onSearchChange={setSearch}
             difficulty={difficulty}
@@ -207,6 +223,8 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
             isRecordsPending={isRecordsPending}
             catalogCount={catalog.charts.length}
             resultCount={filteredCharts.length}
+            hasActiveFilters={activeFilterCount > 0}
+            onReset={handleResetFilters}
         />
     )
     const sidebarContent = (
@@ -323,17 +341,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
                         <EmptyTitle>{t('checker.emptyFilterTitle')}</EmptyTitle>
                         <EmptyDescription>{t('checker.emptyFilterDescription')}</EmptyDescription>
                     </EmptyHeader>
-                    <Button
-                        size='sm'
-                        variant='outline'
-                        onClick={() => {
-                            setSearch('')
-                            setDifficulty('all')
-                            setVersion('all')
-                            setRank('all')
-                            setPersonalOnly(false)
-                            setUnplayedOnly(false)
-                        }}>
+                    <Button size='sm' variant='outline' onClick={handleResetFilters}>
                         {t('checker.resetFilters')}
                     </Button>
                 </Empty>
@@ -374,6 +382,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
                         </div>
                     </div>
                     <div className='flex shrink-0 items-center gap-1'>
+                        <CheckerModeToggle value={mode} onValueChange={setMode} />
                         {isAuthenticated && (
                             <Button
                                 variant='ghost'
@@ -381,31 +390,51 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
                                 aria-label={t('checker.refreshRecords')}
                                 aria-busy={refreshChecker.isPending}
                                 disabled={refreshChecker.isPending || isRecordsPending}
+                                className={TOOLBAR_ICON_BUTTON_CLASS_NAME}
                                 onClick={() => refreshChecker.mutate()}>
                                 <RefreshCw />
                             </Button>
                         )}
                         <div className='hidden h-4 w-24 text-right text-xs tabular-nums text-muted-foreground sm:block'>
-                            {isRecordsPending && unplayedOnly ? (
-                                <Skeleton className='h-4 w-20' />
-                            ) : (
-                                t('checker.resultCount', { count: filteredCharts.length })
-                            )}
+                            {isResultCountPending ? <Skeleton className='h-4 w-20' /> : t('checker.resultCount', { count: filteredCharts.length })}
                         </div>
-                        <Button variant='ghost' size='icon-sm' aria-label={t('navigation.openFilters')} onClick={() => setIsFiltersOpen(true)}>
+                        <Button
+                            variant='ghost'
+                            size='icon-sm'
+                            aria-label={
+                                activeFilterCount > 0 ? t('checker.openFiltersActive', { count: activeFilterCount }) : t('navigation.openFilters')
+                            }
+                            className={TOOLBAR_ICON_BUTTON_CLASS_NAME}
+                            onClick={() => setIsFiltersOpen(true)}>
                             <SlidersHorizontal />
+                            {activeFilterCount > 0 && (
+                                <span
+                                    aria-hidden='true'
+                                    className='pointer-events-none absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center bg-primary px-0.5 text-2xs leading-none font-semibold tabular-nums text-primary-foreground'>
+                                    {activeFilterCount}
+                                </span>
+                            )}
                         </Button>
                         <Button
                             variant='ghost'
                             size='icon-sm'
                             aria-label={t('navigation.openDisplaySettings')}
+                            className={TOOLBAR_ICON_BUTTON_CLASS_NAME}
                             onClick={() => setIsSettingsOpen(true)}>
                             <Settings />
                         </Button>
                     </div>
                 </header>
 
-                <div className='checker-list-scroll'>
+                <ScrollContainer className='checker-list-scroll'>
+                    {isTouchHintVisible && catalog.charts.length > 0 && <CheckerTouchHint onDismiss={dismissCheckerTouchHint} />}
+                    <div className='flex h-8 items-center border-b border-border px-3 text-xs tabular-nums text-muted-foreground sm:hidden'>
+                        {isResultCountPending ? (
+                            <Skeleton className='h-4 w-36' />
+                        ) : (
+                            t('checker.resultSummary', { visible: filteredCharts.length, total: catalog.charts.length })
+                        )}
+                    </div>
                     {checkerLoadFailed && (
                         <Alert className='mb-2'>
                             <AlertTitle>{t('checker.recordLoadErrorTitle')}</AlertTitle>
@@ -419,7 +448,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
                     )}
 
                     {renderChartList()}
-                </div>
+                </ScrollContainer>
 
                 {selectedChart && isSessionAligned && !isRecordsPending && (
                     <ChartDetails
@@ -440,37 +469,41 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
                     />
                 )}
                 <Dialog open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
-                    <DialogContent className='max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md'>
-                        <DialogHeader>
-                            <DialogTitle>{t('checker.filtersTitle')}</DialogTitle>
-                            <DialogDescription>{t('checker.filtersDescription')}</DialogDescription>
-                        </DialogHeader>
-                        {renderFilters()}
+                    <DialogContent className='flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-md'>
+                        <ScrollContainer variant='always' className='grid content-start gap-4 p-4'>
+                            <DialogHeader>
+                                <DialogTitle>{t('checker.filtersTitle')}</DialogTitle>
+                                <DialogDescription>{t('checker.filtersDescription')}</DialogDescription>
+                            </DialogHeader>
+                            {renderFilters()}
+                        </ScrollContainer>
                     </DialogContent>
                 </Dialog>
                 <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-                    <DialogContent className='max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md'>
-                        <DialogHeader>
-                            <DialogTitle>{t('display.title')}</DialogTitle>
-                            <DialogDescription>{t('display.description')}</DialogDescription>
-                        </DialogHeader>
-                        {isPreferencesLoadFailed ? (
-                            <Alert>
-                                <AlertDescription>{t('display.loadError')}</AlertDescription>
-                                <Button size='sm' variant='outline' onClick={() => void preferencesQuery.refetch()}>
-                                    {t('common.retry')}
-                                </Button>
-                            </Alert>
-                        ) : (
-                            <DisplaySettings
-                                value={preferences}
-                                isLoading={isPreferencesPending}
-                                isSaving={savePreferences.isPending}
-                                isAuthenticated={isAuthenticated}
-                                onPreview={handlePreviewPreferences}
-                                onSave={handleSavePreferences}
-                            />
-                        )}
+                    <DialogContent className='flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-md'>
+                        <ScrollContainer variant='always' className='grid content-start gap-4 p-4'>
+                            <DialogHeader>
+                                <DialogTitle>{t('display.title')}</DialogTitle>
+                                <DialogDescription>{t('display.description')}</DialogDescription>
+                            </DialogHeader>
+                            {isPreferencesLoadFailed ? (
+                                <Alert>
+                                    <AlertDescription>{t('display.loadError')}</AlertDescription>
+                                    <Button size='sm' variant='outline' onClick={() => void preferencesQuery.refetch()}>
+                                        {t('common.retry')}
+                                    </Button>
+                                </Alert>
+                            ) : (
+                                <DisplaySettings
+                                    value={preferences}
+                                    isLoading={isPreferencesPending}
+                                    isSaving={savePreferences.isPending}
+                                    isAuthenticated={isAuthenticated}
+                                    onPreview={handlePreviewPreferences}
+                                    onSave={handleSavePreferences}
+                                />
+                            )}
+                        </ScrollContainer>
                     </DialogContent>
                 </Dialog>
                 <AuthDialogWidget open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />

@@ -18,6 +18,7 @@ export const BOARD_POST_RATE_LIMIT_MAX = 5
 export const BOARD_COMMENT_RATE_LIMIT_MAX = 20
 export const RICH_TEXT_MAX_BYTES = RICH_TEXT_MAX_KILOBYTES * BYTES_PER_KILOBYTE
 export const RICH_TEXT_MAX_IMAGES = 20
+export const RICH_TEXT_IMAGE_ALT_MAX_LENGTH = 200
 export const BOARD_POST_MAX_REQUEST_BYTES = RICH_TEXT_MAX_BYTES + POST_REQUEST_OVERHEAD_KILOBYTES * BYTES_PER_KILOBYTE
 
 export const BoardPostKindSchema = z.enum(BOARD_POST_KINDS)
@@ -26,6 +27,8 @@ export const BOARD_POST_KIND = { NOTICE: 'notice', GENERAL: 'general' } as const
 
 export const BoardIdSchema = z.uuid()
 export const BoardPageQuerySchema = z.object({ page: z.coerce.number().int().positive().default(1) })
+export const BOARD_COMMENTS_PAGE_PARAM = 'comments'
+export const BoardCommentsPageSchema = z.coerce.number().int().positive().catch(1)
 
 export const AuthorSchema = UserSummarySchema
 export type Author = z.infer<typeof AuthorSchema>

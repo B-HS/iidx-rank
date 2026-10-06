@@ -3,6 +3,7 @@ import type { FC } from 'react'
 import { useTranslations } from 'next-intl'
 import { useViewerIdentity } from '@entities/auth/use-viewer-identity'
 import { getBoardErrorKey } from '@entities/board/board-error'
+import { BOARD_POST_KIND } from '@entities/board/board.dto'
 import { useBoardPost, useUpdatePost } from '@entities/board/board.query'
 import { Link, useRouter } from '@shared/i18n/navigation'
 import { getApiErrorCode } from '@shared/lib/api-client'
@@ -62,8 +63,9 @@ export const BoardPostEdit: FC<BoardPostEditProps> = ({ postId, initialUserId })
     return (
         <BoardPostForm
             defaultValues={{ kind: post.kind, title: post.title, content: post.content }}
-            canSelectKind={false}
+            kindField={post.kind === BOARD_POST_KIND.NOTICE ? 'readOnly' : 'hidden'}
             isSubmitting={updatePost.isPending || updatePost.isSuccess}
+            isSaved={updatePost.isSuccess}
             errorMessage={updatePost.error ? t(getBoardErrorKey(getApiErrorCode(updatePost.error)) ?? 'board.postUpdateError') : undefined}
             submitLabel={t('board.postUpdateSubmit')}
             submittingLabel={t('board.postSubmitting')}

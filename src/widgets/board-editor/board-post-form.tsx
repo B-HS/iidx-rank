@@ -16,9 +16,10 @@ import {
 } from '@entities/board/board.dto'
 import { uploadImage } from '@entities/file/file.api'
 import { FILE_UPLOAD_RULES, FILE_URL_PREFIX, type FilePurpose } from '@entities/file/file.dto'
+import { BoardCancelButton } from '@features/board-cancel-button/board-cancel-button'
 import { getRichTextImageSources, isRichTextEmpty } from '@features/rich-text-editor/rich-text-document'
 import { RichTextEditor } from '@features/rich-text-editor/rich-text-editor'
-import { Link } from '@shared/i18n/navigation'
+import { useUnsavedChangesWarning } from '@shared/hooks/use-unsaved-changes-warning'
 import { getApiErrorCode } from '@shared/lib/api-client'
 import { Badge } from '@shared/ui/badge'
 import { Button } from '@shared/ui/button'
@@ -29,8 +30,9 @@ import { ToggleGroup, ToggleGroupItem } from '@shared/ui/toggle-group'
 
 type BoardPostFormProps = {
     defaultValues: PostCreateInput
-    canSelectKind: boolean
+    kindField: 'select' | 'readOnly' | 'hidden'
     isSubmitting: boolean
+    isSaved: boolean
     errorMessage: string | undefined
     submitLabel: string
     submittingLabel: string
@@ -53,6 +55,8 @@ const TITLE_FIELD_ID = 'board-post-title'
 const TITLE_ERROR_ID = 'board-post-title-error'
 const KIND_LABEL_ID = 'board-post-kind-label'
 const CONTENT_LABEL_ID = 'board-post-content-label'
+const CONTENT_HINT_ID = 'board-post-content-hint'
+const CONTENT_ERROR_ID = 'board-post-content-error'
 const TOO_LONG_ERROR_TYPE = 'too_big'
 const IMAGE_UPLOAD_ERROR_TOAST_ID = 'board-image-upload-error'
 const UPLOAD_ERROR_REJECT_REASONS = new Map<string, ImageRejectReason>([
@@ -62,8 +66,9 @@ const UPLOAD_ERROR_REJECT_REASONS = new Map<string, ImageRejectReason>([
 
 export const BoardPostForm: FC<BoardPostFormProps> = ({
     defaultValues,
-    canSelectKind,
+    kindField,
     isSubmitting,
+    isSaved,
     errorMessage,
     submitLabel,
     submittingLabel,
@@ -84,6 +89,7 @@ export const BoardPostForm: FC<BoardPostFormProps> = ({
     const contentError = form.formState.errors.content
     const contentErrorMessage = typeof contentError?.message === 'string' ? contentError.message : undefined
     const isUploading = uploadingCount > 0
+    const hasUnsavedChanges = form.formState.isDirty && !isSaved
     const imageRejectMessages: Record<ImageRejectReason, string> = {
         type: t('board.imageTypeError'),
         size: t('board.imageSizeError', { megabytes: BOARD_IMAGE_RULES.maxBytes / BYTES_PER_MEGABYTE }),
@@ -112,37 +118,41 @@ export const BoardPostForm: FC<BoardPostFormProps> = ({
         if (kind.success) onChange(kind.data)
     }
 
+    useUnsavedChangesWarning(hasUnsavedChanges)
+
     return (
         <form className='grid w-full max-w-3xl min-w-0 gap-4 p-3' noValidate onSubmit={form.handleSubmit(onSubmit)}>
-            <div className='grid min-w-0 gap-1.5'>
-                <span id={KIND_LABEL_ID} className='text-sm leading-none font-medium'>
-                    {t('board.kindLabel')}
-                </span>
-                {canSelectKind ? (
-                    <Controller
-                        control={form.control}
-                        name='kind'
-                        render={({ field }) => (
-                            <ToggleGroup
-                                type='single'
-                                variant='outline'
-                                size='sm'
-                                spacing={0}
-                                aria-labelledby={KIND_LABEL_ID}
-                                value={field.value}
-                                disabled={isSubmitting}
-                                onValueChange={(value) => handleKindChange(value, field.onChange)}>
-                                <ToggleGroupItem value={BOARD_POST_KIND.GENERAL}>{t('board.kindGeneral')}</ToggleGroupItem>
-                                <ToggleGroupItem value={BOARD_POST_KIND.NOTICE}>{t('board.kindNotice')}</ToggleGroupItem>
-                            </ToggleGroup>
-                        )}
-                    />
-                ) : (
-                    <Badge variant='secondary'>
-                        {defaultValues.kind === BOARD_POST_KIND.NOTICE ? t('board.kindNotice') : t('board.kindGeneral')}
-                    </Badge>
-                )}
-            </div>
+            {kindField !== 'hidden' && (
+                <div className='grid min-w-0 gap-1.5'>
+                    <span id={KIND_LABEL_ID} className='text-sm leading-none font-medium'>
+                        {t('board.kindLabel')}
+                    </span>
+                    {kindField === 'select' ? (
+                        <Controller
+                            control={form.control}
+                            name='kind'
+                            render={({ field }) => (
+                                <ToggleGroup
+                                    type='single'
+                                    variant='outline'
+                                    size='sm'
+                                    spacing={0}
+                                    aria-labelledby={KIND_LABEL_ID}
+                                    value={field.value}
+                                    disabled={isSubmitting}
+                                    onValueChange={(value) => handleKindChange(value, field.onChange)}>
+                                    <ToggleGroupItem value={BOARD_POST_KIND.GENERAL}>{t('board.kindGeneral')}</ToggleGroupItem>
+                                    <ToggleGroupItem value={BOARD_POST_KIND.NOTICE}>{t('board.kindNotice')}</ToggleGroupItem>
+                                </ToggleGroup>
+                            )}
+                        />
+                    ) : (
+                        <Badge variant='secondary'>
+                            {defaultValues.kind === BOARD_POST_KIND.NOTICE ? t('board.kindNotice') : t('board.kindGeneral')}
+                        </Badge>
+                    )}
+                </div>
+            )}
             <div className='grid min-w-0 gap-1.5'>
                 <div className='flex min-w-0 items-center justify-between gap-2'>
                     <Label htmlFor={TITLE_FIELD_ID}>{t('board.titleLabel')}</Label>
@@ -181,6 +191,7 @@ export const BoardPostForm: FC<BoardPostFormProps> = ({
                             isDisabled={isSubmitting}
                             isInvalid={Boolean(contentError)}
                             isUploading={isUploading}
+                            describedBy={contentError ? `${CONTENT_HINT_ID} ${CONTENT_ERROR_ID}` : CONTENT_HINT_ID}
                             imageRules={EDITOR_IMAGE_RULES}
                             onChange={field.onChange}
                             onImageUpload={handleImageUpload}
@@ -188,16 +199,14 @@ export const BoardPostForm: FC<BoardPostFormProps> = ({
                         />
                     )}
                 />
-                <p className='text-xs text-muted-foreground'>
+                <p id={CONTENT_HINT_ID} className='text-xs text-muted-foreground'>
                     {t('board.imageHint', { megabytes: BOARD_IMAGE_RULES.maxBytes / BYTES_PER_MEGABYTE, max: RICH_TEXT_MAX_IMAGES })}
                 </p>
-                <FieldError>{contentErrorMessage}</FieldError>
+                <FieldError id={CONTENT_ERROR_ID}>{contentErrorMessage}</FieldError>
             </div>
             <FieldError>{errorMessage}</FieldError>
             <div className='flex min-w-0 items-center justify-end gap-2'>
-                <Button variant='ghost' size='sm' asChild>
-                    <Link href={cancelHref}>{t('common.cancel')}</Link>
-                </Button>
+                <BoardCancelButton href={cancelHref} hasUnsavedChanges={hasUnsavedChanges} />
                 <Button type='submit' size='sm' disabled={isSubmitting || isUploading}>
                     {isSubmitting ? submittingLabel : submitLabel}
                 </Button>

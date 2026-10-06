@@ -1,5 +1,6 @@
 'use client'
 import { type FC, useEffect, useEffectEvent, useState } from 'react'
+import { findChildren } from '@tiptap/core'
 import { FileHandler } from '@tiptap/extension-file-handler'
 import { EditorContent, useEditor } from '@tiptap/react'
 import { useTranslations } from 'next-intl'
@@ -8,7 +9,8 @@ import { RICH_TEXT_EXTENSIONS } from '@entities/board/rich-text.extensions'
 import { RICH_TEXT_TYPOGRAPHY_CLASS_NAME } from '@features/rich-text-content/rich-text-typography'
 import { createEventChannel } from '@features/rich-text-editor/create-event-channel'
 import { hasPastedText, keepAllowedImages } from '@features/rich-text-editor/pasted-html'
-import { getRichTextImageSources } from '@features/rich-text-editor/rich-text-document'
+import { getRichTextImageSources, IMAGE_NODE_TYPE } from '@features/rich-text-editor/rich-text-document'
+import { RichTextHeadingView } from '@features/rich-text-editor/rich-text-heading-view'
 import { RichTextToolbar } from '@features/rich-text-editor/rich-text-toolbar'
 import { cn } from '@shared/lib/utils'
 
@@ -29,6 +31,7 @@ type RichTextEditorProps = {
     onChange: (content: RichTextContent) => void
     onImageUpload: (file: File) => Promise<string | null>
     onImageReject: (reason: NonNullable<ReturnType<typeof getImageRejectReason>>) => void
+    describedBy?: string
 }
 
 type ReceivedFiles = {
@@ -37,7 +40,7 @@ type ReceivedFiles = {
     position: number | null
 }
 
-const IMAGE_NODE_TYPE = 'image'
+const EMPTY_IMAGE_ALT = ''
 const EDITOR_FRAME_CLASS_NAME = 'min-w-0 border border-input bg-card'
 const EDITOR_BODY_CLASS_NAME = 'min-h-64 p-3'
 const EDITOR_CONTENT_CLASS_NAME = `${RICH_TEXT_TYPOGRAPHY_CLASS_NAME} ${EDITOR_BODY_CLASS_NAME} outline-none [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-ring`
@@ -60,10 +63,12 @@ export const RichTextEditor: FC<RichTextEditorProps> = ({
     onChange,
     onImageUpload,
     onImageReject,
+    describedBy,
 }) => {
     const [receivedFiles] = useState(() => createEventChannel<ReceivedFiles>())
     const [extensions] = useState(() => [
         ...RICH_TEXT_EXTENSIONS,
+        RichTextHeadingView,
         FileHandler.configure({
             onPaste: (_editor, files, html) => receivedFiles.emit({ files, html, position: null }),
             onDrop: (_editor, files, position) => receivedFiles.emit({ files, html: undefined, position }),
@@ -80,47 +85,60 @@ export const RichTextEditor: FC<RichTextEditorProps> = ({
                 'aria-multiline': 'true',
                 'aria-label': label,
                 'aria-invalid': String(isInvalid),
+                ...(describedBy ? { 'aria-describedby': describedBy } : {}),
                 class: EDITOR_CONTENT_CLASS_NAME,
             },
             transformPastedHTML: (html) => keepAllowedImages(html, imageRules.sourcePrefix),
         },
         onUpdate: ({ editor: updatedEditor }) => onChange(updatedEditor.getJSON()),
     })
-    const insertImage = async (file: File, position: number | null) => {
-        if (!editor || editor.isDestroyed) return
+    const insertImage = async (file: File, position: number | null, shouldFocusEditor: boolean) => {
+        if (!editor || editor.isDestroyed) return null
 
         const rejectReason = getImageRejectReason(file, getRichTextImageSources(editor.getJSON()).length, imageRules)
 
         if (rejectReason) {
             onImageReject(rejectReason)
-            return
+            return null
         }
 
         const source = await onImageUpload(file)
 
-        if (source === null || editor.isDestroyed) return
+        if (source === null || editor.isDestroyed) return null
 
-        if (position === null) {
-            editor.chain().focus().setImage({ src: source }).run()
-            return
-        }
+        const attributes = { src: source, alt: EMPTY_IMAGE_ALT }
+        const chain = shouldFocusEditor ? editor.chain().focus() : editor.chain()
+        const isInserted =
+            position === null
+                ? chain.setImage(attributes).run()
+                : chain.insertContentAt(Math.min(position, editor.state.doc.content.size), { type: IMAGE_NODE_TYPE, attrs: attributes }).run()
 
-        editor
-            .chain()
-            .focus()
-            .insertContentAt(Math.min(position, editor.state.doc.content.size), { type: IMAGE_NODE_TYPE, attrs: { src: source } })
-            .run()
+        return isInserted ? source : null
     }
-    const insertImages = async (files: File[], position: number | null) => {
-        if (isDisabled) return
+    const insertImages = async (files: File[], position: number | null, shouldFocusEditor: boolean) => {
+        if (isDisabled) return []
 
-        for (const [index, file] of files.entries()) await insertImage(file, index === 0 ? position : null)
+        return files.reduce<Promise<string[]>>(async (pendingSources, file, index) => {
+            const sources = await pendingSources
+            const source = await insertImage(file, index === 0 ? position : null, shouldFocusEditor)
+
+            return source === null ? sources : [...sources, source]
+        }, Promise.resolve([]))
+    }
+    const insertImagesAndSelectLast = async (files: File[]) => {
+        const lastSource = (await insertImages(files, null, false)).at(-1)
+
+        if (!editor || editor.isDestroyed || lastSource === undefined) return false
+
+        const [insertedImage] = findChildren(editor.state.doc, (node) => node.type.name === IMAGE_NODE_TYPE && node.attrs.src === lastSource)
+
+        return insertedImage !== undefined && editor.commands.setNodeSelection(insertedImage.pos)
     }
 
     const handleReceivedFiles = useEffectEvent(({ files, html, position }: ReceivedFiles) => {
         if (html && hasPastedText(html)) return
 
-        void insertImages(files, position)
+        void insertImages(files, position, true)
     })
 
     useEffect(() => receivedFiles.subscribe((received) => handleReceivedFiles(received)), [receivedFiles])
@@ -148,7 +166,7 @@ export const RichTextEditor: FC<RichTextEditorProps> = ({
                 editor={editor}
                 isDisabled={isDisabled}
                 imageAccept={imageRules.mimeTypes.join(',')}
-                onImageFiles={(files) => void insertImages(files, null)}
+                onImageFiles={insertImagesAndSelectLast}
             />
             <EditorContent editor={editor} />
             {isUploading && (

@@ -6,6 +6,10 @@ export const CHART_LONG_PRESS_MS = 550
 export const CHART_PRESS_MOVE_TOLERANCE_PX = 10
 export const CHART_LAMP_WIDTH_PX = 5
 export const CHART_LAMP_BLINK_DURATION_MS = 600
+export const COARSE_POINTER_MEDIA_QUERY = '(pointer: coarse)'
+export const CHECKER_TOUCH_HINT_STORAGE_KEY = 'iidx:checker-touch-hint:v1'
+export const CHECKER_TOUCH_HINT_DISMISSED_VALUE = 'dismissed'
+export const CHECKER_TOUCH_HINT_CHANGE_EVENT = 'iidx-checker-touch-hint-change'
 export const CHART_EMPTY_CELL_LAYOUTS = [
     { columns: 3, className: 'block sm:hidden' },
     { columns: 4, className: 'hidden sm:block lg:hidden' },

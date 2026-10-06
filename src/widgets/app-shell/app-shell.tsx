@@ -11,6 +11,7 @@ import { useMyProfile } from '@entities/profile/profile.query'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
 import { LOCALE_OPTIONS } from '@shared/constants/locale'
 import {
+    SHELL_FOOTER_COLLAPSED_HEIGHT_PX,
     SHELL_RAIL_CHROME_HEIGHT_PX,
     SHELL_SIDEBAR_COLLAPSED_WIDTH_PX,
     SHELL_SIDEBAR_MOBILE_WIDTH_PX,
@@ -23,13 +24,9 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuPortal,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuSeparator,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@shared/ui/dropdown-menu'
 import {
@@ -43,38 +40,40 @@ import {
     SidebarMenuItem,
     SidebarProvider,
     SidebarTrigger,
+    useSidebar,
 } from '@shared/ui/sidebar'
+import { ScrollIndicator } from '@shared/ui/scroll-indicator'
 import { Skeleton } from '@shared/ui/skeleton'
 import { TooltipProvider } from '@shared/ui/tooltip'
 import { SHELL_PRIMARY_NAV_ITEMS, SHELL_SECONDARY_NAV_ITEMS } from '@widgets/app-shell/shell-nav'
 import { ShellNavMenu } from '@widgets/app-shell/shell-nav-menu'
 import { RecentUsers } from '@widgets/recent-users/recent-users'
 type LanguageMenuProps = {
-    isPending: boolean
     startTransition: TransitionStartFunction
 }
 const FOOTER_MENU_ITEM_CLASS_NAME = 'flex h-full min-w-0 items-center'
-const FOOTER_MENU_BUTTON_CLASS_NAME =
-    'h-full justify-center rounded-none px-3 group-data-[collapsible=icon]:h-12! group-data-[collapsible=icon]:w-full! group-data-[collapsible=icon]:p-0!'
+const FOOTER_MENU_BUTTON_BASE_CLASS_NAME =
+    'h-full justify-center rounded-none group-data-[collapsible=icon]:h-(--shell-footer-row-height)! group-data-[collapsible=icon]:w-full! group-data-[collapsible=icon]:p-0!'
+const FOOTER_ICON_BUTTON_CLASS_NAME = FOOTER_MENU_BUTTON_BASE_CLASS_NAME + ' w-(--sidebar-width-icon) p-0'
+const FOOTER_TEXT_BUTTON_CLASS_NAME = FOOTER_MENU_BUTTON_BASE_CLASS_NAME + ' px-3'
 const ThemeControl: FC = () => {
     const t = useTranslations()
     const { resolvedTheme, setTheme } = useTheme()
+    const { isMobile, state } = useSidebar()
     return (
         <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
             <SidebarMenuButton
-                className={FOOTER_MENU_BUTTON_CLASS_NAME}
+                className={FOOTER_ICON_BUTTON_CLASS_NAME}
                 aria-label={t('navigation.theme')}
-                tooltip={t('navigation.theme')}
+                tooltip={{ children: t('navigation.theme'), hidden: isMobile, side: state === 'collapsed' ? 'right' : 'top' }}
                 onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}>
                 <Sun className='hidden dark:block' />
                 <Moon className='dark:hidden' />
-                <span className='min-w-0 flex-1 truncate text-left group-data-[collapsible=icon]:hidden'>{t('navigation.theme')}</span>
             </SidebarMenuButton>
         </SidebarMenuItem>
     )
 }
-const LanguageMenu: FC<LanguageMenuProps> = ({ isPending, startTransition }) => {
-    const t = useTranslations()
+const LanguageMenu: FC<LanguageMenuProps> = ({ startTransition }) => {
     const locale = useLocale()
     const router = useRouter()
     const pathname = usePathname()
@@ -85,29 +84,42 @@ const LanguageMenu: FC<LanguageMenuProps> = ({ isPending, startTransition }) => 
         startTransition(() => router.replace(searchParams.size > 0 ? { pathname, query } : pathname, { locale: value }))
     }
     return (
-        <DropdownMenuSub>
-            <DropdownMenuSubTrigger disabled={isPending}>
-                <Languages />
-                {t('navigation.language')}
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                    <DropdownMenuRadioGroup value={locale} onValueChange={handleLocaleChange}>
-                        {LOCALE_OPTIONS.map((option) => (
-                            <DropdownMenuRadioItem key={option.value} value={option.value}>
-                                {option.label}
-                            </DropdownMenuRadioItem>
-                        ))}
-                    </DropdownMenuRadioGroup>
-                </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-        </DropdownMenuSub>
+        <DropdownMenuRadioGroup value={locale} onValueChange={handleLocaleChange}>
+            {LOCALE_OPTIONS.map((option) => (
+                <DropdownMenuRadioItem key={option.value} value={option.value}>
+                    {option.label}
+                </DropdownMenuRadioItem>
+            ))}
+        </DropdownMenuRadioGroup>
+    )
+}
+const LanguageControl: FC = () => {
+    const t = useTranslations()
+    const locale = useLocale()
+    const [isLocalePending, startLocaleTransition] = useTransition()
+    const currentLanguage = new Intl.DisplayNames([locale], { type: 'language' }).of(locale) ?? locale
+    return (
+        <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild disabled={isLocalePending}>
+                    <SidebarMenuButton
+                        className={FOOTER_TEXT_BUTTON_CLASS_NAME}
+                        aria-label={t('navigation.languageCurrent', { language: currentLanguage })}
+                        tooltip={t('navigation.language')}>
+                        <Languages />
+                        <span className='min-w-0 truncate group-data-[collapsible=icon]:hidden'>{currentLanguage}</span>
+                    </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align='start' side='top' className='w-44'>
+                    <LanguageMenu startTransition={startLocaleTransition} />
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </SidebarMenuItem>
     )
 }
 const AccountControl: FC = () => {
     const t = useTranslations()
     const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
-    const [isLocalePending, startLocaleTransition] = useTransition()
     const identityTransition = useIdentityTransition()
     const { data: session, isPending } = authClient.useSession()
     const myProfileQuery = useMyProfile(Boolean(session?.user))
@@ -125,10 +137,11 @@ const AccountControl: FC = () => {
             toast.error(t('auth.signOutError'))
         }
     }
+    const isSessionLoading = isPending || identityTransition.isPending
     const displayName = session?.user.name ?? session?.user.email ?? t('navigation.accountMenu')
     return (
         <SidebarMenuItem className={FOOTER_MENU_ITEM_CLASS_NAME}>
-            {isPending || identityTransition.isPending ? (
+            {isSessionLoading && (
                 <div
                     role='status'
                     aria-label={t('auth.loadingSession')}
@@ -137,11 +150,23 @@ const AccountControl: FC = () => {
                     <Skeleton className='size-4' />
                     <Skeleton className='h-3 min-w-0 flex-1 group-data-[collapsible=icon]:hidden' />
                 </div>
-            ) : (
+            )}
+            {!isSessionLoading && !session?.user && (
+                <SidebarMenuButton
+                    className={FOOTER_TEXT_BUTTON_CLASS_NAME}
+                    aria-label={t('navigation.signIn')}
+                    aria-haspopup='dialog'
+                    tooltip={t('navigation.signIn')}
+                    onClick={() => setIsAuthDialogOpen(true)}>
+                    <LogIn />
+                    <span className='min-w-0 flex-1 truncate text-left group-data-[collapsible=icon]:hidden'>{t('navigation.signIn')}</span>
+                </SidebarMenuButton>
+            )}
+            {!isSessionLoading && session?.user && (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
-                            className={FOOTER_MENU_BUTTON_CLASS_NAME}
+                            className={FOOTER_TEXT_BUTTON_CLASS_NAME}
                             aria-label={t('navigation.accountMenu')}
                             tooltip={t('navigation.accountMenu')}>
                             <UserRound />
@@ -151,43 +176,32 @@ const AccountControl: FC = () => {
                     <DropdownMenuContent align='end' side='top' className='w-60'>
                         <DropdownMenuLabel className='grid gap-0.5'>
                             <span className='truncate'>{displayName}</span>
-                            <span className='truncate text-xs font-normal text-muted-foreground'>{session?.user.email ?? t('navigation.guest')}</span>
+                            <span className='truncate text-xs font-normal text-muted-foreground'>{session.user.email}</span>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        {session?.user && myHandle && (
+                        {myHandle ? (
                             <DropdownMenuItem asChild>
                                 <Link href={`/u/${myHandle}`}>
                                     <CircleUserRound />
                                     {t('navigation.myPage')}
                                 </Link>
                             </DropdownMenuItem>
-                        )}
-                        {session?.user && !myHandle && (
+                        ) : (
                             <DropdownMenuItem disabled>
                                 <CircleUserRound />
                                 {t('navigation.myPage')}
                             </DropdownMenuItem>
                         )}
-                        {session?.user && (
-                            <DropdownMenuItem asChild>
-                                <Link href='/settings'>
-                                    <UserRoundPen />
-                                    {t('navigation.profileSettings')}
-                                </Link>
-                            </DropdownMenuItem>
-                        )}
-                        <LanguageMenu isPending={isLocalePending} startTransition={startLocaleTransition} />
-                        {session?.user ? (
-                            <DropdownMenuItem onSelect={() => void handleSignOut()}>
-                                <LogOut />
-                                {t('navigation.signOut')}
-                            </DropdownMenuItem>
-                        ) : (
-                            <DropdownMenuItem onSelect={() => setIsAuthDialogOpen(true)}>
-                                <LogIn />
-                                {t('navigation.signIn')}
-                            </DropdownMenuItem>
-                        )}
+                        <DropdownMenuItem asChild>
+                            <Link href='/settings'>
+                                <UserRoundPen />
+                                {t('navigation.profileSettings')}
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => void handleSignOut()}>
+                            <LogOut />
+                            {t('navigation.signOut')}
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             )}
@@ -222,16 +236,29 @@ export const AppShell: FC<PropsWithChildren> = ({ children }) => {
                                 </Link>
                             </SidebarHeader>
                             <SidebarContent className='min-h-0 p-0'>
-                                <ShellNavMenu items={SHELL_PRIMARY_NAV_ITEMS} />
-                                <div ref={setSidebarSlotElement} className='min-w-0 group-data-[collapsible=icon]:hidden' />
-                                <div className='min-w-0 group-data-[collapsible=icon]:hidden'>
-                                    <RecentUsers />
-                                </div>
-                                <ShellNavMenu items={SHELL_SECONDARY_NAV_ITEMS} />
+                                <nav aria-label={t('navigation.primaryNav')} className='min-w-0'>
+                                    <ShellNavMenu items={SHELL_PRIMARY_NAV_ITEMS} />
+                                    <div className='min-w-0 group-data-[collapsible=icon]:hidden'>
+                                        <RecentUsers />
+                                    </div>
+                                    <ShellNavMenu items={SHELL_SECONDARY_NAV_ITEMS} />
+                                </nav>
+                                <div
+                                    ref={setSidebarSlotElement}
+                                    className='min-w-0 border-y border-border empty:hidden group-data-[collapsible=icon]:hidden'
+                                />
                             </SidebarContent>
-                            <SidebarFooter className='h-12 shrink-0 gap-0 bg-sidebar p-0 group-data-[collapsible=icon]:h-24'>
-                                <SidebarMenu className='grid h-full grid-cols-2 items-stretch gap-0 group-data-[collapsible=icon]:grid-cols-1'>
+                            <SidebarFooter
+                                className='h-(--shell-footer-row-height) shrink-0 gap-0 bg-sidebar p-0 group-data-[collapsible=icon]:h-(--shell-footer-collapsed-height)'
+                                style={
+                                    {
+                                        '--shell-footer-row-height': SHELL_RAIL_CHROME_HEIGHT_PX + 'px',
+                                        '--shell-footer-collapsed-height': SHELL_FOOTER_COLLAPSED_HEIGHT_PX + 'px',
+                                    } as CSSProperties
+                                }>
+                                <SidebarMenu className='grid h-full grid-cols-[auto_auto_minmax(0,1fr)] items-stretch gap-0 group-data-[collapsible=icon]:auto-rows-fr group-data-[collapsible=icon]:grid-cols-1'>
                                     <ThemeControl />
+                                    <LanguageControl />
                                     <AccountControl />
                                 </SidebarMenu>
                             </SidebarFooter>
@@ -243,6 +270,7 @@ export const AppShell: FC<PropsWithChildren> = ({ children }) => {
                         </SidebarInset>
                     </div>
                 </ShellSidebarSlotContext.Provider>
+                <ScrollIndicator className='md:hidden' />
             </SidebarProvider>
         </TooltipProvider>
     )

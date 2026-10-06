@@ -1,5 +1,6 @@
 'use client'
-import { type ChangeEvent, type FC, Fragment, useRef } from 'react'
+import { type ChangeEvent, type FC, Fragment, useRef, useState } from 'react'
+import { NodeSelection } from '@tiptap/pm/state'
 import { useEditorState, type Editor } from '@tiptap/react'
 import {
     Bold,
@@ -18,9 +19,12 @@ import {
     Undo2,
     Unlink,
 } from 'lucide-react'
+import { Toolbar } from 'radix-ui'
 import { useTranslations, type Messages } from 'next-intl'
 import type { ChainedCommands } from '@tiptap/core'
 import { RICH_TEXT_HEADING_LEVELS } from '@entities/board/rich-text.extensions'
+import { IMAGE_NODE_TYPE } from '@features/rich-text-editor/rich-text-document'
+import { RichTextImageAltPopover } from '@features/rich-text-editor/rich-text-image-alt-popover'
 import { RichTextLinkPopover } from '@features/rich-text-editor/rich-text-link-popover'
 import { RichTextToolbarButton } from '@features/rich-text-editor/rich-text-toolbar-button'
 import { Separator } from '@shared/ui/separator'
@@ -29,7 +33,7 @@ type RichTextToolbarProps = {
     editor: Editor
     isDisabled: boolean
     imageAccept: string
-    onImageFiles: (files: File[]) => void
+    onImageFiles: (files: File[]) => Promise<boolean>
 }
 
 type ToggleAction = {
@@ -124,18 +128,23 @@ const TOOLBAR_SEPARATOR_CLASS_NAME = 'mx-1 h-5 data-vertical:self-center'
 
 export const RichTextToolbar: FC<RichTextToolbarProps> = ({ editor, isDisabled, imageAccept, onImageFiles }) => {
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const [isImageAltOpen, setIsImageAltOpen] = useState(false)
     const t = useTranslations('board')
     const toolbarState = useEditorState({
         editor,
         selector: ({ editor: currentEditor }) => {
             const linkHref: unknown = currentEditor.getAttributes(LINK_MARK_NAME).href
+            const imageAlt: unknown = currentEditor.getAttributes(IMAGE_NODE_TYPE).alt
+            const { selection } = currentEditor.state
 
             return {
                 activeActionIds: TOGGLE_ACTION_GROUPS.flatMap((group) => group.actions)
                     .filter((action) => action.isActive(currentEditor))
                     .map((action) => action.id),
                 linkHref: currentEditor.isActive(LINK_MARK_NAME) && typeof linkHref === 'string' ? linkHref : null,
-                isSelectionEmpty: currentEditor.state.selection.empty,
+                isSelectionEmpty: selection.empty,
+                isImageSelected: selection instanceof NodeSelection && selection.node.type.name === IMAGE_NODE_TYPE,
+                imageAlt: typeof imageAlt === 'string' ? imageAlt : '',
                 canUndo: currentEditor.can().undo(),
                 canRedo: currentEditor.can().redo(),
             }
@@ -153,17 +162,20 @@ export const RichTextToolbar: FC<RichTextToolbarProps> = ({ editor, isDisabled, 
 
         editor.chain().focus().extendMarkRange(LINK_MARK_NAME).setLink({ href }).run()
     }
-    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const handleImageAltApply = (alt: string) => {
+        editor.chain().updateAttributes(IMAGE_NODE_TYPE, { alt }).run()
+        setIsImageAltOpen(false)
+    }
+    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const files = [...(event.target.files ?? [])]
 
         event.target.value = ''
 
-        if (files.length > 0) onImageFiles(files)
+        if (files.length > 0 && (await onImageFiles(files))) setIsImageAltOpen(true)
     }
 
     return (
-        <div
-            role='toolbar'
+        <Toolbar.Root
             aria-label={t('editorToolbar')}
             className='sticky top-(--rail-chrome-height) z-(--z-rail) flex min-w-0 flex-wrap items-center gap-0.5 border-b border-border bg-card p-1 md:top-0'>
             {TOGGLE_ACTION_GROUPS.map((group) => (
@@ -197,7 +209,14 @@ export const RichTextToolbar: FC<RichTextToolbarProps> = ({ editor, isDisabled, 
                 hidden
                 tabIndex={-1}
                 aria-label={t('editorImage')}
-                onChange={handleFileChange}
+                onChange={(event) => void handleFileChange(event)}
+            />
+            <RichTextImageAltPopover
+                currentAlt={toolbarState.imageAlt}
+                isDisabled={isDisabled || !toolbarState.isImageSelected}
+                isOpen={isImageAltOpen}
+                onOpenChange={setIsImageAltOpen}
+                onApply={handleImageAltApply}
             />
             <Separator orientation='vertical' className={TOOLBAR_SEPARATOR_CLASS_NAME} />
             <RichTextToolbarButton
@@ -212,6 +231,6 @@ export const RichTextToolbar: FC<RichTextToolbarProps> = ({ editor, isDisabled, 
                 isDisabled={isDisabled || !toolbarState.canRedo}
                 onSelect={() => editor.chain().focus().redo().run()}
             />
-        </div>
+        </Toolbar.Root>
     )
 }

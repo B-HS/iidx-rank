@@ -3,6 +3,8 @@ import type { Messages } from 'next-intl'
 import { UserPageOverviewTab } from '@widgets/user-page/user-page-overview-tab'
 import { UserPageRecordsTab } from '@widgets/user-page/user-page-records-tab'
 
+export const USER_PAGE_TAB_QUERY_PARAM = 'tab'
+
 export type UserPageTabProps = {
     handle: string
 }

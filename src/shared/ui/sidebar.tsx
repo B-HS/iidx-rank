@@ -8,6 +8,7 @@ import { cn } from '@shared/lib/utils'
 import { useIsMobile } from '@shared/hooks/use-mobile'
 import { Button } from '@shared/ui/button'
 import { Input } from '@shared/ui/input'
+import { ScrollContainer } from '@shared/ui/scroll-container'
 import { Separator } from '@shared/ui/separator'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@shared/ui/sheet'
 import { Skeleton } from '@shared/ui/skeleton'
@@ -265,10 +266,12 @@ const SidebarSeparator = ({ className, ...props }: React.ComponentProps<typeof S
 }
 const SidebarContent = ({ className, ...props }: React.ComponentProps<'div'>) => {
     return (
-        <div
+        <ScrollContainer
+            variant='always'
             data-slot='sidebar-content'
             data-sidebar='content'
-            className={cn('no-scrollbar flex min-h-0 flex-1 flex-col gap-0 overflow-auto group-data-[collapsible=icon]:overflow-hidden', className)}
+            indicatorClassName='group-data-[collapsible=icon]:hidden'
+            className={cn('no-scrollbar flex flex-col gap-0 overflow-auto group-data-[collapsible=icon]:overflow-hidden', className)}
             {...props}
         />
     )

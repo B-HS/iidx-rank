@@ -17,12 +17,12 @@ export const BoardPostListItem: FC<BoardPostListItemProps> = ({ post, viewerId }
     const t = useTranslations('board')
 
     return (
-        <li className='flex min-w-0 flex-col gap-1 border-b border-border px-3 py-2 sm:flex-row sm:items-center sm:gap-3'>
+        <li className='relative flex min-w-0 flex-col gap-1 border-b border-border px-3 py-2 hover:bg-muted/50 sm:flex-row sm:items-center sm:gap-3'>
             <div className='flex min-w-0 flex-1 items-center gap-2'>
                 {post.kind === BOARD_POST_KIND.NOTICE && <Badge variant='secondary'>{t('noticeBadge')}</Badge>}
                 <Link
                     href={`/board/${post.id}`}
-                    className='min-w-0 truncate text-sm font-medium outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:underline'>
+                    className='min-w-0 truncate text-sm font-medium outline-none after:absolute after:inset-0 hover:underline focus-visible:underline focus-visible:after:ring-[3px] focus-visible:after:ring-ring/50 focus-visible:after:ring-inset'>
                     {post.title}
                 </Link>
                 {post.commentCount > 0 && (
@@ -33,7 +33,7 @@ export const BoardPostListItem: FC<BoardPostListItemProps> = ({ post, viewerId }
                     </span>
                 )}
             </div>
-            <div className='flex min-w-0 shrink-0 items-center gap-2 text-xs text-muted-foreground'>
+            <div className='pointer-events-none relative flex min-w-0 shrink-0 items-center gap-2 text-xs text-muted-foreground [&_button]:pointer-events-auto'>
                 <BoardAuthorMenu author={post.author} viewerId={viewerId} className='max-w-40' />
                 <BoardTimestamp value={post.createdAt} className='shrink-0 whitespace-nowrap' />
             </div>

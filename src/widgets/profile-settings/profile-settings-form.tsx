@@ -19,6 +19,7 @@ import { HANDLE_TAKEN_ERROR_CODE, useUpdateMyProfile } from '@entities/profile/p
 import { ProfileSettingsSection } from '@features/profile-settings-section/profile-settings-section'
 import { UserAvatar } from '@features/user-avatar/user-avatar'
 import { getApiErrorCode } from '@shared/lib/api-client'
+import { useUnsavedChangesWarning } from '@shared/hooks/use-unsaved-changes-warning'
 import { Button } from '@shared/ui/button'
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@shared/ui/field'
 import { Input } from '@shared/ui/input'
@@ -50,6 +51,7 @@ export const ProfileSettingsForm: FC<ProfileSettingsFormProps> = ({ profile }) =
     const { refetch: refetchSession } = authClient.useSession()
     const { errors, isDirty } = form.formState
     const isBusy = isUploading || updateProfile.isPending
+    const hasSaveError = updateProfile.isError && getApiErrorCode(updateProfile.error) !== HANDLE_TAKEN_ERROR_CODE
     const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
 
@@ -89,6 +91,8 @@ export const ProfileSettingsForm: FC<ProfileSettingsFormProps> = ({ profile }) =
             },
         }),
     )
+
+    useUnsavedChangesWarning(isDirty)
 
     return (
         <form noValidate onSubmit={handleSubmit} className='min-w-0' aria-busy={isBusy}>
@@ -206,10 +210,15 @@ export const ProfileSettingsForm: FC<ProfileSettingsFormProps> = ({ profile }) =
                     />
                 </Field>
             </ProfileSettingsSection>
-            <div className='flex min-w-0 justify-end border-b border-border p-3'>
-                <Button type='submit' size='sm' disabled={isBusy || !isDirty}>
-                    {updateProfile.isPending ? t('common.saving') : t('common.save')}
-                </Button>
+            <div className='grid min-w-0 border-b border-border p-3'>
+                <div className='grid max-w-xl min-w-0 gap-3'>
+                    <FieldError>{hasSaveError && t('settings.saveError')}</FieldError>
+                    <div className='flex justify-end'>
+                        <Button type='submit' size='sm' disabled={isBusy || !isDirty}>
+                            {updateProfile.isPending ? t('common.saving') : t('common.save')}
+                        </Button>
+                    </div>
+                </div>
             </div>
         </form>
     )

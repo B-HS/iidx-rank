@@ -1,8 +1,9 @@
 'use client'
 import { type FC, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { getBoardErrorKey } from '@entities/board/board-error'
-import { BOARD_COMMENTS_PAGE_SIZE, type CommentCreateInput } from '@entities/board/board.dto'
+import { BOARD_COMMENTS_PAGE_PARAM, BOARD_COMMENTS_PAGE_SIZE, BoardCommentsPageSchema, type CommentCreateInput } from '@entities/board/board.dto'
 import { useBoardComments, useCreateComment, useDeleteComment } from '@entities/board/board.query'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
 import { BoardCommentForm } from '@features/board-comment-form/board-comment-form'
@@ -11,6 +12,7 @@ import { getApiErrorCode } from '@shared/lib/api-client'
 import { Button } from '@shared/ui/button'
 import { Skeleton } from '@shared/ui/skeleton'
 import { BoardCommentItem } from '@widgets/board-post/board-comment-item'
+import { getCommentsPageQuery } from '@widgets/board-post/board-comments-query'
 
 type BoardCommentsProps = {
     postId: string
@@ -21,29 +23,37 @@ const FIRST_PAGE = 1
 const SKELETON_ROW_IDS = ['first', 'second', 'third'] as const
 
 export const BoardComments: FC<BoardCommentsProps> = ({ postId, viewerId }) => {
-    const [page, setPage] = useState(FIRST_PAGE)
     const [submittedCount, setSubmittedCount] = useState(0)
     const t = useTranslations()
+    const page = BoardCommentsPageSchema.parse(useSearchParams().get(BOARD_COMMENTS_PAGE_PARAM))
     const commentsQuery = useBoardComments(postId, page)
     const createComment = useCreateComment(postId)
     const deleteComment = useDeleteComment()
     const commentList = commentsQuery.data
+    const showPage = (targetPage: number, historyMethod: 'pushState' | 'replaceState') => {
+        const currentSearch = window.location.search
+        const currentPage = BoardCommentsPageSchema.parse(new URLSearchParams(currentSearch).get(BOARD_COMMENTS_PAGE_PARAM))
+
+        if (targetPage === currentPage) return
+
+        const query = getCommentsPageQuery(currentSearch, targetPage)
+
+        window.history[historyMethod](null, '', query === '' ? window.location.pathname : `?${query}`)
+    }
     const handleCreate = (input: CommentCreateInput) => {
         const lastPageAfterCreate = Math.ceil(((commentList?.pagination.total ?? 0) + 1) / BOARD_COMMENTS_PAGE_SIZE)
 
         createComment.mutate(input, {
             onSuccess: () => {
-                setPage(lastPageAfterCreate)
+                showPage(lastPageAfterCreate, 'replaceState')
                 setSubmittedCount((count) => count + 1)
             },
         })
     }
     const handleDelete = (commentId: string) => {
-        const isLastCommentOnPage = commentList?.comments.length === 1
+        const pageAfterDelete = commentList?.comments.length === 1 ? Math.max(page - 1, FIRST_PAGE) : page
 
-        deleteComment.mutate(commentId, {
-            onSuccess: () => setPage((currentPage) => (isLastCommentOnPage ? Math.max(currentPage - 1, FIRST_PAGE) : currentPage)),
-        })
+        deleteComment.mutate(commentId, { onSuccess: () => showPage(pageAfterDelete, 'replaceState') })
     }
 
     return (
@@ -69,8 +79,16 @@ export const BoardComments: FC<BoardCommentsProps> = ({ postId, viewerId }) => {
                     ))}
                 </div>
             )}
-            {commentList?.comments.length === 0 && (
+            {commentList?.comments.length === 0 && commentList.pagination.total === 0 && (
                 <p className='border-b border-border p-3 text-sm text-muted-foreground'>{t('board.commentsEmpty')}</p>
+            )}
+            {commentList?.comments.length === 0 && commentList.pagination.total > 0 && (
+                <div className='flex min-w-0 flex-wrap items-center gap-2 border-b border-border p-3'>
+                    <p className='text-sm text-muted-foreground'>{t('board.commentsPageEmpty')}</p>
+                    <Button variant='outline' size='sm' onClick={() => showPage(FIRST_PAGE, 'pushState')}>
+                        {t('board.firstPage')}
+                    </Button>
+                </div>
             )}
             {commentList && commentList.comments.length > 0 && (
                 <ul className='min-w-0'>
@@ -91,7 +109,7 @@ export const BoardComments: FC<BoardCommentsProps> = ({ postId, viewerId }) => {
                     totalPages={commentList.pagination.totalPages}
                     label={t('board.commentsPaginationLabel')}
                     className='border-b border-border p-3'
-                    onPageChange={setPage}
+                    onPageChange={(targetPage) => showPage(targetPage, 'pushState')}
                 />
             )}
             <div className='min-w-0 p-3'>

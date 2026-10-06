@@ -3,6 +3,7 @@ import { renderToReactElement } from '@tiptap/static-renderer/pm/react'
 import { z } from 'zod'
 import type { JSONContent } from '@tiptap/core'
 import { RICH_TEXT_EXTENSIONS } from '@entities/board/rich-text.extensions'
+import { getRichTextHeadingTag } from '@features/rich-text-content/rich-text-heading'
 import { RICH_TEXT_TYPOGRAPHY_CLASS_NAME } from '@features/rich-text-content/rich-text-typography'
 
 type RichTextContentProps = {
@@ -24,6 +25,11 @@ export const RichTextContent: FC<RichTextContentProps> = ({ content }) => (
             extensions: RICH_TEXT_EXTENSIONS,
             options: {
                 nodeMapping: {
+                    heading: ({ node, children }) => {
+                        const HeadingTag = getRichTextHeadingTag(node.attrs.level)
+
+                        return <HeadingTag>{children}</HeadingTag>
+                    },
                     image: ({ node }) => {
                         const attributes = ImageAttributesSchema.safeParse(node.attrs)
 

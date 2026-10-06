@@ -30,8 +30,9 @@ export const BoardPostCreate: FC<BoardPostCreateProps> = ({ initialUserId, initi
     return (
         <BoardPostForm
             defaultValues={EMPTY_POST}
-            canSelectKind={initialIsAdmin}
+            kindField={initialIsAdmin ? 'select' : 'hidden'}
             isSubmitting={createPost.isPending || createPost.isSuccess}
+            isSaved={createPost.isSuccess}
             errorMessage={createPost.error ? t(getBoardErrorKey(getApiErrorCode(createPost.error)) ?? 'board.postCreateError') : undefined}
             submitLabel={t('board.postSubmit')}
             submittingLabel={t('board.postSubmitting')}

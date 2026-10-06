@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const IMAGE_NODE_TYPE = 'image'
+export const IMAGE_NODE_TYPE = 'image'
 const TEXT_NODE_TYPE = 'text'
 
 const RichTextNodeSchema = z.object({

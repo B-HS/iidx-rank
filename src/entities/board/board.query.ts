@@ -23,7 +23,6 @@ export const useCreatePost = () => {
             await queryClient.invalidateQueries({ queryKey: QUERY_KEY.BOARD.ALL })
             toast.success(t('board.postCreateSuccess'))
         },
-        onError: () => toast.error(t('board.postCreateError')),
     })
 }
 
@@ -37,7 +36,6 @@ export const useUpdatePost = (postId: string) => {
             await queryClient.invalidateQueries({ queryKey: QUERY_KEY.BOARD.ALL })
             toast.success(t('board.postUpdateSuccess'))
         },
-        onError: () => toast.error(t('board.postUpdateError')),
     })
 }
 
@@ -65,7 +63,6 @@ export const useCreateComment = (postId: string) => {
             await queryClient.invalidateQueries({ queryKey: QUERY_KEY.BOARD.ALL })
             toast.success(t('board.commentCreateSuccess'))
         },
-        onError: () => toast.error(t('board.commentCreateError')),
     })
 }
 

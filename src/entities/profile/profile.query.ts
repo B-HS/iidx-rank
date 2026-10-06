@@ -10,7 +10,6 @@ import {
     recentUsersQueryOptions,
 } from '@entities/profile/profile.query-options'
 import { QUERY_KEY } from '@shared/constants/query-key'
-import { getApiErrorCode } from '@shared/lib/api-client'
 
 const PROFILE_SAVE_SCOPE_ID = 'profile-save'
 
@@ -39,7 +38,6 @@ export const useUpdateMyProfile = () => {
             ])
             toast.success(t('settings.saveSuccess'))
         },
-        onError: (error) => toast.error(t(getApiErrorCode(error) === HANDLE_TAKEN_ERROR_CODE ? 'settings.handleTaken' : 'settings.saveError')),
     })
 }
 

@@ -113,6 +113,7 @@
     --z-rail: 10;
     --z-raised: 20;
     --z-rank-header: 30;
+    --z-scroll-indicator: 40;
     --z-overlay: 50;
 }
 
@@ -319,6 +320,7 @@ html {
 }
 .checker-lamp {
     background: var(--iidx-lamp-off);
+    box-shadow: 1px 0 0 0 color-mix(in oklch, var(--foreground) 45%, transparent);
 }
 .checker-lamp[data-lamp='EASY'] {
     --lamp-color: var(--iidx-easy);
@@ -361,5 +363,8 @@ html {
 @media (prefers-reduced-motion: reduce) {
     .checker-lamp {
         animation: none !important;
+    }
+    .checker-lamp:not([data-lamp='NO_PLAY']) {
+        background: linear-gradient(to bottom, var(--lamp-color) 50%, var(--lamp-alternate, var(--lamp-color)) 50%);
     }
 }

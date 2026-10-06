@@ -4,9 +4,11 @@ import type { FC } from 'react'
 import type { Catalog } from '@entities/catalog/catalog.dto'
 import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
 import { groupChartsByRank } from '@entities/catalog/catalog-ranks'
+import { CheckerModeToggle } from '@features/checker-mode-toggle/checker-mode-toggle'
 import { ChartRankSkeleton } from '@features/checker-skeleton/chart-rank-skeleton'
 import { CheckerSidebarSkeleton } from '@features/checker-skeleton/checker-sidebar-skeleton'
 import { Button } from '@shared/ui/button'
+import { ScrollContainer } from '@shared/ui/scroll-container'
 import { SidebarTrigger } from '@shared/ui/sidebar'
 import { Skeleton } from '@shared/ui/skeleton'
 import { ShellSidebarPortal } from '@widgets/app-shell/shell-sidebar-portal'
@@ -33,6 +35,7 @@ export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
                         </div>
                     </div>
                     <div className='flex shrink-0 items-center gap-1'>
+                        <CheckerModeToggle value='normal' isDisabled />
                         <div className='hidden h-4 w-24 text-right text-xs tabular-nums text-muted-foreground sm:block'>
                             {catalog ? t('checker.resultCount', { count: catalog.charts.length }) : <Skeleton className='h-4 w-full' />}
                         </div>
@@ -44,7 +47,14 @@ export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
                         </Button>
                     </div>
                 </header>
-                <div className='checker-list-scroll'>
+                <ScrollContainer className='checker-list-scroll'>
+                    <div className='flex h-8 items-center border-b border-border px-3 text-xs tabular-nums text-muted-foreground sm:hidden'>
+                        {catalog ? (
+                            t('checker.resultSummary', { visible: catalog.charts.length, total: catalog.charts.length })
+                        ) : (
+                            <Skeleton className='h-4 w-36' />
+                        )}
+                    </div>
                     {versionDisplay ? (
                         <div className='grid min-w-0'>
                             {sections.map((section) => (
@@ -60,7 +70,7 @@ export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
                     ) : (
                         <Skeleton aria-hidden='true' className='h-full min-h-[calc(100dvh-3rem)] w-full rounded-none' />
                     )}
-                </div>
+                </ScrollContainer>
             </section>
         </>
     )
