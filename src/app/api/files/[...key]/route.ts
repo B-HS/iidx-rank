@@ -17,12 +17,12 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ key
         const upstream = await getR2Object(parsedKey.data)
 
         if (upstream.status === API_STATUS.NOT_FOUND) {
-            await upstream.body?.cancel()
+            await upstream.arrayBuffer()
             return notFoundResponse()
         }
 
         if (!upstream.ok || !upstream.body) {
-            await upstream.body?.cancel()
+            await upstream.arrayBuffer()
             return unavailableResponse()
         }
 
