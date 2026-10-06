@@ -1,4 +1,4 @@
-import { House, type LucideIcon, Music2 } from 'lucide-react'
+import { House, type LucideIcon, MessagesSquare, Music2 } from 'lucide-react'
 import type { Messages } from 'next-intl'
 
 export type ShellNavItem = {
@@ -11,4 +11,4 @@ export const SHELL_PRIMARY_NAV_ITEMS: readonly ShellNavItem[] = [
     { href: '/', labelKey: 'home', icon: House },
     { href: '/table', labelKey: 'checker', icon: Music2 },
 ]
-export const SHELL_SECONDARY_NAV_ITEMS: readonly ShellNavItem[] = []
+export const SHELL_SECONDARY_NAV_ITEMS: readonly ShellNavItem[] = [{ href: '/board', labelKey: 'board', icon: MessagesSquare }]
