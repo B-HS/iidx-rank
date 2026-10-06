@@ -3,7 +3,7 @@ import { RecordInputSchema } from '@entities/checker/checker.dto'
 import { getChecker, upsertRecord } from '@entities/checker/checker.server'
 import { parseJsonInput } from '@shared/server/parse-json-input'
 import { getSession } from '@shared/server/auth'
-import { userRecordsTag } from '@shared/server/cache-tags'
+import { RECENT_USERS_TAG, userRecordsTag } from '@shared/server/cache-tags'
 import { API_STATUS, errorResponse, isTrustedOrigin, successResponse } from '@shared/server/http'
 
 export const GET = async () => {
@@ -63,6 +63,7 @@ export const PATCH = async (request: Request) => {
         if (!record) return errorResponse('CHART_UNAVAILABLE', '현재 기록할 수 없는 차트입니다.', API_STATUS.BAD_REQUEST)
 
         revalidateTag(userRecordsTag(session.user.id), { expire: 0 })
+        revalidateTag(RECENT_USERS_TAG, { expire: 0 })
 
         return successResponse(record)
     } catch {

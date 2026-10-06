@@ -3,6 +3,7 @@ import 'server-only'
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth'
 import { getSessionCookie } from 'better-auth/cookies'
+import { ensureUserProfile } from '@entities/profile/user-summary.server'
 import { getAuthOrigins } from '@shared/server/auth-origins'
 import { USER_ROLE } from '@shared/constants/user-role'
 import { account, session, user, verification } from '@shared/server/db/auth-schema'
@@ -28,6 +29,13 @@ const createAuthInstance = (env: ReturnType<typeof getEnv>) =>
                     before: async (data) => ({
                         data: { ...data, role: env.ADMIN_BOOTSTRAP_EMAILS.includes(data.email.toLowerCase()) ? USER_ROLE.ADMIN : USER_ROLE.USER },
                     }),
+                    after: async (createdUser) => {
+                        try {
+                            await ensureUserProfile(createdUser.id)
+                        } catch {
+                            return
+                        }
+                    },
                 },
             },
         },

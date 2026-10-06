@@ -2,11 +2,12 @@
 import { type CSSProperties, type FC, type PropsWithChildren, type TransitionStartFunction, useState, useTransition } from 'react'
 import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
-import { Languages, LogIn, LogOut, Moon, Sun, UserRound } from 'lucide-react'
+import { CircleUserRound, Languages, LogIn, LogOut, Moon, Sun, UserRound, UserRoundPen } from 'lucide-react'
 import { hasLocale, useLocale, useTranslations } from 'next-intl'
 import { Link, usePathname, useRouter } from '@shared/i18n/navigation'
 import { routing } from '@shared/i18n/routing'
 import { authClient } from '@entities/auth/auth.api'
+import { useMyProfile } from '@entities/profile/profile.query'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
 import { LOCALE_OPTIONS } from '@shared/constants/locale'
 import {
@@ -107,6 +108,8 @@ const AccountControl: FC = () => {
     const [isLocalePending, startLocaleTransition] = useTransition()
     const identityTransition = useIdentityTransition()
     const { data: session, isPending } = authClient.useSession()
+    const myProfileQuery = useMyProfile(Boolean(session?.user))
+    const myHandle = session?.user && myProfileQuery.data?.userId === session.user.id ? myProfileQuery.data.handle : null
     const handleSignOut = async () => {
         try {
             const result = await authClient.signOut()
@@ -149,6 +152,28 @@ const AccountControl: FC = () => {
                             <span className='truncate text-xs font-normal text-muted-foreground'>{session?.user.email ?? t('navigation.guest')}</span>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
+                        {session?.user && myHandle && (
+                            <DropdownMenuItem asChild>
+                                <Link href={`/u/${myHandle}`}>
+                                    <CircleUserRound />
+                                    {t('navigation.myPage')}
+                                </Link>
+                            </DropdownMenuItem>
+                        )}
+                        {session?.user && !myHandle && (
+                            <DropdownMenuItem disabled>
+                                <CircleUserRound />
+                                {t('navigation.myPage')}
+                            </DropdownMenuItem>
+                        )}
+                        {session?.user && (
+                            <DropdownMenuItem asChild>
+                                <Link href='/settings'>
+                                    <UserRoundPen />
+                                    {t('navigation.profileSettings')}
+                                </Link>
+                            </DropdownMenuItem>
+                        )}
                         <LanguageMenu isPending={isLocalePending} startTransition={startLocaleTransition} />
                         {session?.user ? (
                             <DropdownMenuItem onSelect={() => void handleSignOut()}>

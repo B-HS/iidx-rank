@@ -85,10 +85,10 @@ export const upsertRecord = async (userId: string, input: RecordInput) => {
             })
         await transaction
             .insert(userRecordRevision)
-            .values({ userId: validatedUserId, revision: 1 })
+            .values({ userId: validatedUserId, revision: 1, updatedAt: record.updatedAt })
             .onConflictDoUpdate({
                 target: userRecordRevision.userId,
-                set: { revision: sql`${userRecordRevision.revision} + 1` },
+                set: { revision: sql`${userRecordRevision.revision} + 1`, updatedAt: record.updatedAt },
             })
 
         return RecordSchema.parse(savedRecords[0])
