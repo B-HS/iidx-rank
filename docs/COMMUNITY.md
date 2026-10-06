@@ -30,11 +30,11 @@ cacheComponents 환경이므로 요청시간 데이터(세션·params·searchPar
 
 ## 셸
 
-- src/widgets/app-shell/app-shell.tsx가 사이드바와 본문 틀을 가집니다. 사이드바 순서: 홈, 난이도표, 페이지별 슬롯, 최근 갱신 사용자, 게시판, 하단(테마·계정).
+- src/widgets/app-shell/app-shell.tsx가 사이드바와 본문 틀을 가집니다. 메뉴는 nav 랜드마크 하나로 묶으며 순서는 홈, 난이도표, 최근 갱신 사용자, 게시판, 페이지별 슬롯, 하단(테마·언어·계정)입니다. 게시판 항목의 위치가 페이지마다 달라지지 않도록 슬롯을 메뉴 뒤에 둡니다.
 - 내비게이션 항목은 src/widgets/app-shell/shell-nav.ts의 배열 SHELL_PRIMARY_NAV_ITEMS(홈·난이도표), SHELL_SECONDARY_NAV_ITEMS(게시판)에 추가합니다. 항목은 { href, labelKey, icon }이며 활성 판정은 경로 접두 일치입니다.
 - 페이지별 사이드바 내용은 src/widgets/app-shell/shell-sidebar-portal.tsx의 ShellSidebarPortal로 슬롯에 그립니다. 페이지 위젯은 AppShell을 직접 감싸지 않습니다.
 - 최근 갱신 사용자 목록은 src/widgets/recent-users/recent-users.tsx(RecentUsers)입니다.
-- 계정 메뉴: 로그인 시 내 페이지·프로필 설정, 공통으로 언어 선택, 로그인/로그아웃. 난이도표의 표시 설정(로고·불투명도)은 /table 툴바의 버튼으로 엽니다.
+- 하단 컨트롤: 테마 전환, 언어 선택(누구에게나 보이는 별도 메뉴), 계정. 비로그인 상태의 계정 칸은 바로 로그인 다이얼로그를 여는 로그인 버튼이고, 로그인 상태의 계정 메뉴는 내 페이지·프로필 설정·로그아웃입니다. 난이도표의 표시 설정(로고·불투명도)은 /table 툴바의 버튼으로 엽니다.
 
 ## DB
 
@@ -135,3 +135,23 @@ playedCount는 활성 곡 중 lamp가 NO_PLAY가 아닌 기록 수입니다.
 - 클라이언트 요청 헬퍼는 서버 오류 code를 Error의 cause로 전달합니다(getApiErrorCode). 화면은 code를 번역 키로 바꿔 표시하고 서버의 한국어 메시지를 직접 쓰지 않습니다.
 - 페이지별 문서 제목은 레이아웃의 title template("%s | IIDX Rank")과 각 페이지의 generateMetadata로 정합니다.
 - /api/users/recent는 connection()으로 요청 시점 실행을 고정했습니다. 파일 조회 핸들러는 R2 오류 응답의 본문을 cancel하지 않고 소진합니다(docs/bug/2026-10-06-community-rollout.md).
+
+## UI/UX 결정 반영 후 확정 사항 (2026-10-06)
+
+- 주소에 반영하는 상태: 게시판 목록 ?page=, 댓글 페이지 /board/<id>?comments=<N>(1페이지는 생략), 사용자 페이지 탭 /u/<핸들>?tab=<탭 id>(기본 탭은 생략). 댓글 페이지와 탭 전환은 history API로 쿼리만 바꿔 서버 재요청과 스크롤 이동이 없습니다.
+- 스크롤 표시: 네이티브 스크롤바는 전역으로 숨기고 src/shared/ui/scroll-indicator.tsx의 얇은 표시 막대를 씁니다. 모바일 문서 스크롤은 셸의 창 표시, 데스크톱의 본문·사이드바·다이얼로그 본문은 src/shared/ui/scroll-container.tsx(ScrollContainer)로 감쌉니다. 새 본문 스크롤 영역을 만들 때는 ScrollContainer를 사용합니다.
+- 오류 화면: 페이지 오류는 (shell)/error.tsx가 셸 안에서 표시하고, 레이아웃 수준 오류는 [locale]/error.tsx가 표시합니다. 매칭되지 않는 주소는 src/app/global-not-found.tsx가 HTTP 404와 noindex로 응답하며 서버 HTML에는 ko·ja·en 안내를 함께 싣고 하이드레이션 뒤 주소 접두의 언어만 보여 줍니다(next.config.ts의 experimental.globalNotFound).
+- 폼의 실패 안내: 인라인 오류 자리가 있는 폼(글 작성·수정, 댓글, 프로필 설정)은 인라인으로만 표시하고 같은 문장의 toast를 띄우지 않습니다. 폼이 아닌 동작(삭제, 차단, 팔로우, 램프 저장)과 인라인 자리가 없는 실패(이미지 업로드)는 toast를 씁니다.
+- 미저장 경고: 프로필 설정과 게시글 편집기는 변경 후 저장 전이면 탭 닫기·새로고침에 경고합니다(src/shared/hooks/use-unsaved-changes-warning.ts). 게시글 편집기의 취소 버튼은 확인 창을 거칩니다. 사이트 안의 다른 링크 이동은 가로채지 않습니다.
+- 리치 텍스트 표시: 저장 스키마의 제목 단계(2·3)는 유지하고 화면에서는 글 제목 아래 단계(h3·h4)로 그립니다. 에디터도 같은 태그로 그려 모양이 같습니다. 이미지에는 대체 텍스트를 넣을 수 있습니다(입력란 상한 200자).
+- 터치 기기: 아이콘 버튼의 터치 영역을 가상 요소로 넓힙니다(단독 버튼 44x44, 한 줄에 붙은 툴바·페이지네이션 버튼은 이웃 가로채기를 피하려고 가로 36·세로 44, 에디터 툴바는 미적용). 난이도표는 처음 방문 시 길게 누르기 안내를 한 줄로 보여 주고 닫으면 브라우저에 기억합니다.
+- 난이도표 툴바: 게이지(노멀/하드) 전환을 툴바에 두고, 필터 버튼에 적용된 필터 수를 표시하며 필터 창에서 초기화할 수 있습니다. 모션 감소 설정에서는 램프의 두 색을 위아래로 나눠 정적으로 표시하고 모든 램프 띠에 1px 경계선을 둡니다.
+
+## SEO와 구조화 데이터
+
+- 대표 주소는 src/shared/constants/site.ts의 SITE_URL(https://iidx.hyns.dev)입니다. canonical, hreflang, sitemap, JSON-LD의 url이 모두 이 값을 쓰고 로케일 접두 규칙(ko는 접두 없음, ja는 /ja, en은 /en)은 src/shared/lib/seo.ts의 헬퍼 한 곳에서 계산합니다.
+- 색인 대상 페이지(홈, /table, /board, 글 상세, 공개 프로필)는 제목·설명·canonical·hreflang(ko·ja·en·x-default)·openGraph·twitter 카드를 가집니다. 글 상세의 문서 제목은 글 제목, 공개 프로필은 "닉네임 (@핸들)"입니다. 게시판 목록의 2페이지 이상은 자기 자신을 canonical로 합니다.
+- 색인 제외(noindex): /settings, /board/new, /board/<id>/edit, 없는 글, 없거나 비공개인 프로필, 404. 이 경우 제목·설명에 사용자 정보를 넣지 않고 canonical·hreflang·JSON-LD도 내지 않습니다. 메타데이터와 sitemap은 비로그인 시점의 조회 결과만 사용합니다.
+- src/app/robots.ts는 /api(파일 조회 /api/files 제외)와 색인 제외 경로를 차단하고 sitemap 위치를 알립니다. src/app/sitemap.ts는 정적 경로의 로케일 변형, 게시글, 공개 프로필을 싣습니다(비공개 프로필 제외).
+- JSON-LD는 src/features/json-ld의 컴포넌트가 페이지별로 냅니다: 홈 WebSite, 난이도표 WebPage, 게시판 목록 CollectionPage와 ItemList, 글 상세 DiscussionForumPosting, 공개 프로필 ProfilePage와 Person, 홈을 뺀 색인 페이지에 BreadcrumbList. 값은 실제 데이터에서만 만들고 없는 값은 속성을 생략합니다.
+- JSON-LD 주입은 설치본 Next 가이드(02-guides/json-ld.md)대로 script 태그에 dangerouslySetInnerHTML을 쓰되 JSON 직렬화 후 '<'를 이스케이프한 값만 넣습니다. 사용자 콘텐츠를 HTML로 주입하지 않는다는 보안 규칙의 예외는 이 한 곳(src/features/json-ld/json-ld.tsx)뿐입니다.

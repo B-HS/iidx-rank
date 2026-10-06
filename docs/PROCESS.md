@@ -250,3 +250,17 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 - [x] 12. 통합 검증·기록·기능 단위 commit/push
 
 사용자 결정(2026-10-06): workflow 사용(main Opus, 하위 Opus/Sonnet, Fable 미사용). 기능 단위로 검증 후 main 푸시. 사용자 주소는 고유 핸들 /u/<핸들>. 프로필 사진과 게시판 이미지는 반드시 Cloudflare R2에 저장하며 이미지 기능을 빼지 않습니다(env 키 R2_ACCESS_KEY, R2_SECRET_KEY, R2_URL은 사용자가 등록, 에이전트는 값 미열람). 프로필 공개 기본값은 비공개. 게시판은 글·댓글·본문 이미지. UI/UX는 판단이 분명한 항목만 적용. 가정: 홈은 /, 난이도표는 /table, 비공개 프로필은 본인만 열람, 차단은 글·댓글 숨김, 게시판 읽기는 공개·쓰기는 로그인, 공지는 상단 고정·관리자 전용. 기준: AGENTS.md, llm-rules 전문, docs/ARCHITECTURE.md, docs/CACHE.md, docs/DESIGN.md, 설치본 Next 문서, tiptap·Cloudflare R2 공식 문서.
+
+
+## UI/UX 결정 16건 반영·SEO·JSON-LD
+
+현재 상태: 구현·검증·기록·GitHub 반영 완료 (6/6). 로그인이 필요한 조작의 브라우저 확인과 대표 주소(https://iidx.hyns.dev)의 사용자 확인이 남음
+
+- [x] a. 결정 기록과 사전 조사 — bblog의 virtual-scroll, 운영 도메인, 현재 셸·버튼·전역 스타일
+- [x] b. 1차 구현(병렬) — 셸(비로그인 진입 경로·사이드바 구조·셸 안 오류 화면·최근 사용자 목록), 난이도표(모션 감소 램프 구분·터치 대상·필터 상태와 게이지 전환·길게 누르기 안내), 게시판(종류 표시·행 전체 클릭·툴바 키보드 이동·이미지 alt·본문 오류 연결·제목 위계·댓글 페이지 주소·미저장 경고·toast 정책), 프로필(저장 버튼 위치·미저장 경고·탭 주소·toast 정책)
+- [x] c. 2차 구현(병렬) — SEO·JSON-LD·동적 문서 제목·현지화 404, virtual-scroll 적용, 용어·어투 통일과 toast 모양
+- [x] d. 검증 — typecheck·lint·test·build, 메타데이터·JSON-LD·robots·sitemap·404 응답 확인
+- [x] e. main의 diff 확인과 브라우저 점검
+- [x] f. 기록·선별 commit/push
+
+사용자 결정(2026-10-06): 감사 문서 "보고만" 16건 중 1 추천안(모션 감소 시 두 색 정적 표시), 2 유지(일본 시간 고정), 3 bblog의 virtual-scroll을 가져와 네이티브 스크롤바를 숨긴 채 적용, 4~7·9·11 추천안, 8 적당한 위치에 필터 상태 표시와 게이지 전환, 10 필요한 곳에 주소 반영, 12 동적 문서 제목과 전체 페이지의 SEO·JSON-LD, 13 용어·어투 전부 정정, 14 toast 정책 통일, 15 최근 사용자 목록 수정, 16 길게 누르기 안내를 터치 기기에서 보이게. 진행 방식은 Agent 도구의 개별 서브에이전트 대신 Workflow 도구로 오케스트레이션합니다(main Opus, 단계별 Opus/Sonnet과 effort 지정, Fable 미사용). .env.example의 R2 키 3줄은 사용자가 추가했습니다. 기준: AGENTS.md, llm-rules 전문, docs/COMMUNITY.md, docs/quality-assurance/2026-10-06-ui-ux-audit.md, 설치본 Next 문서.
