@@ -21,4 +21,5 @@ export const userRecordRevision = sqliteTable('user_record_revision', {
         .primaryKey()
         .references(() => user.id, { onDelete: 'cascade' }),
     revision: integer('revision').notNull().default(0),
+    updatedAt: text('updated_at'),
 })

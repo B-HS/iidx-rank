@@ -1,9 +1,9 @@
 import { z } from 'zod'
 import { API_STATUS, errorResponse } from '@shared/server/http'
 
-const MAX_JSON_REQUEST_BODY_BYTES = 4096
+const DEFAULT_MAX_JSON_REQUEST_BODY_BYTES = 4096
 
-export const parseJsonInput = async <Output>(request: Request, schema: z.ZodType<Output>) => {
+export const parseJsonInput = async <Output>(request: Request, schema: z.ZodType<Output>, maxBytes = DEFAULT_MAX_JSON_REQUEST_BODY_BYTES) => {
     const contentType = request.headers.get('content-type')?.split(';', 1)[0]?.trim().toLowerCase()
 
     if (contentType !== 'application/json') {
@@ -12,7 +12,7 @@ export const parseJsonInput = async <Output>(request: Request, schema: z.ZodType
 
     const contentLength = request.headers.get('content-length')
 
-    if (contentLength !== null && Number(contentLength) > MAX_JSON_REQUEST_BODY_BYTES) {
+    if (contentLength !== null && Number(contentLength) > maxBytes) {
         return { response: errorResponse('PAYLOAD_TOO_LARGE', '요청 본문이 너무 큽니다.', API_STATUS.PAYLOAD_TOO_LARGE) }
     }
 
@@ -31,7 +31,7 @@ export const parseJsonInput = async <Output>(request: Request, schema: z.ZodType
 
             totalBytes += chunk.value.byteLength
 
-            if (totalBytes > MAX_JSON_REQUEST_BODY_BYTES) {
+            if (totalBytes > maxBytes) {
                 await reader.cancel()
                 return { response: errorResponse('PAYLOAD_TOO_LARGE', '요청 본문이 너무 큽니다.', API_STATUS.PAYLOAD_TOO_LARGE) }
             }

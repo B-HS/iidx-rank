@@ -11,4 +11,24 @@ export const QUERY_KEY = {
         ALL: ['checker'] as const,
         RECORDS: (userId: string) => ['checker', 'records', userId] as const,
     },
+    PROFILE: {
+        ALL: ['profile'] as const,
+        ME: ['profile', 'me'] as const,
+        DETAIL: (handle: string) => ['profile', 'detail', handle] as const,
+        RECORDS: (handle: string) => ['profile', 'records', handle] as const,
+    },
+    USERS: {
+        ALL: ['users'] as const,
+        RECENT: ['users', 'recent'] as const,
+    },
+    BOARD: {
+        ALL: ['board'] as const,
+        POSTS: (params: { page: number }) => ['board', 'posts', params] as const,
+        POST: (postId: string) => ['board', 'post', postId] as const,
+        COMMENTS: (postId: string, page: number) => ['board', 'comments', postId, page] as const,
+    },
+    BLOCK: {
+        ALL: ['block'] as const,
+        LIST: ['block', 'list'] as const,
+    },
 } as const
