@@ -20,6 +20,7 @@
 | / | (shell)/page.tsx | 홈 대시보드(빈 상태) |
 | /table | (shell)/table/page.tsx | 기존 난이도표 |
 | /u/[handle] | (shell)/u/[handle]/page.tsx | 사용자 페이지 |
+| /users | (shell)/users/page.tsx | 사용자 목록(?page=) |
 | /settings | (shell)/settings/page.tsx | 프로필 설정·공개 범위·차단 목록 |
 | /board | (shell)/board/page.tsx | 게시판 목록(?page=) |
 | /board/new | (shell)/board/new/page.tsx | 글쓰기 |
@@ -30,10 +31,10 @@ cacheComponents 환경이므로 요청시간 데이터(세션·params·searchPar
 
 ## 셸
 
-- src/widgets/app-shell/app-shell.tsx가 사이드바와 본문 틀을 가집니다. 메뉴는 nav 랜드마크 하나로 묶으며 순서는 홈, 난이도표, 최근 갱신 사용자, 게시판, 페이지별 슬롯, 하단(테마·언어·계정)입니다. 게시판 항목의 위치가 페이지마다 달라지지 않도록 슬롯을 메뉴 뒤에 둡니다.
+- src/widgets/app-shell/app-shell.tsx가 사이드바와 본문 틀을 가집니다. 메뉴는 nav 랜드마크 하나로 묶으며 순서는 홈, 사용자, 게시판, 난이도표이고 그 아래에 페이지별 슬롯, 하단(테마·언어·계정)이 옵니다. 난이도표는 누르면 원본·진행 패널이 슬롯에 펼쳐지므로 항상 메뉴의 맨 아래에 둡니다.
 - 내비게이션 항목은 src/widgets/app-shell/shell-nav.ts의 배열 SHELL_PRIMARY_NAV_ITEMS(홈·난이도표), SHELL_SECONDARY_NAV_ITEMS(게시판)에 추가합니다. 항목은 { href, labelKey, icon }이며 활성 판정은 경로 접두 일치입니다.
 - 페이지별 사이드바 내용은 src/widgets/app-shell/shell-sidebar-portal.tsx의 ShellSidebarPortal로 슬롯에 그립니다. 페이지 위젯은 AppShell을 직접 감싸지 않습니다.
-- 최근 갱신 사용자 목록은 src/widgets/recent-users/recent-users.tsx(RecentUsers)입니다.
+- 사용자 목록은 사이드바가 아니라 별도 페이지 /users(src/widgets/user-list)에서 보여 줍니다.
 - 하단 컨트롤: 테마 전환, 언어 선택(누구에게나 보이는 별도 메뉴), 계정. 비로그인 상태의 계정 칸은 바로 로그인 다이얼로그를 여는 로그인 버튼이고, 로그인 상태의 계정 메뉴는 내 페이지·프로필 설정·로그아웃입니다. 난이도표의 표시 설정(로고·불투명도)은 /table 툴바의 버튼으로 엽니다.
 
 ## DB
@@ -91,7 +92,7 @@ checker-schema.ts
 - GET /api/profiles/[handle] → Profile { handle, name, bio, avatarUrl, isPublic, followerCount, followingCount, playedCount, isOwner, isFollowing }. 없거나 비공개(본인 제외)면 404 PROFILE_NOT_FOUND.
 - GET /api/profiles/[handle]/records → { records: [{ chartId, title, difficulty, version, lamp, scoreGrade, updatedAt }] }. 활성 곡만, 메모는 포함하지 않습니다.
 - PUT·DELETE /api/profiles/[handle]/follow → Profile. 자기 자신과 비공개 프로필은 팔로우할 수 없습니다.
-- GET /api/users/recent → { users: [{ handle, name, avatarUrl, updatedAt }] }. 공개 프로필 중 기록 갱신 시각 내림차순 10명.
+- GET /api/users?page= → { users: [{ handle, name, avatarUrl, updatedAt }], pagination }. 공개 프로필 중 기록 갱신 시각 내림차순 20명씩.
 
 playedCount는 활성 곡 중 lamp가 NO_PLAY가 아닌 기록 수입니다.
 
@@ -114,8 +115,8 @@ playedCount는 활성 곡 중 lamp가 NO_PLAY가 아닌 기록 수입니다.
 
 ## 캐시·쿼리 키
 
-- 프로필·게시판·차단 조회는 요청마다 DB에서 읽습니다. 최근 갱신 사용자만 'use cache' + RECENT_USERS_TAG('users:recent') + 60초 재검증을 쓰고, 기록 저장과 프로필 공개 설정·핸들·닉네임·사진 변경 시 태그를 만료합니다.
-- QUERY_KEY: PROFILE { ALL, ME, DETAIL(handle), RECORDS(handle) }, USERS { ALL, RECENT }, BOARD { ALL, POSTS(params), POST(id), COMMENTS(postId, page) }, BLOCK { ALL, LIST }.
+- 프로필·게시판·차단 조회는 요청마다 DB에서 읽습니다. 사용자 목록만 'use cache' + RECENT_USERS_TAG('users:recent') + 60초 재검증을 쓰고(페이지 번호가 캐시 키), 기록 저장과 프로필 공개 설정·핸들·닉네임·사진 변경 시 태그를 만료합니다.
+- QUERY_KEY: PROFILE { ALL, ME, DETAIL(handle), RECORDS(handle) }, USERS { ALL, LIST(page) }, BOARD { ALL, POSTS(params), POST(id), COMMENTS(postId, page) }, BLOCK { ALL, LIST }.
 - 계정 전환 시 기존 QueryClient.clear 계약이 그대로 적용됩니다.
 
 ## 화면
@@ -134,7 +135,7 @@ playedCount는 활성 곡 중 lamp가 NO_PLAY가 아닌 기록 수입니다.
 - 리치 텍스트 검증은 JSON 중첩 깊이 100 이하를 먼저 확인하고, 표시용 attrs(link의 target·rel·class, codeBlock language 등)는 안전값으로 정규화합니다. 붙여넣은 HTML의 외부 이미지는 에디터가 제거합니다.
 - 클라이언트 요청 헬퍼는 서버 오류 code를 Error의 cause로 전달합니다(getApiErrorCode). 화면은 code를 번역 키로 바꿔 표시하고 서버의 한국어 메시지를 직접 쓰지 않습니다.
 - 페이지별 문서 제목은 레이아웃의 title template("%s | IIDX Rank")과 각 페이지의 generateMetadata로 정합니다.
-- /api/users/recent는 connection()으로 요청 시점 실행을 고정했습니다. 파일 조회 핸들러는 R2 오류 응답의 본문을 cancel하지 않고 소진합니다(docs/bug/2026-10-06-community-rollout.md).
+- /api/users는 connection()으로 요청 시점 실행을 고정했습니다. 파일 조회 핸들러는 R2 오류 응답의 본문을 cancel하지 않고 소진합니다(docs/bug/2026-10-06-community-rollout.md).
 
 ## UI/UX 결정 반영 후 확정 사항 (2026-10-06)
 
@@ -155,3 +156,9 @@ playedCount는 활성 곡 중 lamp가 NO_PLAY가 아닌 기록 수입니다.
 - src/app/robots.ts는 /api(파일 조회 /api/files 제외)와 색인 제외 경로를 차단하고 sitemap 위치를 알립니다. src/app/sitemap.ts는 정적 경로의 로케일 변형, 게시글, 공개 프로필을 싣습니다(비공개 프로필 제외).
 - JSON-LD는 src/features/json-ld의 컴포넌트가 페이지별로 냅니다: 홈 WebSite, 난이도표 WebPage, 게시판 목록 CollectionPage와 ItemList, 글 상세 DiscussionForumPosting, 공개 프로필 ProfilePage와 Person, 홈을 뺀 색인 페이지에 BreadcrumbList. 값은 실제 데이터에서만 만들고 없는 값은 속성을 생략합니다.
 - JSON-LD 주입은 설치본 Next 가이드(02-guides/json-ld.md)대로 script 태그에 dangerouslySetInnerHTML을 쓰되 JSON 직렬화 후 '<'를 이스케이프한 값만 넣습니다. 사용자 콘텐츠를 HTML로 주입하지 않는다는 보안 규칙의 예외는 이 한 곳(src/features/json-ld/json-ld.tsx)뿐입니다.
+
+## 사용자 목록 페이지 (2026-10-06 변경)
+
+- 사이드바의 최근 갱신 사용자 목록을 없애고 /users 페이지로 옮겼습니다. 공개 프로필 중 기록 갱신 시각이 있는 사용자를 최근 갱신순으로 20명씩 보여 주고 ?page= 로 넘깁니다.
+- 페이지네이션 계산은 src/shared/lib/pagination.ts(PaginationSchema, createPagination)를 게시판과 함께 씁니다.
+- /users는 색인 대상입니다(canonical·hreflang, CollectionPage와 BreadcrumbList JSON-LD, sitemap 포함). 목록에는 공개 프로필만 나옵니다.

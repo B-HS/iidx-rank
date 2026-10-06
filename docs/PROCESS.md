@@ -264,3 +264,17 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 - [x] f. 기록·선별 commit/push
 
 사용자 결정(2026-10-06): 감사 문서 "보고만" 16건 중 1 추천안(모션 감소 시 두 색 정적 표시), 2 유지(일본 시간 고정), 3 bblog의 virtual-scroll을 가져와 네이티브 스크롤바를 숨긴 채 적용, 4~7·9·11 추천안, 8 적당한 위치에 필터 상태 표시와 게이지 전환, 10 필요한 곳에 주소 반영, 12 동적 문서 제목과 전체 페이지의 SEO·JSON-LD, 13 용어·어투 전부 정정, 14 toast 정책 통일, 15 최근 사용자 목록 수정, 16 길게 누르기 안내를 터치 기기에서 보이게. 진행 방식은 Agent 도구의 개별 서브에이전트 대신 Workflow 도구로 오케스트레이션합니다(main Opus, 단계별 Opus/Sonnet과 effort 지정, Fable 미사용). .env.example의 R2 키 3줄은 사용자가 추가했습니다. 기준: AGENTS.md, llm-rules 전문, docs/COMMUNITY.md, docs/quality-assurance/2026-10-06-ui-ux-audit.md, 설치본 Next 문서.
+
+
+## 사용자 목록 페이지 분리와 사이드바 메뉴 순서
+
+현재 상태: 구현·검증·기록·GitHub 반영 완료 (4/4)
+
+- [x] a. 사용자 목록 조회를 페이지 단위로 변경 — entities/profile(dto·storage·server·api·query), GET /api/users?page=, 쿼리 키, 공용 페이지네이션 헬퍼
+- [x] b. /users 페이지 — 목록 위젯·스켈레톤·페이징, 메타데이터·JSON-LD·sitemap
+- [x] c. 사이드바 — 최근 갱신 사용자 목록 제거, 메뉴 순서 홈·사용자·게시판·난이도표(맨 아래, 그 밑에 난이도표 패널)
+- [x] d. 검증·기록·commit/push
+
+사용자 지적(2026-10-06): 최근 갱신 사용자는 사이드바 목록이 아니라 별도 페이지로 보여 주는 것이 맞고, 난이도표 메뉴는 누르면 필터·패널이 아래에 펼쳐지므로 항상 메뉴의 맨 아래에 둡니다. 직전 작업의 후속 수정이며 범위가 작아 main이 직접 수행합니다(서브에이전트 미사용).
+
+검증: typecheck 통과, lint 오류 0(기존 경고 4), 테스트 141 pass, 임시 SQLite 빌드 통과(/users 부분 프리렌더, /api/users 동적). 로컬 서버에서 /users·/users?page=2·/ja/users 200과 제목, canonical, GET /api/users?page=1 응답, page=0은 400, 이전 /api/users/recent는 404, sitemap에 /users 3개 로케일. 브라우저 1280폭에서 메뉴 순서(홈·사용자·게시판·난이도표)와 난이도표 패널 위치, 사용자 목록 화면, 콘솔 오류 없음(로컬의 /_vercel 스크립트 404 제외)을 확인했습니다.
