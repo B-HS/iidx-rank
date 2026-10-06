@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
+import { getTranslations } from 'next-intl/server'
 import { myProfileQueryOptions } from '@entities/profile/profile.query-options'
 import { getMyProfile } from '@entities/profile/profile.server'
 import { DEFAULT_QUERY_STALE_TIME_MS } from '@shared/constants/cache'
@@ -30,5 +31,10 @@ const SettingsPage = () => (
         </Suspense>
     </ProfileSettingsFrame>
 )
+
+export const generateMetadata = async () => {
+    const t = await getTranslations('settings')
+    return { title: t('title') }
+}
 
 export default SettingsPage

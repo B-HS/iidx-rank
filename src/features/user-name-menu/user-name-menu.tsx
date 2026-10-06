@@ -41,7 +41,7 @@ export const UserNameMenu: FC<UserNameMenuProps> = ({ author, canBlock, onBlock,
                         type='button'
                         className={cn(
                             NAME_CLASS_NAME,
-                            'outline-none hover:text-foreground hover:underline focus-visible:text-foreground focus-visible:underline aria-expanded:text-foreground',
+                            'outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 hover:text-foreground hover:underline focus-visible:text-foreground focus-visible:underline aria-expanded:text-foreground',
                             className,
                         )}>
                         {author.name}

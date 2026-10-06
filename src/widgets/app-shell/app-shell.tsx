@@ -80,7 +80,9 @@ const LanguageMenu: FC<LanguageMenuProps> = ({ isPending, startTransition }) => 
     const pathname = usePathname()
     const handleLocaleChange = (value: string) => {
         if (value === locale || !hasLocale(routing.locales, value)) return
-        startTransition(() => router.replace(pathname, { locale: value }))
+        const searchParams = new URLSearchParams(window.location.search)
+        const query = Object.fromEntries([...new Set(searchParams.keys())].map((key) => [key, searchParams.getAll(key)] as const))
+        startTransition(() => router.replace(searchParams.size > 0 ? { pathname, query } : pathname, { locale: value }))
     }
     return (
         <DropdownMenuSub>
@@ -212,10 +214,11 @@ export const AppShell: FC<PropsWithChildren> = ({ children }) => {
                         <Sidebar collapsible='icon' className='border-r-0 group-data-[side=left]:border-r-0'>
                             <SidebarHeader className='flex shrink-0 flex-row items-center gap-2 p-0' style={{ height: SHELL_RAIL_CHROME_HEIGHT_PX }}>
                                 <SidebarTrigger aria-label={t('navigation.toggleSidebar')} className='ml-2 size-8 shrink-0' />
-                                <Link href='/' aria-label={t('app.name')} className='flex min-w-0 items-center gap-2 text-foreground'>
-                                    <span className='truncate text-sm font-semibold tracking-tight group-data-[collapsible=icon]:hidden'>
-                                        {t('app.name')}
-                                    </span>
+                                <Link
+                                    href='/'
+                                    aria-label={t('app.name')}
+                                    className='flex min-w-0 items-center gap-2 text-foreground group-data-[collapsible=icon]:hidden'>
+                                    <span className='truncate text-sm font-semibold tracking-tight'>{t('app.name')}</span>
                                 </Link>
                             </SidebarHeader>
                             <SidebarContent className='min-h-0 p-0'>
@@ -234,9 +237,9 @@ export const AppShell: FC<PropsWithChildren> = ({ children }) => {
                             </SidebarFooter>
                         </Sidebar>
                         <SidebarInset className='min-h-dvh min-w-0 rounded-none shadow-none md:h-full md:min-h-0 md:overflow-hidden'>
-                            <main className='flex min-h-dvh min-w-0 flex-1 flex-col bg-background md:h-full md:min-h-0 md:overflow-hidden'>
+                            <div className='flex min-h-dvh min-w-0 flex-1 flex-col bg-background md:h-full md:min-h-0 md:overflow-hidden'>
                                 {children}
-                            </main>
+                            </div>
                         </SidebarInset>
                     </div>
                 </ShellSidebarSlotContext.Provider>

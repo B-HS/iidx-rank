@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
+import { getTranslations } from 'next-intl/server'
 import { profileQueryOptions, profileRecordsQueryOptions } from '@entities/profile/profile.query-options'
 import { getProfile, getProfileRecords } from '@entities/profile/profile.server'
 import { HandleSchema } from '@entities/profile/user-summary.dto'
@@ -41,5 +42,10 @@ const UserPageRoute = ({ params }: UserPageRouteProps) => (
         </Suspense>
     </UserPageFrame>
 )
+
+export const generateMetadata = async () => {
+    const t = await getTranslations('profile')
+    return { title: t('pageTitle') }
+}
 
 export default UserPageRoute

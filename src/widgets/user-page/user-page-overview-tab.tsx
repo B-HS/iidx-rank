@@ -12,7 +12,10 @@ const PLAYED_LAMPS = LAMPS.filter((lamp) => lamp !== NO_PLAY_LAMP).toReversed()
 export const UserPageOverviewTab: FC<UserPageTabProps> = ({ handle }) => {
     const recordsQuery = useProfileRecords(handle)
 
-    if (!recordsQuery.data) return <ProfileRecordsStatus isError={recordsQuery.isError} />
+    if (!recordsQuery.data)
+        return (
+            <ProfileRecordsStatus isError={recordsQuery.isError} isRetrying={recordsQuery.isFetching} onRetry={() => void recordsQuery.refetch()} />
+        )
 
     const playedRecords = recordsQuery.data.records.filter((record) => record.lamp !== NO_PLAY_LAMP)
     const items = PLAYED_LAMPS.map((lamp) => ({ lamp, count: playedRecords.filter((record) => record.lamp === lamp).length }))

@@ -43,7 +43,7 @@ export const ChartDetails: FC<Props> = ({
         <Dialog open={Boolean(chart)} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle className='truncate pr-8'>{chart.title}</DialogTitle>
+                    <DialogTitle className='pr-8 leading-snug break-words'>{chart.title}</DialogTitle>
                     <DialogDescription>
                         {t(`difficulty.${chart.difficulty}`)} · {chart.version}
                     </DialogDescription>

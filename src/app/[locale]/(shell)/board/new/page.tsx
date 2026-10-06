@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { getBoardViewer } from '@entities/board/board.server'
 import { USER_ROLE } from '@shared/constants/user-role'
 import { BoardEditorSkeleton } from '@widgets/board-editor/board-editor-skeleton'
@@ -23,6 +24,11 @@ const BoardPostCreatePage = () => {
             </Suspense>
         </BoardFrame>
     )
+}
+
+export const generateMetadata = async () => {
+    const t = await getTranslations('board')
+    return { title: t('createTitle') }
 }
 
 export default BoardPostCreatePage

@@ -13,7 +13,7 @@ export const FollowButton: FC<FollowButtonProps> = ({ isFollowing, isPending, on
     const t = useTranslations('social')
 
     return (
-        <Button variant='outline' size='sm' aria-pressed={isFollowing} aria-busy={isPending} disabled={isPending} onClick={onToggle}>
+        <Button variant='outline' size='sm' aria-busy={isPending} disabled={isPending} onClick={onToggle}>
             {isFollowing ? t('unfollow') : t('follow')}
         </Button>
     )

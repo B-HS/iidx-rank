@@ -35,9 +35,13 @@ export const UserPage: FC<UserPageProps> = ({ handle, initialUserId, isAvailable
                     <EmptyTitle>{isAvailable ? t('profile.loadErrorTitle') : t('profile.unavailableTitle')}</EmptyTitle>
                     <EmptyDescription>{isAvailable ? t('profile.loadErrorDescription') : t('profile.unavailableDescription')}</EmptyDescription>
                 </EmptyHeader>
-                {isAvailable && (
+                {isAvailable ? (
                     <Button variant='outline' size='sm' disabled={profileQuery.isFetching} onClick={() => void profileQuery.refetch()}>
                         {t('common.retry')}
+                    </Button>
+                ) : (
+                    <Button variant='outline' size='sm' asChild>
+                        <Link href='/'>{t('navigation.home')}</Link>
                     </Button>
                 )}
             </Empty>

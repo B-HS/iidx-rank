@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
+import { getTranslations } from 'next-intl/server'
 import { BoardPageQuerySchema } from '@entities/board/board.dto'
 import { boardPostsQueryOptions } from '@entities/board/board.query-options'
 import { getBoardPostList, getBoardViewer } from '@entities/board/board.server'
@@ -32,5 +33,10 @@ const BoardListPage = ({ searchParams }: BoardListRouteProps) => (
         <BoardListDataBoundary searchParams={searchParams} />
     </Suspense>
 )
+
+export const generateMetadata = async () => {
+    const t = await getTranslations('navigation')
+    return { title: t('board') }
+}
 
 export default BoardListPage

@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { boardPostQueryOptions } from '@entities/board/board.query-options'
 import { getBoardPost, getBoardViewer } from '@entities/board/board.server'
 import { DEFAULT_QUERY_STALE_TIME_MS } from '@shared/constants/cache'
@@ -39,6 +40,11 @@ const BoardPostEditPage = ({ params }: BoardPostEditRouteProps) => {
             </Suspense>
         </BoardFrame>
     )
+}
+
+export const generateMetadata = async () => {
+    const t = await getTranslations('board')
+    return { title: t('editTitle') }
 }
 
 export default BoardPostEditPage

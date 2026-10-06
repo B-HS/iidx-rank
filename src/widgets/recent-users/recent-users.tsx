@@ -34,7 +34,7 @@ export const RecentUsers: FC = () => {
                         <li key={user.handle} className='min-w-0'>
                             <Link
                                 href={`/u/${user.handle}`}
-                                className='flex h-8 min-w-0 items-center gap-2 px-3 text-sm outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:bg-sidebar-accent focus-visible:text-sidebar-accent-foreground'>
+                                className='flex h-8 min-w-0 items-center gap-2 px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-inset hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:bg-sidebar-accent focus-visible:text-sidebar-accent-foreground'>
                                 <UserAvatar name={user.name} avatarUrl={user.avatarUrl} className='size-6 [&_[data-slot=avatar-fallback]]:text-xs' />
                                 <span className='min-w-0 truncate'>{user.name}</span>
                             </Link>

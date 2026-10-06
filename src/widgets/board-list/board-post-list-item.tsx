@@ -22,7 +22,7 @@ export const BoardPostListItem: FC<BoardPostListItemProps> = ({ post, viewerId }
                 {post.kind === BOARD_POST_KIND.NOTICE && <Badge variant='secondary'>{t('noticeBadge')}</Badge>}
                 <Link
                     href={`/board/${post.id}`}
-                    className='min-w-0 truncate text-sm font-medium outline-none hover:underline focus-visible:underline'>
+                    className='min-w-0 truncate text-sm font-medium outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:underline'>
                     {post.title}
                 </Link>
                 {post.commentCount > 0 && (

@@ -12,7 +12,7 @@ export const generateMetadata = async ({ params }: Pick<LayoutProps<'/[locale]'>
     const { locale } = await params
     if (!hasLocale(routing.locales, locale)) notFound()
     const t = await getTranslations({ locale, namespace: 'app' })
-    return { title: t('title'), description: t('description') }
+    return { title: { template: `%s | ${t('name')}`, default: t('title') }, description: t('description') }
 }
 const RootLayout = async ({ children, params }: LayoutProps<'/[locale]'>) => {
     const { locale } = await params

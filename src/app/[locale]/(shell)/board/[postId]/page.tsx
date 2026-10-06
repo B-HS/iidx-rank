@@ -57,4 +57,9 @@ const BoardPostPage = ({ params }: BoardPostRouteProps) => {
     )
 }
 
+export const generateMetadata = async () => {
+    const t = await getTranslations('navigation')
+    return { title: t('board') }
+}
+
 export default BoardPostPage

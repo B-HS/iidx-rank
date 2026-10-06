@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { cookies } from 'next/headers'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
+import { getTranslations } from 'next-intl/server'
 import type { Catalog } from '@entities/catalog/catalog.dto'
 import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
 import { getCatalogForShell } from '@entities/catalog/catalog.server'
@@ -71,4 +72,10 @@ const TablePage = async () => {
         </Suspense>
     )
 }
+
+export const generateMetadata = async () => {
+    const t = await getTranslations('navigation')
+    return { title: t('checker') }
+}
+
 export default TablePage

@@ -9,7 +9,10 @@ import type { UserPageTabProps } from '@widgets/user-page/user-page-tabs'
 export const UserPageRecordsTab: FC<UserPageTabProps> = ({ handle }) => {
     const recordsQuery = useProfileRecords(handle)
 
-    if (!recordsQuery.data) return <ProfileRecordsStatus isError={recordsQuery.isError} />
+    if (!recordsQuery.data)
+        return (
+            <ProfileRecordsStatus isError={recordsQuery.isError} isRetrying={recordsQuery.isFetching} onRetry={() => void recordsQuery.refetch()} />
+        )
 
     return <ProfileRecordList records={recordsQuery.data.records.filter((record) => record.lamp !== NO_PLAY_LAMP)} />
 }

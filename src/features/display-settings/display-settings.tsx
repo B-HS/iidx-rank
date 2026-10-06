@@ -18,10 +18,11 @@ type Props = {
 export const DisplaySettings: FC<Props> = ({ value, isLoading, isSaving, isAuthenticated, onPreview, onSave }) => {
     const t = useTranslations()
     const logoOpacityId = useId()
+    const versionDisplayLabelId = useId()
     return (
         <div className='grid gap-3' aria-busy={isLoading || isSaving}>
             <div className='grid gap-1.5'>
-                <Label>{t('display.versionDisplay')}</Label>
+                <Label id={versionDisplayLabelId}>{t('display.versionDisplay')}</Label>
                 {isLoading ? (
                     <Skeleton className='h-8 w-full' />
                 ) : (
@@ -34,7 +35,10 @@ export const DisplaySettings: FC<Props> = ({ value, isLoading, isSaving, isAuthe
                         }}
                         disabled={isLoading || isSaving}
                         className='w-full'
-                        aria-label={t('display.versionDisplay')}>
+                        variant='outline'
+                        size='sm'
+                        spacing={0}
+                        aria-labelledby={versionDisplayLabelId}>
                         <ToggleGroupItem value='logo' className='flex-1'>
                             {t('display.logo')}
                         </ToggleGroupItem>

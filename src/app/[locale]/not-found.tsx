@@ -9,10 +9,12 @@ const NotFoundPage: FC = () => {
         <main className='flex min-h-dvh items-center justify-center p-3 sm:p-4'>
             <Empty className='min-h-64 max-w-xl border-0'>
                 <EmptyHeader>
-                    <EmptyTitle>{t('errors.notFoundTitle')}</EmptyTitle>
+                    <EmptyTitle>
+                        <h1>{t('errors.notFoundTitle')}</h1>
+                    </EmptyTitle>
                     <EmptyDescription>{t('errors.notFoundDescription')}</EmptyDescription>
                 </EmptyHeader>
-                <Button variant='outline' asChild>
+                <Button variant='outline' size='sm' asChild>
                     <Link href='/'>{t('navigation.home')}</Link>
                 </Button>
             </Empty>

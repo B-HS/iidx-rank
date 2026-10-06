@@ -159,12 +159,19 @@ export const AuthDialogWidget: FC<Props> = ({ children, open, onOpenChange }) =>
     const [internalOpen, setInternalOpen] = useState(false)
     const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
     const isOpen = open ?? internalOpen
-    const handleOpenChange = onOpenChange ?? setInternalOpen
+    const handleOpenChange = (nextOpen: boolean) => {
+        if (!nextOpen) setMode('sign-in')
+        if (onOpenChange) {
+            onOpenChange(nextOpen)
+            return
+        }
+        setInternalOpen(nextOpen)
+    }
     const isSigningUp = mode === 'sign-up'
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-            <DialogContent className='max-w-md'>
+            <DialogContent className='sm:max-w-md'>
                 <DialogHeader>
                     <DialogTitle>{isSigningUp ? t('auth.signUpTitle') : t('auth.signInTitle')}</DialogTitle>
                     <DialogDescription>{isSigningUp ? t('auth.signUpDescription') : t('auth.signInDescription')}</DialogDescription>
