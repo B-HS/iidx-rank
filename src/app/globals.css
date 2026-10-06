@@ -262,7 +262,8 @@
     @apply flex min-w-0 flex-1 flex-col md:h-full md:min-h-0 md:overflow-hidden;
 }
 
-.checker-toolbar {
+.checker-toolbar,
+.shell-page-header {
     @apply sticky top-0 z-(--z-raised) flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border bg-background px-3 md:static;
 }
 

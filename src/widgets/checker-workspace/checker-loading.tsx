@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl'
-import { SlidersHorizontal } from 'lucide-react'
+import { Settings, SlidersHorizontal } from 'lucide-react'
 import type { FC } from 'react'
 import type { Catalog } from '@entities/catalog/catalog.dto'
 import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
@@ -9,14 +9,17 @@ import { CheckerSidebarSkeleton } from '@features/checker-skeleton/checker-sideb
 import { Button } from '@shared/ui/button'
 import { SidebarTrigger } from '@shared/ui/sidebar'
 import { Skeleton } from '@shared/ui/skeleton'
-import { AppShell } from '@widgets/app-shell/app-shell'
+import { ShellSidebarPortal } from '@widgets/app-shell/shell-sidebar-portal'
 
 type Props = { catalog?: Catalog; versionDisplay?: DisplayPreferencesInput['versionDisplay'] }
 export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
     const t = useTranslations()
     const sections = catalog ? groupChartsByRank(catalog.charts, 'normal') : []
     return (
-        <AppShell sidebarContent={<CheckerSidebarSkeleton />}>
+        <>
+            <ShellSidebarPortal>
+                <CheckerSidebarSkeleton />
+            </ShellSidebarPortal>
             <section aria-label={t('common.loading')} aria-busy='true' className='checker-workspace'>
                 <span role='status' className='sr-only'>
                     {t('common.loading')}
@@ -38,6 +41,9 @@ export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
                         <Button disabled variant='ghost' size='icon-sm' aria-label={t('navigation.openFilters')}>
                             <SlidersHorizontal />
                         </Button>
+                        <Button disabled variant='ghost' size='icon-sm' aria-label={t('navigation.openDisplaySettings')}>
+                            <Settings />
+                        </Button>
                     </div>
                 </header>
                 <div className='checker-list-scroll'>
@@ -58,6 +64,6 @@ export const CheckerLoading: FC<Props> = ({ catalog, versionDisplay }) => {
                     )}
                 </div>
             </section>
-        </AppShell>
+        </>
     )
 }

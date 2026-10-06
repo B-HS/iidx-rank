@@ -17,13 +17,14 @@
         "notifications": "通知"
     },
     "navigation": {
+        "home": "ホーム",
         "checker": "難易度表",
         "toggleSidebar": "サイドバーを開閉",
         "sidebar": "ナビゲーション",
         "sidebarDescription": "モバイルでナビゲーションとアカウントメニューを利用できます。",
+        "openDisplaySettings": "表示設定を開く",
         "openFilters": "譜面フィルターを開く",
         "openSidebar": "ナビゲーションを開く",
-        "settings": "設定",
         "theme": "テーマ切替",
         "accountMenu": "ユーザーメニュー",
         "signIn": "ログイン",
@@ -32,6 +33,10 @@
         "guest": "未ログイン",
         "filters": "フィルター",
         "language": "言語"
+    },
+    "home": {
+        "emptyTitle": "ダッシュボードは準備中です。",
+        "emptyDescription": "現在は難易度表で譜面ごとのランクとクリアランプを確認できます。"
     },
     "checker": {
         "title": "難易度表",

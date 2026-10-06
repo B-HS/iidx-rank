@@ -1,12 +1,14 @@
 'use client'
-import { type CSSProperties, type FC, type PropsWithChildren, type ReactNode, useState } from 'react'
+import { type CSSProperties, type FC, type PropsWithChildren, type TransitionStartFunction, useState, useTransition } from 'react'
 import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
-import { LogIn, LogOut, Moon, Music2, Settings, Sun, UserRound } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { Link } from '@shared/i18n/navigation'
+import { Languages, LogIn, LogOut, Moon, Sun, UserRound } from 'lucide-react'
+import { hasLocale, useLocale, useTranslations } from 'next-intl'
+import { Link, usePathname, useRouter } from '@shared/i18n/navigation'
+import { routing } from '@shared/i18n/routing'
 import { authClient } from '@entities/auth/auth.api'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
+import { LOCALE_OPTIONS } from '@shared/constants/locale'
 import {
     SHELL_RAIL_CHROME_HEIGHT_PX,
     SHELL_SIDEBAR_COLLAPSED_WIDTH_PX,
@@ -14,12 +16,19 @@ import {
     SHELL_SIDEBAR_WIDTH_PX,
 } from '@shared/constants/ui'
 import { useIdentityTransition } from '@shared/hooks/use-identity-transition'
+import { ShellSidebarSlotContext } from '@shared/providers/shell-sidebar-slot-context'
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuPortal,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@shared/ui/dropdown-menu'
 import {
@@ -36,10 +45,13 @@ import {
 } from '@shared/ui/sidebar'
 import { Skeleton } from '@shared/ui/skeleton'
 import { TooltipProvider } from '@shared/ui/tooltip'
-type Props = PropsWithChildren<{
-    sidebarContent?: ReactNode
-    onOpenSettings?: () => void
-}>
+import { SHELL_PRIMARY_NAV_ITEMS, SHELL_SECONDARY_NAV_ITEMS } from '@widgets/app-shell/shell-nav'
+import { ShellNavMenu } from '@widgets/app-shell/shell-nav-menu'
+import { RecentUsers } from '@widgets/recent-users/recent-users'
+type LanguageMenuProps = {
+    isPending: boolean
+    startTransition: TransitionStartFunction
+}
 const FOOTER_MENU_ITEM_CLASS_NAME = 'flex h-full min-w-0 items-center'
 const FOOTER_MENU_BUTTON_CLASS_NAME =
     'h-full justify-center rounded-none px-3 group-data-[collapsible=icon]:h-12! group-data-[collapsible=icon]:w-full! group-data-[collapsible=icon]:p-0!'
@@ -60,9 +72,39 @@ const ThemeControl: FC = () => {
         </SidebarMenuItem>
     )
 }
-const AccountControl: FC<Pick<Props, 'onOpenSettings'>> = ({ onOpenSettings }) => {
+const LanguageMenu: FC<LanguageMenuProps> = ({ isPending, startTransition }) => {
+    const t = useTranslations()
+    const locale = useLocale()
+    const router = useRouter()
+    const pathname = usePathname()
+    const handleLocaleChange = (value: string) => {
+        if (value === locale || !hasLocale(routing.locales, value)) return
+        startTransition(() => router.replace(pathname, { locale: value }))
+    }
+    return (
+        <DropdownMenuSub>
+            <DropdownMenuSubTrigger disabled={isPending}>
+                <Languages />
+                {t('navigation.language')}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                    <DropdownMenuRadioGroup value={locale} onValueChange={handleLocaleChange}>
+                        {LOCALE_OPTIONS.map((option) => (
+                            <DropdownMenuRadioItem key={option.value} value={option.value}>
+                                {option.label}
+                            </DropdownMenuRadioItem>
+                        ))}
+                    </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+        </DropdownMenuSub>
+    )
+}
+const AccountControl: FC = () => {
     const t = useTranslations()
     const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
+    const [isLocalePending, startLocaleTransition] = useTransition()
     const identityTransition = useIdentityTransition()
     const { data: session, isPending } = authClient.useSession()
     const handleSignOut = async () => {
@@ -107,10 +149,7 @@ const AccountControl: FC<Pick<Props, 'onOpenSettings'>> = ({ onOpenSettings }) =
                             <span className='truncate text-xs font-normal text-muted-foreground'>{session?.user.email ?? t('navigation.guest')}</span>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem disabled={!onOpenSettings} onSelect={onOpenSettings}>
-                            <Settings />
-                            {t('navigation.settings')}
-                        </DropdownMenuItem>
+                        <LanguageMenu isPending={isLocalePending} startTransition={startLocaleTransition} />
                         {session?.user ? (
                             <DropdownMenuItem onSelect={() => void handleSignOut()}>
                                 <LogOut />
@@ -129,7 +168,8 @@ const AccountControl: FC<Pick<Props, 'onOpenSettings'>> = ({ onOpenSettings }) =
         </SidebarMenuItem>
     )
 }
-export const AppShell: FC<Props> = ({ children, sidebarContent, onOpenSettings }) => {
+export const AppShell: FC<PropsWithChildren> = ({ children }) => {
+    const [sidebarSlotElement, setSidebarSlotElement] = useState<HTMLElement | null>(null)
     const t = useTranslations()
     return (
         <TooltipProvider>
@@ -142,46 +182,39 @@ export const AppShell: FC<Props> = ({ children, sidebarContent, onOpenSettings }
                         '--sidebar-width-mobile': SHELL_SIDEBAR_MOBILE_WIDTH_PX + 'px',
                     } as CSSProperties
                 }>
-                <div className='flex min-h-dvh w-full md:h-full md:min-h-0 md:overflow-hidden'>
-                    <Sidebar collapsible='icon' className='border-r-0 group-data-[side=left]:border-r-0'>
-                        <SidebarHeader className='flex shrink-0 flex-row items-center gap-2 p-0' style={{ height: SHELL_RAIL_CHROME_HEIGHT_PX }}>
-                            <SidebarTrigger aria-label={t('navigation.toggleSidebar')} className='ml-2 size-8 shrink-0' />
-                            <Link href='/' aria-label={t('app.name')} className='flex min-w-0 items-center gap-2 text-foreground'>
-                                <span className='truncate text-sm font-semibold tracking-tight group-data-[collapsible=icon]:hidden'>
-                                    {t('app.name')}
-                                </span>
-                            </Link>
-                        </SidebarHeader>
-                        <SidebarContent className='min-h-0 p-0'>
-                            <SidebarMenu className='gap-0 p-0'>
-                                <SidebarMenuItem className='min-w-0 flex-1'>
-                                    <SidebarMenuButton
-                                        asChild
-                                        isActive
-                                        tooltip={t('navigation.checker')}
-                                        className='h-9 rounded-none px-3 group-data-[collapsible=icon]:h-9! group-data-[collapsible=icon]:w-full! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!'>
-                                        <Link href='/' aria-label={t('navigation.checker')}>
-                                            <Music2 />
-                                            <span className='group-data-[collapsible=icon]:hidden'>{t('navigation.checker')}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            </SidebarMenu>
-                            <div className='min-w-0 group-data-[collapsible=icon]:hidden'>{sidebarContent}</div>
-                        </SidebarContent>
-                        <SidebarFooter className='h-12 shrink-0 gap-0 bg-sidebar p-0 group-data-[collapsible=icon]:h-24'>
-                            <SidebarMenu className='grid h-full grid-cols-2 items-stretch gap-0 group-data-[collapsible=icon]:grid-cols-1'>
-                                <ThemeControl />
-                                <AccountControl onOpenSettings={onOpenSettings} />
-                            </SidebarMenu>
-                        </SidebarFooter>
-                    </Sidebar>
-                    <SidebarInset className='min-h-dvh min-w-0 rounded-none shadow-none md:h-full md:min-h-0 md:overflow-hidden'>
-                        <main className='flex min-h-dvh min-w-0 flex-1 flex-col bg-background md:h-full md:min-h-0 md:overflow-hidden'>
-                            {children}
-                        </main>
-                    </SidebarInset>
-                </div>
+                <ShellSidebarSlotContext.Provider value={{ element: sidebarSlotElement }}>
+                    <div className='flex min-h-dvh w-full md:h-full md:min-h-0 md:overflow-hidden'>
+                        <Sidebar collapsible='icon' className='border-r-0 group-data-[side=left]:border-r-0'>
+                            <SidebarHeader className='flex shrink-0 flex-row items-center gap-2 p-0' style={{ height: SHELL_RAIL_CHROME_HEIGHT_PX }}>
+                                <SidebarTrigger aria-label={t('navigation.toggleSidebar')} className='ml-2 size-8 shrink-0' />
+                                <Link href='/' aria-label={t('app.name')} className='flex min-w-0 items-center gap-2 text-foreground'>
+                                    <span className='truncate text-sm font-semibold tracking-tight group-data-[collapsible=icon]:hidden'>
+                                        {t('app.name')}
+                                    </span>
+                                </Link>
+                            </SidebarHeader>
+                            <SidebarContent className='min-h-0 p-0'>
+                                <ShellNavMenu items={SHELL_PRIMARY_NAV_ITEMS} />
+                                <div ref={setSidebarSlotElement} className='min-w-0 group-data-[collapsible=icon]:hidden' />
+                                <div className='min-w-0 group-data-[collapsible=icon]:hidden'>
+                                    <RecentUsers />
+                                </div>
+                                <ShellNavMenu items={SHELL_SECONDARY_NAV_ITEMS} />
+                            </SidebarContent>
+                            <SidebarFooter className='h-12 shrink-0 gap-0 bg-sidebar p-0 group-data-[collapsible=icon]:h-24'>
+                                <SidebarMenu className='grid h-full grid-cols-2 items-stretch gap-0 group-data-[collapsible=icon]:grid-cols-1'>
+                                    <ThemeControl />
+                                    <AccountControl />
+                                </SidebarMenu>
+                            </SidebarFooter>
+                        </Sidebar>
+                        <SidebarInset className='min-h-dvh min-w-0 rounded-none shadow-none md:h-full md:min-h-0 md:overflow-hidden'>
+                            <main className='flex min-h-dvh min-w-0 flex-1 flex-col bg-background md:h-full md:min-h-0 md:overflow-hidden'>
+                                {children}
+                            </main>
+                        </SidebarInset>
+                    </div>
+                </ShellSidebarSlotContext.Provider>
             </SidebarProvider>
         </TooltipProvider>
     )

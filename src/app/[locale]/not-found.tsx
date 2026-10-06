@@ -13,7 +13,7 @@ const NotFoundPage: FC = () => {
                     <EmptyDescription>{t('errors.notFoundDescription')}</EmptyDescription>
                 </EmptyHeader>
                 <Button variant='outline' asChild>
-                    <Link href='/'>{t('navigation.checker')}</Link>
+                    <Link href='/'>{t('navigation.home')}</Link>
                 </Button>
             </Empty>
         </main>

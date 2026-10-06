@@ -1,9 +1,9 @@
 'use client'
-import { type CSSProperties, type FC, useEffect, useRef, useState, useTransition } from 'react'
+import { type CSSProperties, type FC, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
-import { RefreshCw, SlidersHorizontal } from 'lucide-react'
-import { hasLocale, useLocale, useTranslations } from 'next-intl'
+import { RefreshCw, Settings, SlidersHorizontal } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
 import { authClient } from '@entities/auth/auth.api'
@@ -21,13 +21,9 @@ import { CheckerFilters } from '@features/checker-filters/checker-filters'
 import { CheckerRecordsSkeleton } from '@features/checker-skeleton/checker-records-skeleton'
 import { ChartRankSection } from '@features/chart-rank-section/chart-rank-section'
 import { useIdentityTransition } from '@shared/hooks/use-identity-transition'
-import { useRouter as useLocaleRouter, usePathname } from '@shared/i18n/navigation'
-import { routing } from '@shared/i18n/routing'
-import { LanguageSettings } from '@features/language-settings/language-settings'
 import { useAnonymousPreferences, saveAnonymousPreferences } from '@entities/preferences/anonymous-preferences.client'
 import { groupChartsByRank } from '@entities/catalog/catalog-ranks'
-import { Separator } from '@shared/ui/separator'
-import { AppShell } from '@widgets/app-shell/app-shell'
+import { ShellSidebarPortal } from '@widgets/app-shell/shell-sidebar-portal'
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert'
 import { Button } from '@shared/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@shared/ui/dialog'
@@ -44,9 +40,6 @@ type Props = {
 export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, initialPreferences, initialAnonymousPreferences }) => {
     const t = useTranslations()
     const locale = useLocale()
-    const localeRouter = useLocaleRouter()
-    const pathname = usePathname()
-    const [isLocalePending, startLocaleTransition] = useTransition()
     const anonymousPreferences = useAnonymousPreferences(initialAnonymousPreferences)
     const queryClient = useQueryClient()
     const router = useRouter()
@@ -179,11 +172,6 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
             return
         }
         savePreferences.mutate(input, { onSuccess: () => setDisplayDraft(null), onError: () => setDisplayDraft(null) })
-    }
-    const handleLocaleChange = (value: string) => {
-        if (!hasLocale(routing.locales, value)) return
-        setIsSettingsOpen(false)
-        startLocaleTransition(() => localeRouter.replace(pathname, { locale: value }))
     }
     const handleCatalogSync = async () => {
         if (!canSyncCatalog) return
@@ -382,7 +370,8 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
         }
     }, [identityTransition, initialUserId, isSessionPending, queryClient, router, session?.user.id])
     return (
-        <AppShell sidebarContent={sidebarContent} onOpenSettings={() => setIsSettingsOpen(true)}>
+        <>
+            <ShellSidebarPortal>{sidebarContent}</ShellSidebarPortal>
             <section style={chartDisplayStyle} className='checker-workspace'>
                 <header className='checker-toolbar'>
                     <div className='flex min-w-0 items-center gap-2'>
@@ -415,6 +404,13 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
                         </div>
                         <Button variant='ghost' size='icon-sm' aria-label={t('navigation.openFilters')} onClick={() => setIsFiltersOpen(true)}>
                             <SlidersHorizontal />
+                        </Button>
+                        <Button
+                            variant='ghost'
+                            size='icon-sm'
+                            aria-label={t('navigation.openDisplaySettings')}
+                            onClick={() => setIsSettingsOpen(true)}>
+                            <Settings />
                         </Button>
                     </div>
                 </header>
@@ -468,8 +464,6 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
                             <DialogTitle>{t('display.title')}</DialogTitle>
                             <DialogDescription>{t('display.description')}</DialogDescription>
                         </DialogHeader>
-                        <LanguageSettings value={locale} isPending={isLocalePending} onChange={handleLocaleChange} />
-                        <Separator />
                         {isPreferencesLoadFailed ? (
                             <Alert>
                                 <AlertDescription>{t('display.loadError')}</AlertDescription>
@@ -491,6 +485,6 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
                 </Dialog>
                 <AuthDialogWidget open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen} />
             </section>
-        </AppShell>
+        </>
     )
 }

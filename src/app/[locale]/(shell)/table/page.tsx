@@ -63,7 +63,7 @@ const CheckerAppearanceBoundary = async ({ catalog }: Pick<DataProps, 'catalog'>
         </Suspense>
     )
 }
-const HomePage = async () => {
+const TablePage = async () => {
     const catalog = await getCatalogForShell()
     return (
         <Suspense fallback={<CheckerLoading catalog={catalog} />}>
@@ -71,4 +71,4 @@ const HomePage = async () => {
         </Suspense>
     )
 }
-export default HomePage
+export default TablePage

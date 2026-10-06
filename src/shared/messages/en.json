@@ -17,13 +17,14 @@
         "notifications": "Notifications"
     },
     "navigation": {
+        "home": "Home",
         "checker": "Difficulty table",
         "toggleSidebar": "Expand or collapse sidebar",
         "sidebar": "Navigation",
         "sidebarDescription": "Access navigation and your account on mobile.",
+        "openDisplaySettings": "Open display settings",
         "openFilters": "Open chart filters",
         "openSidebar": "Open navigation",
-        "settings": "Settings",
         "theme": "Switch theme",
         "accountMenu": "User menu",
         "signIn": "Sign in",
@@ -32,6 +33,10 @@
         "guest": "Not signed in",
         "filters": "Filters",
         "language": "Language"
+    },
+    "home": {
+        "emptyTitle": "The dashboard is being prepared.",
+        "emptyDescription": "For now, check chart ranks and clear lamps in the difficulty table."
     },
     "checker": {
         "title": "Difficulty table",
