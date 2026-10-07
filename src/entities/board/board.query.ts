@@ -4,7 +4,12 @@ import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import type { CommentCreateInput, PostCreateInput, PostUpdateInput } from '@entities/board/board.dto'
 import { createBoardComment, createBoardPost, deleteBoardComment, deleteBoardPost, updateBoardPost } from '@entities/board/board.api'
-import { boardCommentsQueryOptions, boardPostQueryOptions, boardPostsQueryOptions } from '@entities/board/board.query-options'
+import {
+    boardCommentsQueryOptions,
+    boardPostQueryOptions,
+    boardPostsQueryOptions,
+    myBoardActivityQueryOptions,
+} from '@entities/board/board.query-options'
 import { QUERY_KEY } from '@shared/constants/query-key'
 
 export const useBoardPosts = (page: number) => useQuery(boardPostsQueryOptions(page))
@@ -12,6 +17,8 @@ export const useBoardPosts = (page: number) => useQuery(boardPostsQueryOptions(p
 export const useBoardPost = (postId: string) => useQuery(boardPostQueryOptions(postId))
 
 export const useBoardComments = (postId: string, page: number) => useQuery(boardCommentsQueryOptions(postId, page))
+
+export const useMyBoardActivity = (enabled: boolean) => useQuery({ ...myBoardActivityQueryOptions(), enabled })
 
 export const useCreatePost = () => {
     const t = useTranslations()

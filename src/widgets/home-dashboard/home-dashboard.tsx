@@ -1,26 +1,19 @@
+'use client'
 import type { FC } from 'react'
-import { useTranslations } from 'next-intl'
-import { Link } from '@shared/i18n/navigation'
-import { Button } from '@shared/ui/button'
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@shared/ui/empty'
-import { ScrollContainer } from '@shared/ui/scroll-container'
-import { ShellPageHeader } from '@widgets/app-shell/shell-page-header'
-export const HomeDashboard: FC = () => {
-    const t = useTranslations()
-    return (
-        <section className='flex min-w-0 flex-1 flex-col md:h-full md:min-h-0 md:overflow-hidden'>
-            <ShellPageHeader title={t('navigation.home')} />
-            <ScrollContainer className='flex'>
-                <Empty className='min-h-64 border-0'>
-                    <EmptyHeader>
-                        <EmptyTitle>{t('home.emptyTitle')}</EmptyTitle>
-                        <EmptyDescription>{t('home.emptyDescription')}</EmptyDescription>
-                    </EmptyHeader>
-                    <Button variant='outline' size='sm' asChild>
-                        <Link href='/table'>{t('navigation.checker')}</Link>
-                    </Button>
-                </Empty>
-            </ScrollContainer>
-        </section>
-    )
+import { useViewerIdentity } from '@entities/auth/use-viewer-identity'
+import { HomeDashboardSkeleton } from '@widgets/home-dashboard/home-dashboard-skeleton'
+import { HomeGuestDashboard } from '@widgets/home-dashboard/home-guest-dashboard'
+import { HomeMemberDashboard } from '@widgets/home-dashboard/home-member-dashboard'
+
+type HomeDashboardProps = {
+    initialUserId: string | null
+}
+
+export const HomeDashboard: FC<HomeDashboardProps> = ({ initialUserId }) => {
+    const { isAligned, viewerId } = useViewerIdentity(initialUserId)
+
+    if (!isAligned) return <HomeDashboardSkeleton />
+    if (viewerId === null) return <HomeGuestDashboard />
+
+    return <HomeMemberDashboard userId={viewerId} />
 }

@@ -5,6 +5,7 @@ import {
     CommentCreateInputSchema,
     CommentListSchema,
     CommentSchema,
+    MyBoardActivitySchema,
     PostCreateInputSchema,
     PostListSchema,
     PostSchema,
@@ -17,6 +18,7 @@ import { apiRequest } from '@shared/lib/api-client'
 
 const POSTS_ENDPOINT = '/api/board/posts'
 const COMMENTS_ENDPOINT = '/api/board/comments'
+const MY_ACTIVITY_ENDPOINT = '/api/board/mine'
 
 const getPostEndpoint = (postId: string) => `${POSTS_ENDPOINT}/${BoardIdSchema.parse(postId)}`
 const getPostCommentsEndpoint = (postId: string) => `${getPostEndpoint(postId)}/comments`
@@ -28,6 +30,8 @@ export const fetchBoardPost = (postId: string) => apiRequest(getPostEndpoint(pos
 
 export const fetchBoardComments = (postId: string, page: number) =>
     apiRequest(`${getPostCommentsEndpoint(postId)}${getPageQuery(page)}`, CommentListSchema)
+
+export const fetchMyBoardActivity = () => apiRequest(MY_ACTIVITY_ENDPOINT, MyBoardActivitySchema)
 
 export const createBoardPost = (input: PostCreateInput) =>
     apiRequest(POSTS_ENDPOINT, PostSchema, { method: 'POST', body: JSON.stringify(PostCreateInputSchema.parse(input)) })

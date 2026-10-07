@@ -1,7 +1,14 @@
 import 'server-only'
-import { and, asc, count, desc, eq, gte, notExists, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, gte, ne, notExists, sql } from 'drizzle-orm'
 import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
-import { BOARD_COMMENTS_PAGE_SIZE, BOARD_NOTICES_LIMIT, BOARD_POSTS_PAGE_SIZE, BOARD_POST_KIND } from '@entities/board/board.dto'
+import {
+    BOARD_COMMENTS_PAGE_SIZE,
+    BOARD_MY_POSTS_LIMIT,
+    BOARD_MY_POST_COMMENTS_LIMIT,
+    BOARD_NOTICES_LIMIT,
+    BOARD_POSTS_PAGE_SIZE,
+    BOARD_POST_KIND,
+} from '@entities/board/board.dto'
 import { userSummaryColumns } from '@entities/profile/user-summary.server'
 import { user } from '@shared/server/db/auth-schema'
 import { boardComment, boardPost } from '@shared/server/db/board-schema'
@@ -184,6 +191,30 @@ export const countRecentComments = async (authorId: string, since: string) => {
 
     return rows[0]?.total ?? 0
 }
+
+export const readMyPostRows = async (viewerId: string) =>
+    await selectPostSummaries()
+        .where(eq(boardPost.authorId, viewerId))
+        .orderBy(desc(boardPost.createdAt), desc(boardPost.id))
+        .limit(BOARD_MY_POSTS_LIMIT)
+
+export const readMyPostCommentRows = async (viewerId: string) =>
+    await getDb()
+        .select({
+            id: boardComment.id,
+            postId: boardComment.postId,
+            postTitle: boardPost.title,
+            content: boardComment.content,
+            createdAt: boardComment.createdAt,
+            author: userSummaryColumns,
+        })
+        .from(boardComment)
+        .innerJoin(boardPost, eq(boardPost.id, boardComment.postId))
+        .innerJoin(user, eq(user.id, boardComment.authorId))
+        .innerJoin(userProfile, eq(userProfile.userId, boardComment.authorId))
+        .where(and(eq(boardPost.authorId, viewerId), ne(boardComment.authorId, viewerId), isNotBlockedBy(viewerId, boardComment.authorId)))
+        .orderBy(desc(boardComment.createdAt), desc(boardComment.id))
+        .limit(BOARD_MY_POST_COMMENTS_LIMIT)
 
 export const readSitemapPostRows = async (limit: number) =>
     await getDb()

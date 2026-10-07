@@ -11,6 +11,7 @@ import {
     CommentCreateInputSchema,
     CommentListSchema,
     CommentSchema,
+    MyBoardActivitySchema,
     PostCreateInputSchema,
     PostListSchema,
     PostSchema,
@@ -32,12 +33,15 @@ import {
     readCommentRow,
     readCommentRows,
     readGeneralPostRows,
+    readMyPostCommentRows,
+    readMyPostRows,
     readNoticeRows,
     readPostAccessRow,
     readPostRow,
     readSitemapPostRows,
     updatePost,
 } from '@entities/board/board.storage'
+import { getCommentExcerpt } from '@entities/board/comment-excerpt'
 import { parseRichTextDocument } from '@entities/board/rich-text'
 import { ensureUserProfile, toUserSummary } from '@entities/profile/user-summary.server'
 import { USER_ROLE } from '@shared/constants/user-role'
@@ -120,6 +124,19 @@ export const getBoardCommentList = async (viewer: BoardViewer | null, postId: st
     return CommentListSchema.parse({
         comments: comments.map((comment) => toComment(viewer, comment)),
         pagination: createPagination(validatedPage, BOARD_COMMENTS_PAGE_SIZE, total),
+    })
+}
+
+export const getMyBoardActivity = async (viewer: BoardViewer) => {
+    const [posts, comments] = await Promise.all([readMyPostRows(viewer.userId), readMyPostCommentRows(viewer.userId)])
+
+    return MyBoardActivitySchema.parse({
+        posts: posts.map(toPostSummary),
+        comments: comments.map(({ content, ...comment }) => ({
+            ...comment,
+            author: toUserSummary(comment.author),
+            excerpt: getCommentExcerpt(content),
+        })),
     })
 }
 

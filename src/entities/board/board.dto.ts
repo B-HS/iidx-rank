@@ -12,6 +12,9 @@ const RATE_LIMIT_WINDOW_MINUTES = 10
 export const BOARD_POSTS_PAGE_SIZE = 20
 export const BOARD_NOTICES_LIMIT = 5
 export const BOARD_COMMENTS_PAGE_SIZE = 30
+export const BOARD_MY_POSTS_LIMIT = 5
+export const BOARD_MY_POST_COMMENTS_LIMIT = 8
+export const BOARD_COMMENT_EXCERPT_MAX_LENGTH = 80
 export const BOARD_POST_TITLE_MAX_LENGTH = 100
 export const BOARD_COMMENT_MAX_LENGTH = 1000
 export const BOARD_RATE_LIMIT_WINDOW_MS = RATE_LIMIT_WINDOW_MINUTES * MILLISECONDS_PER_MINUTE
@@ -66,6 +69,19 @@ export type Comment = z.infer<typeof CommentSchema>
 
 export const CommentListSchema = z.object({ comments: z.array(CommentSchema), pagination: PaginationSchema })
 export type CommentList = z.infer<typeof CommentListSchema>
+
+export const MyPostCommentSchema = z.object({
+    id: BoardIdSchema,
+    postId: BoardIdSchema,
+    postTitle: z.string(),
+    author: AuthorSchema,
+    excerpt: z.string(),
+    createdAt: z.string(),
+})
+export type MyPostComment = z.infer<typeof MyPostCommentSchema>
+
+export const MyBoardActivitySchema = z.object({ posts: z.array(PostSummarySchema), comments: z.array(MyPostCommentSchema) })
+export type MyBoardActivity = z.infer<typeof MyBoardActivitySchema>
 
 export const PostCreateInputSchema = z.strictObject({ kind: BoardPostKindSchema, title: PostTitleSchema, content: RichTextContentSchema })
 export type PostCreateInput = z.infer<typeof PostCreateInputSchema>
