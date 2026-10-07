@@ -6,25 +6,18 @@ import { LAMPS, SCORE_GRADES } from '@entities/checker/checker.dto'
 type Lamp = ChartRecord['lamp']
 
 const UNPLAYED_LAMP = 'NO_PLAY' satisfies Lamp
-const NORMAL_ACHIEVED_LAMPS: readonly Lamp[] = LAMPS.slice(LAMPS.indexOf('CLEAR'))
-const HARD_ACHIEVED_LAMPS: readonly Lamp[] = LAMPS.slice(LAMPS.indexOf('HARD'))
 const RANK_ORDER = [...RANKS.toReversed(), null]
 
 const getLampByChartId = (records: ChartRecord[]) => new Map(records.map((record) => [record.chartId, record.lamp]))
 
-const getRankSections = (
-    charts: Chart[],
-    lampByChartId: ReturnType<typeof getLampByChartId>,
-    getRank: (chart: Chart) => Chart['normalRank'],
-    achievedLamps: readonly Lamp[],
-) =>
+const getRankSections = (charts: Chart[], lampByChartId: ReturnType<typeof getLampByChartId>, getRank: (chart: Chart) => Chart['normalRank']) =>
     RANK_ORDER.map((rank) => {
         const rankedCharts = charts.filter((chart) => getRank(chart) === rank)
 
         return {
             rank,
             total: rankedCharts.length,
-            achieved: rankedCharts.filter((chart) => achievedLamps.includes(lampByChartId.get(chart.id) ?? UNPLAYED_LAMP)).length,
+            played: rankedCharts.filter((chart) => (lampByChartId.get(chart.id) ?? UNPLAYED_LAMP) !== UNPLAYED_LAMP).length,
         }
     })
 
@@ -45,17 +38,17 @@ export const getLampSummary = (charts: Chart[], records: ChartRecord[]) => {
 }
 
 /**
- * Counts total and achieved charts per rank, from the highest rank down to unranked (null), for both gauges.
- * A chart is achieved at CLEAR or better on the normal table and at HARD or better on the hard table.
+ * Counts total and played charts per rank, from the highest rank down to unranked (null), grouped by the normal and the hard rank.
+ * A chart counts as played with any lamp other than NO_PLAY, whichever gauge was used.
  * @param charts - charts of the current catalog
  * @param records - records of one user
  */
-export const getRankAchievement = (charts: Chart[], records: ChartRecord[]) => {
+export const getRankPlayCounts = (charts: Chart[], records: ChartRecord[]) => {
     const lampByChartId = getLampByChartId(records)
 
     return {
-        normal: getRankSections(charts, lampByChartId, (chart) => chart.normalRank, NORMAL_ACHIEVED_LAMPS),
-        hard: getRankSections(charts, lampByChartId, (chart) => chart.hardRank, HARD_ACHIEVED_LAMPS),
+        normal: getRankSections(charts, lampByChartId, (chart) => chart.normalRank),
+        hard: getRankSections(charts, lampByChartId, (chart) => chart.hardRank),
     }
 }
 
@@ -105,7 +98,7 @@ export const getScoreGradeDistribution = (charts: Chart[], records: ChartRecord[
 }
 
 export type LampSummary = ReturnType<typeof getLampSummary>
-export type RankAchievement = ReturnType<typeof getRankAchievement>
-export type RankAchievementSection = RankAchievement['normal'][number]
+export type RankPlayCounts = ReturnType<typeof getRankPlayCounts>
+export type RankPlaySection = RankPlayCounts['normal'][number]
 export type RecentRecord = ReturnType<typeof getRecentRecords>[number]
 export type ScoreGradeDistribution = ReturnType<typeof getScoreGradeDistribution>
