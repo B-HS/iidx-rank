@@ -27,6 +27,10 @@ export const QUERY_KEY = {
         POST: (postId: string) => ['board', 'post', postId] as const,
         COMMENTS: (postId: string, page: number) => ['board', 'comments', postId, page] as const,
     },
+    EAMUSEMENT: {
+        ALL: ['eamusement'] as const,
+        STATUS: ['eamusement', 'status'] as const,
+    },
     BLOCK: {
         ALL: ['block'] as const,
         LIST: ['block', 'list'] as const,

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { ChartSchema } from '@entities/catalog/catalog.dto'
 import { RecordSchema } from '@entities/checker/checker.dto'
+import { ImportPlayerSchema, ImportStatusSchema, NotesRadarSchema } from '@entities/eamusement/eamusement.dto'
 import { FileKeySchema } from '@entities/file/file.dto'
 import { HandleSchema, UserSummarySchema } from '@entities/profile/user-summary.dto'
 import { PaginationSchema } from '@shared/lib/pagination'
@@ -33,6 +34,14 @@ export const ProfileUpdateInputSchema = z.strictObject({
 })
 export type ProfileUpdateInput = z.infer<typeof ProfileUpdateInputSchema>
 
+export const ProfileEamusementSchema = z.object({
+    djName: ImportPlayerSchema.shape.djName,
+    danRank: ImportPlayerSchema.shape.danRank,
+    notesRadar: NotesRadarSchema.nullable(),
+    syncedAt: ImportStatusSchema.shape.importedAt,
+})
+export type ProfileEamusement = z.infer<typeof ProfileEamusementSchema>
+
 export const ProfileSchema = UserSummarySchema.extend({
     bio: z.string(),
     followerCount: z.number().int().nonnegative(),
@@ -40,6 +49,7 @@ export const ProfileSchema = UserSummarySchema.extend({
     playedCount: z.number().int().nonnegative(),
     isOwner: z.boolean(),
     isFollowing: z.boolean(),
+    eamusement: ProfileEamusementSchema.nullable(),
 })
 export type Profile = z.infer<typeof ProfileSchema>
 

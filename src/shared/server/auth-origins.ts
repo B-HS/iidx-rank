@@ -6,3 +6,5 @@ export const getAuthOrigins = () => {
     if (AUTH_PRODUCTION_ORIGINS.some((origin) => origin === configuredOrigin)) return [...AUTH_PRODUCTION_ORIGINS]
     return [configuredOrigin]
 }
+
+export const getExtensionOrigins = () => getEnv().EXTENSION_ORIGINS

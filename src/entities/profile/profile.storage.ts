@@ -1,5 +1,6 @@
 import 'server-only'
 import { and, asc, count, desc, eq, isNotNull, ne } from 'drizzle-orm'
+import { readLatestPlayerImport, toNotesRadar } from '@entities/eamusement/eamusement.storage'
 import type { ProfileUpdateInput } from '@entities/profile/profile.dto'
 import { MyProfileSchema, NO_PLAY_LAMP, ProfileRecordsSchema, ProfileSchema, USER_LIST_PAGE_SIZE } from '@entities/profile/profile.dto'
 import { toUserSummary, userSummaryColumns } from '@entities/profile/user-summary.server'
@@ -54,7 +55,7 @@ export const readProfile = async (handle: string, viewerId: string | null) => {
     const { bio, userId: ownerId, ...summary } = owner
     const database = getDb()
     const isOwner = ownerId === viewerId
-    const [followers, following, played, viewerFollows] = await Promise.all([
+    const [followers, following, played, viewerFollows, latestImport] = await Promise.all([
         database.select({ total: count() }).from(userFollow).where(eq(userFollow.followeeId, ownerId)),
         database.select({ total: count() }).from(userFollow).where(eq(userFollow.followerId, ownerId)),
         database
@@ -69,6 +70,7 @@ export const readProfile = async (handle: string, viewerId: string | null) => {
                   .from(userFollow)
                   .where(and(eq(userFollow.followerId, viewerId), eq(userFollow.followeeId, ownerId)))
                   .limit(1),
+        readLatestPlayerImport(ownerId),
     ])
 
     return ProfileSchema.parse({
@@ -79,6 +81,12 @@ export const readProfile = async (handle: string, viewerId: string | null) => {
         playedCount: played[0]?.total ?? 0,
         isOwner,
         isFollowing: viewerFollows.length > 0,
+        eamusement: latestImport && {
+            djName: latestImport.djName,
+            danRank: latestImport.danRank,
+            notesRadar: toNotesRadar(latestImport),
+            syncedAt: latestImport.createdAt,
+        },
     })
 }
 

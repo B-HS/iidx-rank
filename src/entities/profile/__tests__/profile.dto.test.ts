@@ -4,6 +4,7 @@ import {
     PROFILE_NAME_MAX_LENGTH,
     ProfileBioSchema,
     ProfileNameSchema,
+    ProfileSchema,
     ProfileUpdateInputSchema,
     UserListPageQuerySchema,
 } from '@entities/profile/profile.dto'
@@ -79,5 +80,37 @@ describe('사용자 목록 페이지 번호', () => {
     test('0 이하이거나 숫자가 아니면 실패합니다', () => {
         expect(UserListPageQuerySchema.safeParse({ page: '0' }).success).toBe(false)
         expect(UserListPageQuerySchema.safeParse({ page: 'abc' }).success).toBe(false)
+    })
+})
+
+describe('프로필의 e-amusement 정보', () => {
+    const PROFILE = {
+        handle: 'iidx_player',
+        name: '닉네임',
+        avatarUrl: null,
+        isPublic: true,
+        bio: '',
+        followerCount: 0,
+        followingCount: 0,
+        playedCount: 0,
+        isOwner: false,
+        isFollowing: false,
+    }
+    const EAMUSEMENT = {
+        djName: '-TEST-',
+        danRank: '十段',
+        notesRadar: { NOTES: 128.45, CHORD: 131.22, PEAK: 118.9, CHARGE: 142, SCRATCH: 136.75, 'SOF-LAN': null },
+        syncedAt: '2026-10-07T10:05:03.000Z',
+    }
+
+    test('가져온 적이 없으면 null이고 가져온 뒤에는 DJ NAME·단위·노트레이더·동기화 시각을 담습니다', () => {
+        expect(ProfileSchema.parse({ ...PROFILE, eamusement: null }).eamusement).toBeNull()
+        expect(ProfileSchema.parse({ ...PROFILE, eamusement: EAMUSEMENT }).eamusement).toEqual(EAMUSEMENT)
+        expect(ProfileSchema.parse({ ...PROFILE, eamusement: { ...EAMUSEMENT, notesRadar: null } }).eamusement?.notesRadar).toBeNull()
+    })
+    test('IIDX ID는 공개 프로필 응답에 남기지 않습니다', () => {
+        const profile = ProfileSchema.parse({ ...PROFILE, eamusement: { ...EAMUSEMENT, iidxId: '1234-5678' } })
+
+        expect(profile.eamusement).toEqual(EAMUSEMENT)
     })
 })

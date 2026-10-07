@@ -8,6 +8,7 @@ import { ProfileSettingsSection } from '@features/profile-settings-section/profi
 import { Button } from '@shared/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@shared/ui/empty'
 import { BlockedUsers } from '@widgets/blocked-users/blocked-users'
+import { EamusementImport } from '@widgets/eamusement-import/eamusement-import'
 import { ProfileSettingsForm } from '@widgets/profile-settings/profile-settings-form'
 import { ProfileSettingsSkeleton } from '@widgets/profile-settings/profile-settings-skeleton'
 
@@ -59,6 +60,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({ initialUserId }) => 
     return (
         <>
             <ProfileSettingsForm key={profile.userId} profile={profile} />
+            <EamusementImport />
             <ProfileSettingsSection title={t('settings.blockedSection')} description={t('settings.blockedSectionDescription')}>
                 <BlockedUsers />
             </ProfileSettingsSection>

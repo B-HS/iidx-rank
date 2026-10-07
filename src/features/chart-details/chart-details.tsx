@@ -1,6 +1,6 @@
 'use client'
 import { type FC, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { type Record as ChartRecord, LAMPS, SCORE_GRADES, MAX_MEMO_LENGTH, type RecordInput } from '@entities/checker/checker.dto'
 import { type Chart } from '@entities/catalog/catalog.dto'
 import { CHART_MEMO_TEXTAREA_ROWS } from '@shared/constants/checker'
@@ -33,11 +33,15 @@ export const ChartDetails: FC<Props> = ({
     onRequestSignIn,
 }) => {
     const t = useTranslations()
+    const locale = useLocale()
     const [lamp, setLamp] = useState<ChartRecord['lamp']>(record?.lamp ?? 'NO_PLAY')
     const [scoreGrade, setScoreGrade] = useState<ChartRecord['scoreGrade']>(record?.scoreGrade ?? null)
     const [memo, setMemo] = useState(record?.memo ?? '')
     const rank = mode === 'normal' ? chart.normalRank : chart.hardRank
     const isPersonal = mode === 'normal' ? chart.normalPersonal : chart.hardPersonal
+    const exScore = record?.exScore ?? null
+    const missCount = record?.missCount ?? null
+    const isEamusementSource = record?.source === 'eamusement'
     const handleSave = () => onSave({ chartId: chart.id, lamp, memo, scoreGrade })
     return (
         <Dialog open={Boolean(chart)} onOpenChange={onOpenChange}>
@@ -107,6 +111,30 @@ export const ChartDetails: FC<Props> = ({
                             </SelectContent>
                         </Select>
                     </div>
+                    {(exScore !== null || missCount !== null || isEamusementSource) && (
+                        <div className='grid gap-2 border border-border p-2'>
+                            {isEamusementSource && (
+                                <Badge variant='secondary' className='w-fit'>
+                                    {t('checker.detailSourceEamusement')}
+                                </Badge>
+                            )}
+                            <dl className='grid grid-cols-2 gap-2 text-xs'>
+                                {exScore !== null && (
+                                    <div className='grid gap-0.5'>
+                                        <dt className='text-muted-foreground'>{t('checker.detailExScore')}</dt>
+                                        <dd className='text-sm font-semibold tabular-nums'>{exScore.toLocaleString(locale)}</dd>
+                                    </div>
+                                )}
+                                {missCount !== null && (
+                                    <div className='grid gap-0.5'>
+                                        <dt className='text-muted-foreground'>{t('checker.detailMissCount')}</dt>
+                                        <dd className='text-sm font-semibold tabular-nums'>{missCount.toLocaleString(locale)}</dd>
+                                    </div>
+                                )}
+                            </dl>
+                            <p className='text-xs text-muted-foreground'>{t('checker.detailEamusementHint')}</p>
+                        </div>
+                    )}
                     <div className='grid gap-1.5'>
                         <Label htmlFor='chart-record-memo'>{t('checker.detailMemo')}</Label>
                         <Textarea

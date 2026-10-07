@@ -1,0 +1,12 @@
+export const IMPORT_KIND = 'iidx-rank-import'
+export const IMPORT_VERSION = 2
+export const IMPORT_MAX_BODY_BYTES = 2 * 1024 * 1024
+export const IMPORT_MAX_CHARTS = 20_000
+export const IMPORT_COOLDOWN_MS = 10_000
+export const IMPORT_UNMATCHED_LIMIT = 200
+export const IMPORT_STYLE = { SP: 0, DP: 1 } as const
+export const IMPORT_TARGET_LEVEL = 12
+export const IMPORT_MIN_LEVEL = 1
+export const IMPORT_MAX_LEVEL = 12
+export const IMPORT_TITLE_MAX_LENGTH = 200
+export const IMPORT_PLAYER_TEXT_MAX_LENGTH = 64

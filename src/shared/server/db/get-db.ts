@@ -5,7 +5,8 @@ import type { Client } from '@libsql/client'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import { account, session, user, verification } from '@shared/server/db/auth-schema'
 import { catalogCharts, catalogSource } from '@shared/server/db/catalog-schema'
-import { userRecord, userRecordRevision } from '@shared/server/db/checker-schema'
+import { userRecord, userRecordHistory, userRecordRevision } from '@shared/server/db/checker-schema'
+import { eamusementImport } from '@shared/server/db/eamusement-schema'
 import { boardComment, boardPost } from '@shared/server/db/board-schema'
 import { uploadedFile } from '@shared/server/db/file-schema'
 import { userDisplayPreference } from '@shared/server/db/preferences-schema'
@@ -21,6 +22,8 @@ const databaseSchema = {
     verification,
     userRecord,
     userRecordRevision,
+    userRecordHistory,
+    eamusementImport,
     userDisplayPreference,
     userProfile,
     userFollow,

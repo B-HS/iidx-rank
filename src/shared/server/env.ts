@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 const DEFAULT_DATABASE_URL = 'file:./data/iidx.db'
 const DEFAULT_BETTER_AUTH_URL = 'http://localhost:3000'
+const EXTENSION_ORIGIN_PATTERN = /^chrome-extension:\/\/[a-p]{32}$/
 
 const envSchema = z.object({
     DATABASE_URL: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).default(DEFAULT_DATABASE_URL)),
@@ -27,6 +28,17 @@ const envSchema = z.object({
     GITHUB_SECRET_KEY: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
     NAVER_CLIENT_ID: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
     NAVER_SECRET_KEY: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
+    EXTENSION_ORIGINS: z
+        .string()
+        .default('')
+        .transform((value) =>
+            z.array(z.string().regex(EXTENSION_ORIGIN_PATTERN)).parse(
+                value
+                    .split(',')
+                    .map((origin) => origin.trim())
+                    .filter(Boolean),
+            ),
+        ),
 })
 
 let environment: z.infer<typeof envSchema> | undefined
@@ -48,6 +60,7 @@ export const getEnv = () => {
         GITHUB_SECRET_KEY: process.env.GITHUB_SECRET_KEY,
         NAVER_CLIENT_ID: process.env.NAVER_CLIENT_ID,
         NAVER_SECRET_KEY: process.env.NAVER_SECRET_KEY,
+        EXTENSION_ORIGINS: process.env.EXTENSION_ORIGINS,
     })
 
     return environment

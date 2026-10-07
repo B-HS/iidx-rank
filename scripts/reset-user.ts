@@ -3,7 +3,8 @@ import { eq, count, inArray, or, sql } from 'drizzle-orm'
 import { getDb } from '@shared/server/db/get-db'
 import { user, account, session, verification } from '@shared/server/db/auth-schema'
 import { boardComment, boardPost } from '@shared/server/db/board-schema'
-import { userRecord, userRecordRevision } from '@shared/server/db/checker-schema'
+import { userRecord, userRecordHistory, userRecordRevision } from '@shared/server/db/checker-schema'
+import { eamusementImport } from '@shared/server/db/eamusement-schema'
 import { uploadedFile } from '@shared/server/db/file-schema'
 import { userDisplayPreference } from '@shared/server/db/preferences-schema'
 import { userBlock, userFollow, userProfile } from '@shared/server/db/profile-schema'
@@ -54,6 +55,8 @@ try {
                 await transaction.delete(userProfile).where(eq(userProfile.userId, target.id))
                 await transaction.delete(session).where(eq(session.userId, target.id))
                 await transaction.delete(account).where(eq(account.userId, target.id))
+                await transaction.delete(userRecordHistory).where(eq(userRecordHistory.userId, target.id))
+                await transaction.delete(eamusementImport).where(eq(eamusementImport.userId, target.id))
                 await transaction.delete(userRecord).where(eq(userRecord.userId, target.id))
                 await transaction.delete(userDisplayPreference).where(eq(userDisplayPreference.userId, target.id))
                 await transaction.delete(userRecordRevision).where(eq(userRecordRevision.userId, target.id))
