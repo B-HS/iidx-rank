@@ -138,9 +138,48 @@ iidx-rank(이 저장소)와 익스텐션 iidx-data-parser(`/Users/hyunseokbyun/d
 - 마이그레이션은 기존 `user_record` 행을 `source = 'manual'`, `recorded_at = updated_at`으로 이력에 한 줄씩 옮깁니다.
 - 프로필에 보이는 플레이어 정보는 해당 사용자의 DJ NAME이 있는 가장 최근 `eamusement_import` 행입니다. 공개 프로필에는 DJ NAME·단위·노트레이더·동기화 시각만 보이고 IIDX ID는 본인 설정 화면에서만 보입니다.
 
+## 익스텐션 반영 흐름 (페이지 경유)
+
+익스텐션은 `POST /api/import/records`를 직접 호출하지 않습니다. iidx-rank의 가져오기 화면을 열고 수집 데이터를 그 화면에 넘기면, 화면이 사이트 자신의 요청으로 업로드합니다. 익스텐션 ID를 서버에 등록할 필요가 없고 ID가 바뀌어도 영향이 없습니다.
+
+1. 익스텐션 background가 넘겨줄 데이터가 있다는 표시(handoff)를 만들고 `<RANK_ORIGIN>/import`를 새 활성 탭으로 엽니다. handoff는 임의의 `handoffId`와 생성 시각을 갖고 10분 뒤 만료됩니다.
+2. 가져오기 화면(`/import`)과 iidx-rank 출처에 주입된 익스텐션 content script가 `window.postMessage`로 대화합니다.
+3. 화면은 받은 본문을 rank-import v2 스키마로 검증하고 `POST /api/import/records`로 업로드합니다. 요청 헤더 `X-Import-Channel: extension`을 붙이며, 서버는 사이트 출처의 요청일 때만 이 값을 `channel`에 반영합니다. 정보 표시용이고 권한 판단에는 쓰지 않습니다.
+4. 화면은 대기 → 업로드 중 → 결과(건수, 바뀐 차트 표, 일치하지 않은 곡) 또는 실패를 보여 주고, 결과를 익스텐션에 돌려줍니다. 익스텐션은 그 결과를 마지막 반영 상태로 저장합니다. 성공이면 handoff를 지우고, 실패면 화면의 다시 시도 결과를 받을 수 있도록 만료까지 유지합니다.
+5. 로그인하지 않은 상태면 화면이 로그인을 안내하고, 로그인 뒤 같은 본문으로 이어서 업로드합니다.
+
+### 메시지
+
+모든 메시지는 `window.postMessage(message, window.location.origin)`으로 보내고, 받는 쪽은 `event.source === window`와 `event.origin === window.location.origin`을 확인한 뒤 스키마로 검증합니다. 공통 필드 `channel`은 리터럴 `"iidx-rank-import"`입니다.
+
+| type      | 방향            | 나머지 필드                                    | 의미                                                                   |
+| --------- | --------------- | ---------------------------------------------- | ---------------------------------------------------------------------- |
+| `hello`   | 익스텐션 → 화면 | 없음                                           | content script가 준비됨. 화면은 `ready`로 답합니다                     |
+| `ready`   | 화면 → 익스텐션 | 없음                                           | 화면이 본문을 받을 준비가 됨. 마운트 직후와 `hello`를 받을 때 보냅니다 |
+| `payload` | 익스텐션 → 화면 | `handoffId: string`, `payload: rank-import v2` | 넘겨줄 본문                                                            |
+| `none`    | 익스텐션 → 화면 | 없음                                           | 대기 중인 handoff가 없음                                               |
+| `result`  | 화면 → 익스텐션 | `handoffId: string`, `outcome`                 | 업로드 결과                                                            |
+
+`outcome`은 `{ status: "success", result: ImportResult }` 또는 `{ status: "failed", code: string }`입니다. `code`는 서버 오류 코드(`AUTH_REQUIRED`, `IMPORT_COOLDOWN`, `UNSUPPORTED_STYLE`, `INVALID_INPUT` 등)이거나 화면이 정한 `INVALID_PAYLOAD`(본문 검증 실패), `REQUEST_FAILED`(네트워크)입니다.
+
+- 화면은 같은 `handoffId`를 한 번만 업로드합니다. 실패 뒤의 다시 시도는 사용자가 버튼을 눌렀을 때만 합니다.
+- 익스텐션은 성공 `result`를 받기 전까지 handoff를 유지해, 화면이 새로고침되거나 로그인으로 다시 열려도 같은 본문을 다시 넘길 수 있게 합니다.
+- content script는 `ready`를 받을 때마다 background에 handoff를 묻습니다. 없거나 만료됐으면 `none`을 보냅니다.
+- 화면은 `ready`를 보낸 뒤 일정 시간 안에 `payload`나 `none`이 오지 않으면 익스텐션이 없는 것으로 보고 안내(익스텐션에서 반영을 시작하거나 설정에서 파일로 가져오기)를 보여 줍니다.
+
+### 응답의 변경 목록
+
+`ImportResult`에 `changes`가 추가됩니다. 이번 가져오기로 바뀐 차트의 목록이고 최대 1000건입니다.
+
+```jsonc
+{ "changes": [{ "chartId": "chart-...", "previousLamp": "CLEAR", "lamp": "HARD", "scoreGrade": "AA", "exScore": 3000 }] }
+```
+
+`previousLamp`는 기록이 없던 차트면 `null`입니다. 화면은 catalog로 `chartId`를 곡명과 패턴으로 바꿔 표로 보여 줍니다.
+
 ## 익스텐션 출처
 
-- 서버 환경변수 `EXTENSION_ORIGINS`에 `chrome-extension://<32자 ID>`를 쉼표로 나열합니다. 비어 있으면 익스텐션 요청은 모두 403입니다.
+- 익스텐션은 위의 페이지 경유 흐름을 쓰므로 서버에 ID를 등록하지 않아도 됩니다. `EXTENSION_ORIGINS`는 익스텐션 출처에서 직접 호출하는 클라이언트를 따로 허용할 때만 쓰는 선택 설정입니다.
 - 압축 해제 로드의 ID는 폴더 경로에 따라 정해집니다. `chrome://extensions`에서 ID를 확인해 등록합니다.
 - 익스텐션의 대상 출처는 빌드 시 `RANK_ORIGIN` 환경변수로 정하고 기본값은 `https://iidx.hyns.dev`입니다. 로컬 개발은 `RANK_ORIGIN=http://localhost:3000 bun run build`를 씁니다.
 

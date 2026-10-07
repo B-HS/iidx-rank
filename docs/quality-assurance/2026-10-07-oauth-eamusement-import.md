@@ -7,7 +7,6 @@
 - [ ] GitHub OAuth 앱 콜백 주소에 `<BETTER_AUTH_URL>/api/auth/callback/github` 등록
 - [ ] Naver 애플리케이션 콜백 주소에 `<BETTER_AUTH_URL>/api/auth/callback/naver` 등록, 제공 정보에 이메일 포함
 - [ ] 환경변수 이름 확인: `GITHUB_CLIENT_ID`, `GITHUB_SECRET_KEY`, `NAVER_CLIENT_ID`(`NAVERE_`가 아님), `NAVER_SECRET_KEY`. 로컬과 Vercel 모두
-- [ ] 익스텐션을 로드해 `chrome://extensions`의 ID를 `EXTENSION_ORIGINS=chrome-extension://<ID>`로 Vercel에 등록
 - [ ] push하면 Vercel 빌드에서 마이그레이션 0005가 운영 DB에 적용됩니다. 추가만 하는 변경이고 기존 `user_record` 행을 이력으로 복사합니다
 
 ## 실제 환경에서 확인
@@ -16,8 +15,10 @@
 - [ ] Naver 로그인 왕복(대표 출처)
 - [ ] 대표 출처가 아닌 운영 출처에서 시작한 외부 로그인. `oAuthProxy`가 약 1850자 state와 암호화된 프로필을 넘깁니다
 - [ ] 이메일로 가입한 계정과 같은 이메일로 외부 로그인하면 연결 불가 안내가 나오는지
-- [ ] 익스텐션 service worker의 `fetch(credentials: 'include')`에 세션 쿠키가 붙는지. 서드파티 쿠키 차단 설정에서도 확인. 붙지 않으면 iidx-rank 출처의 content script가 first-party로 요청하는 방식으로 바꿉니다
-- [ ] 익스텐션 POST의 `Origin`이 `chrome-extension://<ID>`로 오는지(403이면 `EXTENSION_ORIGINS` 값 확인)
+- [x] 익스텐션 service worker의 세션 확인 요청에 쿠키가 붙는지 — 2026-10-07 사용자 실기에서 계정 이름과 핸들이 표시됨
+- [ ] 익스텐션의 반영 버튼 → `/import` 탭이 열리고 업로드 중 → 결과 표가 뜨는지, popup 반영 카드에 같은 결과가 남는지
+- [ ] 비로그인 상태에서 `/import`가 로그인을 안내하고 로그인 뒤 이어서 업로드하는지(외부 로그인 리다이렉트 뒤 포함)
+- [ ] 한국어가 아닌 브라우저에서 `/en/import`·`/ja/import`로 넘어가도 동작하는지
 - [ ] 실제 수집 결과의 `unmatched` 목록. 곡명 정규화가 다른 차트가 나오면 별칭 표를 만듭니다
 - [ ] Turso에서 레벨 12 전체(약 600건) 가져오기 한 번의 소요 시간
 

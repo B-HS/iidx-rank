@@ -147,7 +147,6 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 사용자가 main 직접 수행을 선택했습니다. 기존 5px 램프 및 중립색 격자 경계는 유지합니다. 기준: AGENTS.md와 llm-rules 관련 전문 및 Next 로컬 CSS 가이드.
 
-
 ## 카드 밀도·접기·필터와 설정 모달
 
 현재 상태: 구현·검증·GitHub·Production 반영 완료 (6/6)
@@ -160,7 +159,6 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 - [x] 결과 기록·선별 commit/push·Production 반영 확인
 
 사용자가 workflow 없이 main 직접 수행을 명시했습니다. 기존 저장 설정은 보존하고 미설정 계정과 비로그인 기본값만 10%로 변경합니다. 램프·DJ 랭크·UUID 캐시 계약은 유지합니다. 기준: AGENTS.md, llm-rules 관련 전문, Next 로컬 가이드, Radix Collapsible 및 shadcn 공식 registry.
-
 
 ## 가입 오류·KO/JP/EN·비로그인 설정·로딩 크기
 
@@ -176,7 +174,6 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 사용자가 서브에이전트 없이 직접 진행을 명시했습니다. .env/키 파일을 읽거나 쓰지 않습니다. 개인 UUID 캐시·DB 저장·수집 주기는 유지합니다. 일본어 표시 이름 JP의 실제 표준 locale은 ja입니다. 기준: AGENTS.md와 llm-rules 관련 전문, Next 로컬 Cache Components/authentication/i18n 가이드 및 선택한 i18n·Better Auth 공식 문서.
 
-
 ## 모바일 Safari 문서 스크롤·랭크 sticky
 
 현재 상태: 구현·검증·GitHub·Production 화면 확인 완료 (4/4), 실제 iPhone 상태 표시줄 탭은 미검증
@@ -188,7 +185,6 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 사용자가 서브에이전트 없이 직접 진행을 선택했습니다. 모바일은 문서 스크롤, 데스크톱은 기존 내부 목록 스크롤을 유지하며 CSS sticky를 사용합니다. 모달과 사이드바의 Radix 스크롤 잠금은 유지합니다. 기준: AGENTS.md, llm-rules 관련 전문, llm-rules-process/verify/save-docs, Next 로컬 스타일 가이드, MDN position 문서.
 
-
 ## Sticky 레이어·하단 여백·일일 갱신 확인
 
 현재 상태: 빌드·화면·GitHub·Production 확인 및 자동 갱신 활성 확인 완료 (4/4)
@@ -199,7 +195,6 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 - [x] 결과 기록·선별 commit/push·Production 확인
 
 사용자가 main 직접 수행을 선택했습니다. 모바일 문서 스크롤과 데스크톱 목록 스크롤을 보존합니다. 일반 조회는 DB에서만 읽고 기존 관리자/일일 원본 갱신 경로는 유지합니다. 기준: AGENTS.md, llm-rules 전문 및 process/verify/save-docs, Next 설치 CSS 가이드, Vercel Cron 공식 문서.
-
 
 ## 버그·수정 필요 지점 감사 및 수정
 
@@ -218,7 +213,6 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 사용자가 workflow 사용과 Fable 미사용을 명시했습니다. main은 Opus, 하위는 난이도에 따라 Opus(의미적 감사·까다로운 수정)와 Sonnet(범위가 분명한 수정·기계 검증)으로 배정합니다. 하위 에이전트는 Git과 .env에 접근하지 않습니다. 확인된 결함만 최소 변경으로 고치고 요청 밖 리팩토링은 하지 않습니다. 기준: AGENTS.md, llm-rules 전문, docs/ARCHITECTURE.md, docs/CACHE.md, 설치본 Next 문서.
 
-
 ## 감사 후속 결정 반영 — 관리자 초기 지정 유지·상위 램프 보호
 
 현재 상태: 수정·검증·기록·GitHub 반영 완료 (4/4), 브라우저 재현과 목록 이메일의 가입 여부 확인은 미수행
@@ -229,7 +223,6 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 - [x] d. 선별 commit/push
 
 사용자 결정(2026-10-06): 관리자 초기 지정은 A(목록 이메일의 가입 여부 확인만, 코드 변경 없음), 노멀 모드 램프 순환은 B(상위 램프는 클릭해도 내려가지 않게 변경). 같은 작업의 후속 단계이므로 workflow 선택을 유지합니다. 설계된 순환의 되돌림(노멀 CLEAR→NO_PLAY, 하드 EX_HARD→NO_PLAY)은 유지합니다.
-
 
 ## 커뮤니티 기능·DP·UI 고도화
 
@@ -251,7 +244,6 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 사용자 결정(2026-10-06): workflow 사용(main Opus, 하위 Opus/Sonnet, Fable 미사용). 기능 단위로 검증 후 main 푸시. 사용자 주소는 고유 핸들 /u/<핸들>. 프로필 사진과 게시판 이미지는 반드시 Cloudflare R2에 저장하며 이미지 기능을 빼지 않습니다(env 키 R2_ACCESS_KEY, R2_SECRET_KEY, R2_URL은 사용자가 등록, 에이전트는 값 미열람). 프로필 공개 기본값은 비공개. 게시판은 글·댓글·본문 이미지. UI/UX는 판단이 분명한 항목만 적용. 가정: 홈은 /, 난이도표는 /table, 비공개 프로필은 본인만 열람, 차단은 글·댓글 숨김, 게시판 읽기는 공개·쓰기는 로그인, 공지는 상단 고정·관리자 전용. 기준: AGENTS.md, llm-rules 전문, docs/ARCHITECTURE.md, docs/CACHE.md, docs/DESIGN.md, 설치본 Next 문서, tiptap·Cloudflare R2 공식 문서.
 
-
 ## UI/UX 결정 16건 반영·SEO·JSON-LD
 
 현재 상태: 구현·검증·기록·GitHub 반영 완료 (6/6). 로그인이 필요한 조작의 브라우저 확인과 대표 주소(https://iidx.hyns.dev)의 사용자 확인이 남음
@@ -265,7 +257,6 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 
 사용자 결정(2026-10-06): 감사 문서 "보고만" 16건 중 1 추천안(모션 감소 시 두 색 정적 표시), 2 유지(일본 시간 고정), 3 bblog의 virtual-scroll을 가져와 네이티브 스크롤바를 숨긴 채 적용, 4~7·9·11 추천안, 8 적당한 위치에 필터 상태 표시와 게이지 전환, 10 필요한 곳에 주소 반영, 12 동적 문서 제목과 전체 페이지의 SEO·JSON-LD, 13 용어·어투 전부 정정, 14 toast 정책 통일, 15 최근 사용자 목록 수정, 16 길게 누르기 안내를 터치 기기에서 보이게. 진행 방식은 Agent 도구의 개별 서브에이전트 대신 Workflow 도구로 오케스트레이션합니다(main Opus, 단계별 Opus/Sonnet과 effort 지정, Fable 미사용). .env.example의 R2 키 3줄은 사용자가 추가했습니다. 기준: AGENTS.md, llm-rules 전문, docs/COMMUNITY.md, docs/quality-assurance/2026-10-06-ui-ux-audit.md, 설치본 Next 문서.
 
-
 ## 사용자 목록 페이지 분리와 사이드바 메뉴 순서
 
 현재 상태: 구현·검증·기록·GitHub 반영 완료 (4/4)
@@ -278,7 +269,6 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 사용자 지적(2026-10-06): 최근 갱신 사용자는 사이드바 목록이 아니라 별도 페이지로 보여 주는 것이 맞고, 난이도표 메뉴는 누르면 필터·패널이 아래에 펼쳐지므로 항상 메뉴의 맨 아래에 둡니다. 직전 작업의 후속 수정이며 범위가 작아 main이 직접 수행합니다(서브에이전트 미사용).
 
 검증: typecheck 통과, lint 오류 0(기존 경고 4), 테스트 141 pass, 임시 SQLite 빌드 통과(/users 부분 프리렌더, /api/users 동적). 로컬 서버에서 /users·/users?page=2·/ja/users 200과 제목, canonical, GET /api/users?page=1 응답, page=0은 400, 이전 /api/users/recent는 404, sitemap에 /users 3개 로케일. 브라우저 1280폭에서 메뉴 순서(홈·사용자·게시판·난이도표)와 난이도표 패널 위치, 사용자 목록 화면, 콘솔 오류 없음(로컬의 /_vercel 스크립트 404 제외)을 확인했습니다.
-
 
 ## 외부 로그인·e-amusement 가져오기·익스텐션 연동
 
@@ -299,3 +289,17 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 결과: Workflow 1회(에이전트 8개)와 main의 리뷰 지적 반영으로 끝냈습니다. 교차 리뷰는 높음 0·중간 2·낮음 10건이었고, 오래된 데이터의 덮어쓰기 방지, null 값 유지, 플레이어 정보 조회 기준, OAuth 토큰 암호화, 계약 문서 정정을 반영했습니다. 검증은 임시 SQLite에서 마이그레이션·backfill·typecheck 0·test 181 pass·lint 오류 0·build 성공·통합 32개 단언·로컬 서버 HTTP 14개 경로·설정 화면 표시입니다. `.env.example`은 권한 설정으로 에이전트가 읽거나 쓸 수 없어 사용자가 직접 수정한 상태 그대로 두었습니다(커밋하지 않음). 이력은 docs/history/2026-10-07-oauth-eamusement-import.md, 남은 확인은 docs/quality-assurance/2026-10-07-oauth-eamusement-import.md에 있습니다.
 
 Production(https://iidx.hyns.dev): push 후 GET /api/extension/session 200 `user: null`, GET /api/import/status 401, GET /api/catalog 200을 확인했습니다. 새 라우트가 응답하므로 빌드 단계의 마이그레이션 0005와 배포가 끝난 상태입니다.
+
+## 익스텐션 반영을 가져오기 화면 경유로 전환
+
+현재 상태: 구현·검증·기록·GitHub 반영 완료 (5/5). 실제 Chrome에 로드한 익스텐션과 운영 화면의 왕복은 사용자 확인 대기
+
+- [x] a. 계약 추가 — docs/E-AMUSEMENT.md의 "익스텐션 반영 흐름 (페이지 경유)"(메시지 규약, 응답의 변경 목록)
+- [x] b. iidx-rank(Opus) — /import 화면(대기·로그인 안내·업로드 중·결과 표·실패), 응답 changes, X-Import-Channel 채널 힌트, ko·ja·en 메시지
+- [x] c. 파서(Opus) — 직접 POST 제거, handoff와 iidx-rank용 content script, 진행 중 상태, popup 문구
+- [x] d. main — 실패 보고 뒤에도 handoff를 만료까지 유지하도록 수정, robots에 /import 추가, 실제 content script 번들과 로컬 /import 화면의 왕복 검증
+- [x] e. 기록·commit·push, 익스텐션 재빌드
+
+사용자 지적(2026-10-07): 익스텐션에서 반영하면 ORIGIN_NOT_ALLOWED가 떴고, 서버에 ID를 등록하는 방식 자체를 없애 달라는 요청이었습니다. 출처 검사를 완화하는 변경은 권한 검사에서 거부되어 적용하지 않았고, 사용자 결정으로 익스텐션이 가져오기 화면을 열어 화면이 직접 업로드하는 방식으로 바꿨습니다. 화면은 "업로드 중입니다"를 보여 준 뒤 결과 표를 보여 줍니다. 서버의 출처 검사와 인증 코드는 바꾸지 않았습니다. 같은 작업의 후속이라 Workflow 도구(에이전트 2개, Opus)를 그대로 썼습니다.
+
+검증(임시 SQLite): typecheck 오류 0, test 203 pass, lint 오류 0·기존 경고 4, build 성공(/ko·/ja·/en/import 부분 프리렌더). 파서는 typecheck 오류 0, test 148 pass, build 성공. 로컬 서버(포트 3111)의 /import 화면에 빌드된 rank-content-script.js를 넣고 background 응답만 흉내 내어 hello → ready → payload → POST /api/import/records(channel extension) → 결과 표 → result 보고까지 확인했습니다. 임시 DB의 catalog 캐시가 비어 있어 곡명 행은 "알 수 없는 곡"으로만 확인했고 곡명 매핑은 단위 테스트로 확인했습니다.
