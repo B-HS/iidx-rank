@@ -278,3 +278,22 @@ Production https://iidx-rank.vercel.app: 7f7166c 자동 배포 READY, cloud buil
 사용자 지적(2026-10-06): 최근 갱신 사용자는 사이드바 목록이 아니라 별도 페이지로 보여 주는 것이 맞고, 난이도표 메뉴는 누르면 필터·패널이 아래에 펼쳐지므로 항상 메뉴의 맨 아래에 둡니다. 직전 작업의 후속 수정이며 범위가 작아 main이 직접 수행합니다(서브에이전트 미사용).
 
 검증: typecheck 통과, lint 오류 0(기존 경고 4), 테스트 141 pass, 임시 SQLite 빌드 통과(/users 부분 프리렌더, /api/users 동적). 로컬 서버에서 /users·/users?page=2·/ja/users 200과 제목, canonical, GET /api/users?page=1 응답, page=0은 400, 이전 /api/users/recent는 404, sitemap에 /users 3개 로케일. 브라우저 1280폭에서 메뉴 순서(홈·사용자·게시판·난이도표)와 난이도표 패널 위치, 사용자 목록 화면, 콘솔 오류 없음(로컬의 /_vercel 스크립트 404 제외)을 확인했습니다.
+
+
+## 외부 로그인·e-amusement 가져오기·익스텐션 연동
+
+현재 상태: 구현·검증·기록·commit 완료 (9/9). iidx-rank push는 운영 DB 마이그레이션이 따라오므로 사용자 확인 대기. 실제 OAuth 왕복과 익스텐션 실기 동작은 미검증
+
+- [x] 0. 두 저장소 조사, 결정 4건 확인, 계약 문서(docs/E-AMUSEMENT.md)와 결정 기록 작성
+- [x] 1. 사전 조사(병렬) — better-auth 1.7.7 외부 로그인 설정과 다중 도메인 콜백(Sonnet), Chrome 익스텐션의 쿠키 전송·chrome.i18n(Sonnet), 파서 검증 리뷰(Opus, 읽기 전용)
+- [x] 2. iidx-rank 서버(Opus) — 환경변수, GitHub·Naver 프로바이더, 기록 이력·가져오기 스키마와 마이그레이션, 가져오기 도메인, `/api/extension/session`·`/api/import/records`·`/api/import/status`, 수동 저장의 이력 기록, 프로필의 플레이어 정보
+- [x] 3. iidx-rank 화면(Sonnet) — 로그인 대화상자의 외부 로그인 버튼, 설정의 e-amusement 가져오기(파일 업로드·최근 동기화·플레이어 정보), 프로필의 플레이어 정보, 차트 상세의 EX SCORE·MISS COUNT, ko·ja·en 메시지
+- [x] 4. 파서 코어(Opus) — 검증 리뷰 지적 수정, rank-import v2, iidx-rank 세션 확인과 자동 반영, 진행 메시지의 키화, 빌드 시 RANK_ORIGIN 주입
+- [x] 5. 파서 화면(Sonnet) — popup 분리(1파일 1컴포넌트, useCallback 제거), iidx-rank 계정·반영 결과 카드, chrome.i18n ko·ja·en, UI/UX 점검, 문서 갱신
+- [x] 6. 교차 리뷰(Opus, 읽기 전용) — 두 저장소의 계약 일치와 가져오기 경로의 보안
+- [x] 7. main의 diff 확인·리뷰 지적 반영·최소 검증(임시 SQLite에서 마이그레이션·typecheck·lint·test·build, 파서 typecheck·test·build)
+- [x] 8. 기록·논리 단위 commit. 파서는 push 완료, iidx-rank는 운영 DB 마이그레이션이 따라오므로 사용자 확인 뒤 push
+
+사용자 결정(2026-10-07): 익스텐션은 브라우저의 iidx-rank 세션 사용, 네이버 키 이름은 NAVER_CLIENT_ID, 기록은 변경마다 이력에 insert하고 조회는 최신 값, 저장 범위는 기록 확장과 플레이어 정보. 카카오 로그인은 TODO. Workflow 도구로 진행하고 Fable·서브에이전트·general-purpose 에이전트는 쓰지 않습니다(main Opus, 단계별 Opus·Sonnet). 로컬 env의 DATABASE_URL이 운영 DB를 가리킬 수 있으므로 DB에 닿는 모든 명령은 `DATABASE_URL=file:./data/verify-import.db`를 앞에 붙여 임시 SQLite에서만 실행합니다. 하위 작업은 Git과 .env에 접근하지 않습니다. 기준: AGENTS.md, llm-rules 전문, docs/E-AMUSEMENT.md, docs/acknowledge/2026-10-07-eamusement-import-oauth.md, docs/ARCHITECTURE.md, docs/CACHE.md, docs/DESIGN.md, 설치본 Next 문서, better-auth·Chrome Extensions 공식 문서.
+
+결과: Workflow 1회(에이전트 8개)와 main의 리뷰 지적 반영으로 끝냈습니다. 교차 리뷰는 높음 0·중간 2·낮음 10건이었고, 오래된 데이터의 덮어쓰기 방지, null 값 유지, 플레이어 정보 조회 기준, OAuth 토큰 암호화, 계약 문서 정정을 반영했습니다. 검증은 임시 SQLite에서 마이그레이션·backfill·typecheck 0·test 181 pass·lint 오류 0·build 성공·통합 32개 단언·로컬 서버 HTTP 14개 경로·설정 화면 표시입니다. `.env.example`은 권한 설정으로 에이전트가 읽거나 쓸 수 없어 사용자가 직접 수정한 상태 그대로 두었습니다(커밋하지 않음). 이력은 docs/history/2026-10-07-oauth-eamusement-import.md, 남은 확인은 docs/quality-assurance/2026-10-07-oauth-eamusement-import.md에 있습니다.
