@@ -393,7 +393,16 @@
         "originRejected": "Authentication requests from this address were rejected. Ask the administrator to check the service address.",
         "serviceUnavailable": "Could not connect to the authentication service. Please try again shortly.",
         "rateLimited": "Too many requests. Please try again shortly.",
-        "networkError": "Could not reach the server. Check your network connection."
+        "networkError": "Could not reach the server. Check your network connection.",
+        "providerGithub": "GitHub",
+        "providerNaver": "Naver",
+        "socialContinue": "Continue with {provider}",
+        "socialRedirecting": "Redirecting",
+        "socialDivider": "or",
+        "socialAccountNotLinked": "An account with the same email already exists, so the external account could not be linked. Sign in with your email and password.",
+        "socialCancelled": "External sign-in was cancelled.",
+        "socialEmailMissing": "Could not get a verified email from the external account. Check that email sharing is allowed and try again, or sign up with your email.",
+        "socialError": "Could not complete external sign-in. Please try again shortly."
     },
     "errors": {
         "pageTitle": "Error",

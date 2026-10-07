@@ -7,7 +7,9 @@ import { z } from 'zod'
 import { useTranslations } from 'next-intl'
 import { getAuthErrorKey } from '@entities/auth/auth-error'
 import { authClient } from '@entities/auth/auth.api'
+import { SocialSignInButtons } from '@features/auth-dialog/social-sign-in-buttons'
 import { AUTH_PASSWORD_MIN_LENGTH, AUTH_PASSWORD_MAX_LENGTH } from '@shared/constants/auth'
+import { useSocialProviders } from '@shared/hooks/use-social-providers'
 import { Button } from '@shared/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@shared/ui/dialog'
 import { FieldError } from '@shared/ui/field'
@@ -156,6 +158,7 @@ type Props = {
 }
 export const AuthDialogWidget: FC<Props> = ({ children, open, onOpenChange }) => {
     const t = useTranslations()
+    const socialProviders = useSocialProviders()
     const [internalOpen, setInternalOpen] = useState(false)
     const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
     const isOpen = open ?? internalOpen
@@ -176,6 +179,7 @@ export const AuthDialogWidget: FC<Props> = ({ children, open, onOpenChange }) =>
                     <DialogTitle>{isSigningUp ? t('auth.signUpTitle') : t('auth.signInTitle')}</DialogTitle>
                     <DialogDescription>{isSigningUp ? t('auth.signUpDescription') : t('auth.signInDescription')}</DialogDescription>
                 </DialogHeader>
+                <SocialSignInButtons providers={socialProviders} />
                 {isSigningUp ? (
                     <SignUpForm onSuccess={() => handleOpenChange(false)} onSwitch={() => setMode('sign-in')} />
                 ) : (

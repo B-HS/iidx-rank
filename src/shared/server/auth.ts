@@ -3,12 +3,35 @@ import 'server-only'
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth'
 import { getSessionCookie } from 'better-auth/cookies'
+import { oAuthProxy } from 'better-auth/plugins'
+import type { NaverProfile } from 'better-auth/social-providers'
 import { ensureUserProfile } from '@entities/profile/user-summary.server'
 import { getAuthOrigins } from '@shared/server/auth-origins'
 import { USER_ROLE } from '@shared/constants/user-role'
 import { account, session, user, verification } from '@shared/server/db/auth-schema'
 import { getDb } from '@shared/server/db/get-db'
 import { getEnv } from '@shared/server/env'
+import { getSocialProviderCredentials } from '@shared/server/social-providers'
+
+const EMAIL_LOCAL_PART_SEPARATOR = '@'
+
+const createSocialProviders = () => {
+    const { github, naver } = getSocialProviderCredentials()
+
+    return {
+        ...(github ? { github } : {}),
+        ...(naver
+            ? {
+                  naver: {
+                      ...naver,
+                      mapProfileToUser: ({ response }: NaverProfile) => ({
+                          name: response.name || response.nickname || response.email?.split(EMAIL_LOCAL_PART_SEPARATOR, 1)[0] || '',
+                      }),
+                  },
+              }
+            : {}),
+    }
+}
 
 const createAuthInstance = (env: ReturnType<typeof getEnv>) =>
     betterAuth({
@@ -20,6 +43,9 @@ const createAuthInstance = (env: ReturnType<typeof getEnv>) =>
             schema: { user, session, account, verification },
         }),
         emailAndPassword: { enabled: true },
+        account: { encryptOAuthTokens: true },
+        socialProviders: createSocialProviders(),
+        plugins: [oAuthProxy({ productionURL: env.BETTER_AUTH_URL })],
         user: {
             additionalFields: { role: { type: [USER_ROLE.USER, USER_ROLE.ADMIN], required: false, defaultValue: USER_ROLE.USER, input: false } },
         },

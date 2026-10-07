@@ -16,3 +16,17 @@ export const getAuthErrorKey = (error: AuthError) => {
     if (error.code === 'FAILED_TO_CREATE_USER' || error.code === 'FAILED_TO_CREATE_SESSION') return 'auth.serviceUnavailable'
     return 'auth.authError'
 }
+
+type SocialAuthErrorKey = 'auth.socialAccountNotLinked' | 'auth.socialCancelled' | 'auth.socialEmailMissing' | 'auth.socialError'
+
+const SOCIAL_AUTH_ERROR_KEYS = new Map<string, SocialAuthErrorKey>([
+    ['account_not_linked', 'auth.socialAccountNotLinked'],
+    ['unable_to_link_account', 'auth.socialAccountNotLinked'],
+    ['account_already_linked_to_different_user', 'auth.socialAccountNotLinked'],
+    ['email_does_not_match', 'auth.socialAccountNotLinked'],
+    ['access_denied', 'auth.socialCancelled'],
+    ['email_not_found', 'auth.socialEmailMissing'],
+    ['email_not_verified', 'auth.socialEmailMissing'],
+])
+
+export const getSocialAuthErrorKey = (code: string) => SOCIAL_AUTH_ERROR_KEYS.get(code) ?? 'auth.socialError'

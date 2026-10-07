@@ -8,6 +8,8 @@ import { SITE_URL } from '@shared/constants/site'
 import { routing } from '@shared/i18n/routing'
 import { OPEN_GRAPH_LOCALE } from '@shared/lib/seo'
 import { AppProviders } from '@shared/providers/app-providers'
+import { SocialProvidersProvider } from '@shared/providers/social-providers-provider'
+import { getEnabledSocialProviders } from '@shared/server/social-providers'
 import '../globals.css'
 
 export const generateStaticParams = () => routing.locales.map((locale) => ({ locale }))
@@ -32,7 +34,9 @@ const RootLayout = async ({ children, params }: LayoutProps<'/[locale]'>) => {
         <html lang={locale} suppressHydrationWarning>
             <body className='min-h-dvh bg-background md:h-dvh md:overflow-hidden font-sans text-foreground antialiased'>
                 <NextIntlClientProvider>
-                    <AppProviders>{children}</AppProviders>
+                    <AppProviders>
+                        <SocialProvidersProvider providers={getEnabledSocialProviders()}>{children}</SocialProvidersProvider>
+                    </AppProviders>
                 </NextIntlClientProvider>
                 <Analytics />
                 <SpeedInsights />

@@ -23,6 +23,10 @@ const envSchema = z.object({
     R2_ACCESS_KEY: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
     R2_SECRET_KEY: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
     R2_URL: z.preprocess((value) => (value === '' ? undefined : value), z.url().optional()),
+    GITHUB_CLIENT_ID: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
+    GITHUB_SECRET_KEY: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
+    NAVER_CLIENT_ID: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
+    NAVER_SECRET_KEY: z.preprocess((value) => (value === '' ? undefined : value), z.string().min(1).optional()),
 })
 
 let environment: z.infer<typeof envSchema> | undefined
@@ -40,6 +44,10 @@ export const getEnv = () => {
         R2_ACCESS_KEY: process.env.R2_ACCESS_KEY,
         R2_SECRET_KEY: process.env.R2_SECRET_KEY,
         R2_URL: process.env.R2_URL,
+        GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+        GITHUB_SECRET_KEY: process.env.GITHUB_SECRET_KEY,
+        NAVER_CLIENT_ID: process.env.NAVER_CLIENT_ID,
+        NAVER_SECRET_KEY: process.env.NAVER_SECRET_KEY,
     })
 
     return environment

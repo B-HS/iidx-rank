@@ -393,7 +393,16 @@
         "originRejected": "このアドレスからの認証リクエストは拒否されました。管理者にサービスのアドレスをご確認ください。",
         "serviceUnavailable": "認証サービスに接続できませんでした。しばらくしてからもう一度お試しください。",
         "rateLimited": "リクエストが多すぎます。しばらくしてからもう一度お試しください。",
-        "networkError": "サーバーに接続できませんでした。ネットワーク接続を確認してください。"
+        "networkError": "サーバーに接続できませんでした。ネットワーク接続を確認してください。",
+        "providerGithub": "GitHub",
+        "providerNaver": "NAVER",
+        "socialContinue": "{provider}アカウントで続ける",
+        "socialRedirecting": "移動中です",
+        "socialDivider": "または",
+        "socialAccountNotLinked": "同じメールアドレスで登録済みのアカウントがあるため、外部アカウントを連携できませんでした。メールアドレスとパスワードでログインしてください。",
+        "socialCancelled": "外部ログインをキャンセルしました。",
+        "socialEmailMissing": "外部アカウントから確認済みのメールアドレスを取得できませんでした。メールアドレスの提供に同意しているか確認して再度お試しいただくか、メールアドレスで登録してください。",
+        "socialError": "外部ログインを完了できませんでした。しばらくしてからもう一度お試しください。"
     },
     "errors": {
         "pageTitle": "エラー",
