@@ -3,7 +3,7 @@ import type { Chart } from '@entities/catalog/catalog.dto'
 import { RANKS } from '@entities/catalog/catalog.dto'
 import type { Record as ChartRecord } from '@entities/checker/checker.dto'
 import { LAMPS, SCORE_GRADES } from '@entities/checker/checker.dto'
-import { getLampSummary, getRankPlayCounts, getRecentRecords, getScoreGradeDistribution } from '@entities/dashboard/dashboard-summary'
+import { getLampSummary, getRankLampDistribution, getRecentRecords, getScoreGradeDistribution } from '@entities/dashboard/dashboard-summary'
 
 const CHART_ID_HEX_LENGTH = 32
 const EARLIER = '2026-10-01T00:00:00.000Z'
@@ -88,25 +88,42 @@ describe('getLampSummary', () => {
     })
 })
 
-describe('getRankPlayCounts', () => {
+describe('getRankLampDistribution', () => {
     test('빈 catalog에서도 높은 랭크부터 미정까지 모든 구간을 0으로 돌려준다', () => {
-        const playCounts = getRankPlayCounts([], [])
-        const expected = [...RANKS.toReversed(), null].map((rank) => ({ rank, total: 0, played: 0 }))
+        const distribution = getRankLampDistribution([], [])
+        const expected = [...RANKS.toReversed(), null].map((rank) => ({
+            rank,
+            total: 0,
+            played: 0,
+            lamps: LAMPS.map((lamp) => ({ lamp, count: 0 })),
+        }))
 
-        expect(playCounts.normal).toEqual(expected)
-        expect(playCounts.hard).toEqual(expected)
-        expect(playCounts.normal[0]?.rank).toBe('S+')
-        expect(playCounts.normal.at(-1)?.rank).toBeNull()
+        expect(distribution.normal).toEqual(expected)
+        expect(distribution.hard).toEqual(expected)
+        expect(distribution.normal[0]?.rank).toBe('S+')
+        expect(distribution.normal.at(-1)?.rank).toBeNull()
     })
 
     test('게이지와 무관하게 NO_PLAY가 아닌 램프는 모두 플레이한 것으로 센다', () => {
         const charts = LAMPS.map((_, index) => createChart(index, { normalRank: 'A', hardRank: 'S' }))
         const records = LAMPS.map((lamp, index) => createRecord(index, { lamp }))
-        const playCounts = getRankPlayCounts(charts, records)
+        const distribution = getRankLampDistribution(charts, records)
         const playedLampCount = LAMPS.length - 1
 
-        expect(playCounts.normal.find(({ rank }) => rank === 'A')).toEqual({ rank: 'A', total: LAMPS.length, played: playedLampCount })
-        expect(playCounts.hard.find(({ rank }) => rank === 'S')).toEqual({ rank: 'S', total: LAMPS.length, played: playedLampCount })
+        const everyLampOnce = LAMPS.map((lamp) => ({ lamp, count: 1 }))
+
+        expect(distribution.normal.find(({ rank }) => rank === 'A')).toEqual({
+            rank: 'A',
+            total: LAMPS.length,
+            played: playedLampCount,
+            lamps: everyLampOnce,
+        })
+        expect(distribution.hard.find(({ rank }) => rank === 'S')).toEqual({
+            rank: 'S',
+            total: LAMPS.length,
+            played: playedLampCount,
+            lamps: everyLampOnce,
+        })
     })
 
     test('노멀 랭크와 하드 랭크를 따로 묶고 랭크가 null인 차트는 미정 구간에 넣는다', () => {
@@ -116,23 +133,23 @@ describe('getRankPlayCounts', () => {
             createChart(3, { normalRank: null, hardRank: null }),
         ]
         const records = [createRecord(1, { lamp: 'HARD' }), createRecord(2, { lamp: 'CLEAR' }), createRecord(3, { lamp: 'EX_HARD' })]
-        const playCounts = getRankPlayCounts(charts, records)
+        const distribution = getRankLampDistribution(charts, records)
 
-        expect(playCounts.normal.find(({ rank }) => rank === 'S+')).toEqual({ rank: 'S+', total: 1, played: 1 })
-        expect(playCounts.normal.find(({ rank }) => rank === null)).toEqual({ rank: null, total: 2, played: 2 })
-        expect(playCounts.hard.find(({ rank }) => rank === 'B+')).toEqual({ rank: 'B+', total: 1, played: 1 })
-        expect(playCounts.hard.find(({ rank }) => rank === null)).toEqual({ rank: null, total: 2, played: 2 })
+        expect(distribution.normal.find(({ rank }) => rank === 'S+')).toMatchObject({ rank: 'S+', total: 1, played: 1 })
+        expect(distribution.normal.find(({ rank }) => rank === null)).toMatchObject({ rank: null, total: 2, played: 2 })
+        expect(distribution.hard.find(({ rank }) => rank === 'B+')).toMatchObject({ rank: 'B+', total: 1, played: 1 })
+        expect(distribution.hard.find(({ rank }) => rank === null)).toMatchObject({ rank: null, total: 2, played: 2 })
     })
 
     test('기록이 없는 차트와 비활성 차트의 기록은 플레이한 것으로 세지 않는다', () => {
-        const playCounts = getRankPlayCounts(
+        const distribution = getRankLampDistribution(
             [createChart(1, { normalRank: 'F', hardRank: 'F' })],
             [createRecord(INACTIVE_CHART_INDEX, { lamp: 'FULL_COMBO' })],
         )
 
-        expect(playCounts.normal.find(({ rank }) => rank === 'F')).toEqual({ rank: 'F', total: 1, played: 0 })
-        expect(playCounts.hard.find(({ rank }) => rank === 'F')).toEqual({ rank: 'F', total: 1, played: 0 })
-        expect(playCounts.normal.reduce((sum, { total }) => sum + total, 0)).toBe(1)
+        expect(distribution.normal.find(({ rank }) => rank === 'F')).toMatchObject({ rank: 'F', total: 1, played: 0 })
+        expect(distribution.hard.find(({ rank }) => rank === 'F')).toMatchObject({ rank: 'F', total: 1, played: 0 })
+        expect(distribution.normal.reduce((sum, { total }) => sum + total, 0)).toBe(1)
     })
 })
 
