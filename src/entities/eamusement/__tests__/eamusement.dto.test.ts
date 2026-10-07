@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import { ExtensionSessionSchema, ImportInputSchema } from '@entities/eamusement/eamusement.dto'
-import { IMPORT_MAX_CHARTS, IMPORT_PLAYER_TEXT_MAX_LENGTH, IMPORT_TITLE_MAX_LENGTH } from '@shared/constants/eamusement'
+import { ExtensionSessionSchema, ImportInputSchema, ImportResultSchema } from '@entities/eamusement/eamusement.dto'
+import { IMPORT_CHANGES_LIMIT, IMPORT_MAX_CHARTS, IMPORT_PLAYER_TEXT_MAX_LENGTH, IMPORT_TITLE_MAX_LENGTH } from '@shared/constants/eamusement'
 
 const CHART = {
     chartId: 'chart-6d4d8c5dd256f3870c3527063b541f01',
@@ -96,5 +96,37 @@ describe('익스텐션 세션 응답 스키마', () => {
         const user = { id: '3f2b8c1e-5a47-4d9e-9b3a-1c2d3e4f5a6b', name: '닉네임', handle: 'iidx_player' }
 
         expect(ExtensionSessionSchema.parse({ user: { ...user, email: 'a@example.com', token: 'secret' } })).toEqual({ user })
+    })
+})
+
+describe('가져오기 응답 스키마', () => {
+    const CHANGE = { chartId: CHART.chartId, previousLamp: 'CLEAR', lamp: 'HARD', scoreGrade: 'AA', exScore: 3000 }
+    const RESULT = {
+        importId: 12,
+        channel: 'extension',
+        importedAt: '2026-10-07T10:05:03.000Z',
+        receivedCount: 612,
+        matchedCount: 598,
+        changedCount: 41,
+        changes: [CHANGE],
+        unmatched: [{ title: '곡명', difficulty: 'A' }],
+    }
+
+    test('계약 예시 응답을 그대로 통과시킵니다', () => {
+        expect<unknown>(ImportResultSchema.parse(RESULT)).toEqual(RESULT)
+    })
+    test('변경 목록은 기록이 없던 차트의 이전 램프 null과 값이 없는 DJ 랭크·EX SCORE를 허용합니다', () => {
+        const change = { ...CHANGE, previousLamp: null, scoreGrade: null, exScore: null }
+
+        expect<unknown>(ImportResultSchema.parse({ ...RESULT, changes: [change] }).changes).toEqual([change])
+    })
+    test('변경 목록에서 계약에 없는 필드는 응답에서 제거합니다', () => {
+        expect<unknown>(ImportResultSchema.parse({ ...RESULT, changes: [{ ...CHANGE, missCount: 3 }] }).changes).toEqual([CHANGE])
+    })
+    test('변경 목록이 없거나 최대 건수를 넘으면 거부합니다', () => {
+        expect(ImportResultSchema.safeParse({ ...RESULT, changes: undefined }).success).toBe(false)
+        expect(ImportResultSchema.safeParse({ ...RESULT, changes: Array.from({ length: IMPORT_CHANGES_LIMIT + 1 }, () => CHANGE) }).success).toBe(
+            false,
+        )
     })
 })

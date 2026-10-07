@@ -1,15 +1,15 @@
 import { revalidateTag } from 'next/cache'
 import type { ImportChannel } from '@entities/eamusement/eamusement.dto'
-import { ImportInputSchema } from '@entities/eamusement/eamusement.dto'
+import { EXTENSION_IMPORT_CHANNEL, ImportInputSchema } from '@entities/eamusement/eamusement.dto'
 import { importRecords } from '@entities/eamusement/eamusement.server'
-import { IMPORT_MAX_BODY_BYTES, IMPORT_STYLE } from '@shared/constants/eamusement'
+import { IMPORT_CHANNEL_HEADER, IMPORT_MAX_BODY_BYTES, IMPORT_STYLE } from '@shared/constants/eamusement'
 import { getSession } from '@shared/server/auth'
 import { RECENT_USERS_TAG, userRecordsTag } from '@shared/server/cache-tags'
 import { API_STATUS, errorResponse, isExtensionOrigin, isTrustedOrigin, successResponse } from '@shared/server/http'
 import { parseJsonInput } from '@shared/server/parse-json-input'
 
-const resolveImportChannel = (origin: string | null) => {
-    if (isTrustedOrigin(origin)) return 'file'
+const resolveImportChannel = (origin: string | null, channelHint: string | null) => {
+    if (isTrustedOrigin(origin)) return channelHint === EXTENSION_IMPORT_CHANNEL ? EXTENSION_IMPORT_CHANNEL : 'file'
     if (isExtensionOrigin(origin)) return 'extension'
 
     return null
@@ -19,7 +19,7 @@ export const POST = async (request: Request) => {
     let channel: ImportChannel | null
 
     try {
-        channel = resolveImportChannel(request.headers.get('origin'))
+        channel = resolveImportChannel(request.headers.get('origin'), request.headers.get(IMPORT_CHANNEL_HEADER))
     } catch {
         return errorResponse('AUTH_UNAVAILABLE', '인증 서비스를 사용할 수 없습니다. 서버 설정을 확인해 주세요.', API_STATUS.SERVICE_UNAVAILABLE)
     }

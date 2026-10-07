@@ -10,3 +10,7 @@ export const IMPORT_MIN_LEVEL = 1
 export const IMPORT_MAX_LEVEL = 12
 export const IMPORT_TITLE_MAX_LENGTH = 200
 export const IMPORT_PLAYER_TEXT_MAX_LENGTH = 64
+export const IMPORT_CHANGES_LIMIT = 1000
+export const IMPORT_CHANNEL_HEADER = 'X-Import-Channel'
+export const IMPORT_HANDOFF_CHANNEL = 'iidx-rank-import'
+export const IMPORT_HANDOFF_WAIT_MS = 3_000

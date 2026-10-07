@@ -3,6 +3,7 @@ import { ChartSchema } from '@entities/catalog/catalog.dto'
 import { RecordSchema } from '@entities/checker/checker.dto'
 import { HandleSchema } from '@entities/profile/user-summary.dto'
 import {
+    IMPORT_CHANGES_LIMIT,
     IMPORT_KIND,
     IMPORT_MAX_CHARTS,
     IMPORT_MAX_LEVEL,
@@ -24,6 +25,8 @@ const NotesRadarAxisSchema = z.number().nonnegative().nullable()
 
 export const ImportChannelSchema = z.enum(IMPORT_CHANNELS)
 export type ImportChannel = z.infer<typeof ImportChannelSchema>
+
+export const EXTENSION_IMPORT_CHANNEL = 'extension' satisfies ImportChannel
 
 export const ImportPlayerSchema = z.strictObject({
     djName: PlayerTextSchema,
@@ -72,6 +75,15 @@ export type ImportInput = z.infer<typeof ImportInputSchema>
 export const ImportUnmatchedChartSchema = ImportChartSchema.pick({ title: true, difficulty: true })
 export type ImportUnmatchedChart = z.infer<typeof ImportUnmatchedChartSchema>
 
+export const ImportChangeSchema = z.object({
+    chartId: ImportChartSchema.shape.chartId,
+    previousLamp: ImportChartSchema.shape.lamp.nullable(),
+    lamp: ImportChartSchema.shape.lamp,
+    scoreGrade: ImportChartSchema.shape.scoreGrade,
+    exScore: ImportChartSchema.shape.exScore,
+})
+export type ImportChange = z.infer<typeof ImportChangeSchema>
+
 const ImportCountsSchema = z.object({
     receivedCount: CountSchema,
     matchedCount: CountSchema,
@@ -82,6 +94,7 @@ export const ImportResultSchema = ImportCountsSchema.extend({
     importId: z.number().int().positive(),
     channel: ImportChannelSchema,
     importedAt: z.iso.datetime(),
+    changes: z.array(ImportChangeSchema).max(IMPORT_CHANGES_LIMIT),
     unmatched: z.array(ImportUnmatchedChartSchema).max(IMPORT_UNMATCHED_LIMIT),
 })
 export type ImportResult = z.infer<typeof ImportResultSchema>

@@ -3,7 +3,7 @@ import { and, desc, eq, getTableColumns, isNotNull, sql } from 'drizzle-orm'
 import type { Record as ChartRecord } from '@entities/checker/checker.dto'
 import { incrementRecordRevision } from '@entities/checker/checker.server'
 import type { ImportChannel, ImportInput } from '@entities/eamusement/eamusement.dto'
-import { planImport } from '@entities/eamusement/eamusement-merge'
+import { planImport, summarizeImportChanges } from '@entities/eamusement/eamusement-merge'
 import { IMPORT_COOLDOWN_MS } from '@shared/constants/eamusement'
 import { catalogCharts } from '@shared/server/db/catalog-schema'
 import { userRecord, userRecordHistory } from '@shared/server/db/checker-schema'
@@ -105,7 +105,15 @@ export const writeImport = async (userId: string, channel: ImportChannel, input:
                 createdAt,
             })
             .returning({ id: eamusementImport.id })
-        const importedRecords = changes.map((change) => ({ userId, ...change, source: IMPORT_RECORD_SOURCE }))
+        const importedRecords = changes.map(({ chartId, lamp, scoreGrade, exScore, missCount }) => ({
+            userId,
+            chartId,
+            lamp,
+            scoreGrade,
+            exScore,
+            missCount,
+            source: IMPORT_RECORD_SOURCE,
+        }))
 
         for (const batch of toBatches(importedRecords, RECORD_WRITE_BATCH_SIZE)) {
             await transaction
@@ -132,6 +140,9 @@ export const writeImport = async (userId: string, channel: ImportChannel, input:
 
         if (changes.length > 0) await incrementRecordRevision(transaction, userId, createdAt)
 
-        return { status: 'IMPORTED' as const, result: { importId: savedImport.id, channel, importedAt: createdAt, ...counts, unmatched } }
+        return {
+            status: 'IMPORTED' as const,
+            result: { importId: savedImport.id, channel, importedAt: createdAt, ...counts, changes: summarizeImportChanges(changes), unmatched },
+        }
     })
 }

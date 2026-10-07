@@ -1,10 +1,11 @@
 import type { ImportChart } from '@entities/eamusement/eamusement.dto'
 import { NO_PLAY_LAMP } from '@entities/profile/profile.dto'
-import { IMPORT_TARGET_LEVEL, IMPORT_UNMATCHED_LIMIT } from '@shared/constants/eamusement'
+import { IMPORT_CHANGES_LIMIT, IMPORT_TARGET_LEVEL, IMPORT_UNMATCHED_LIMIT } from '@shared/constants/eamusement'
 import type { UserRecordRow } from '@shared/server/db/checker-schema'
 
 type CurrentRecord = Pick<UserRecordRow, 'chartId' | 'lamp' | 'scoreGrade' | 'exScore' | 'missCount' | 'updatedAt'>
-type ImportChange = Omit<CurrentRecord, 'updatedAt'>
+type RecordValues = Omit<CurrentRecord, 'updatedAt'>
+type PlannedChange = RecordValues & { previousLamp: CurrentRecord['lamp'] | null }
 
 export const planImport = (currentRecords: CurrentRecord[], activeChartIds: ReadonlySet<string>, charts: ImportChart[], observedAt: string) => {
     const targetCharts = [...new Map(charts.filter((chart) => chart.level === IMPORT_TARGET_LEVEL).map((chart) => [chart.chartId, chart])).values()]
@@ -17,7 +18,7 @@ export const planImport = (currentRecords: CurrentRecord[], activeChartIds: Read
 
         if (current && current.updatedAt > observedAt) return []
 
-        const next: ImportChange = {
+        const next: RecordValues = {
             chartId: chart.chartId,
             lamp: chart.lamp,
             scoreGrade: chart.scoreGrade ?? current?.scoreGrade ?? null,
@@ -30,8 +31,9 @@ export const planImport = (currentRecords: CurrentRecord[], activeChartIds: Read
             current.scoreGrade !== next.scoreGrade ||
             current.exScore !== next.exScore ||
             current.missCount !== next.missCount
+        const change: PlannedChange = { ...next, previousLamp: current?.lamp ?? null }
 
-        return isChanged ? [next] : []
+        return isChanged ? [change] : []
     })
     const unmatched = targetCharts
         .filter((chart) => !activeChartIds.has(chart.chartId))
@@ -40,3 +42,8 @@ export const planImport = (currentRecords: CurrentRecord[], activeChartIds: Read
 
     return { receivedCount: charts.length, matchedCount: matchedCharts.length, changedCount: changes.length, changes, unmatched }
 }
+
+export const summarizeImportChanges = (changes: ReturnType<typeof planImport>['changes']) =>
+    changes
+        .slice(0, IMPORT_CHANGES_LIMIT)
+        .map(({ chartId, previousLamp, lamp, scoreGrade, exScore }) => ({ chartId, previousLamp, lamp, scoreGrade, exScore }))

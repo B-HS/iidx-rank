@@ -4,7 +4,7 @@ import { getAbsoluteUrl, getLocalizedPath } from '@shared/lib/seo'
 
 const API_PATHNAME = '/api/'
 const PUBLIC_FILE_PATHNAME = '/api/files/'
-const NO_INDEX_PATHNAMES = ['/settings', '/board/new', '/board/*/edit']
+const NO_INDEX_PATHNAMES = ['/settings', '/import', '/board/new', '/board/*/edit']
 
 const robots = () =>
     ({

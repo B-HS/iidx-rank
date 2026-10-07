@@ -1,6 +1,9 @@
+import { IMPORT_COOLDOWN_MS, IMPORT_MAX_BODY_BYTES } from '@shared/constants/eamusement'
+
 export const EMPTY_VALUE_PLACEHOLDER = '-'
 export const NOTES_RADAR_FRACTION_DIGITS = 2
 export const DJ_POINT_FRACTION_DIGITS = 2
 export const IMPORT_DIFFICULTY_LABELS = { B: 'BEGINNER', N: 'NORMAL', H: 'HYPER', A: 'ANOTHER', L: 'LEGGENDARIA' } as const
 export const BYTES_PER_MEGABYTE = 1024 * 1024
 export const MS_PER_SECOND = 1000
+export const IMPORT_MESSAGE_VALUES = { megabytes: IMPORT_MAX_BODY_BYTES / BYTES_PER_MEGABYTE, seconds: IMPORT_COOLDOWN_MS / MS_PER_SECOND }
