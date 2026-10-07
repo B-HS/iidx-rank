@@ -8,7 +8,7 @@
 - 프로필 사진과 게시판 본문 이미지는 Cloudflare R2에 저장합니다. 이미지 기능은 빼지 않습니다.
 - 게시판은 글·댓글·본문 이미지, 공지는 관리자만 작성·수정·삭제하고 목록 상단에 고정합니다. 읽기는 누구나, 쓰기는 로그인 사용자.
 - 차단은 차단한 사용자의 글·댓글을 숨기고 설정에서 해제합니다. 공지는 차단과 무관하게 표시합니다.
-- 홈은 /, 난이도표는 /table. 대시보드 내용은 미정이라 빈 상태 화면입니다.
+- 홈은 /, 난이도표는 /table. 홈은 로그인 사용자에게 내 정보·노트레이더·램프 현황·랭크별 달성·최근 플레이곡·게시판 활동을, 비로그인 사용자에게 로그인 안내와 난이도표 현황·공지·최근 글을 보여 줍니다.
 - DP 난이도표: 현재 원본 스프레드시트(☆12参考表)의 8개 탭은 모두 SP 전용이라 DP 원본이 없습니다. 사용자 결정으로 이번 범위에서 제외합니다.
 
 ## 라우트
@@ -17,7 +17,7 @@
 
 | 경로 | 파일 | 내용 |
 |---|---|---|
-| / | (shell)/page.tsx | 홈 대시보드(빈 상태) |
+| / | (shell)/page.tsx | 홈 대시보드 |
 | /table | (shell)/table/page.tsx | 기존 난이도표 |
 | /u/[handle] | (shell)/u/[handle]/page.tsx | 사용자 페이지 |
 | /users | (shell)/users/page.tsx | 사용자 목록(?page=) |
@@ -110,13 +110,14 @@ playedCount는 활성 곡 중 lamp가 NO_PLAY가 아닌 기록 수입니다.
 - GET /api/board/posts/[postId]/comments?page= → { comments: Comment[], pagination }. Comment { id, author, content, createdAt, canDelete }. 30개씩 작성순. 차단한 작성자의 댓글은 제외합니다.
 - POST /api/board/posts/[postId]/comments ← { content } → Comment
 - DELETE /api/board/comments/[commentId]. 작성자 본인 또는 관리자.
+- GET /api/board/mine → { posts: PostSummary[], comments: [{ id, postId, postTitle, author, excerpt, createdAt }] }. 로그인 필수(없으면 401 AUTH_REQUIRED). posts는 내가 쓴 글 최신 5개, comments는 내 글에 다른 사용자가 단 댓글 최신 8개이며 내 댓글과 차단한 작성자의 댓글은 제외합니다. excerpt는 본문 앞 80자입니다. 홈 대시보드가 사용합니다.
 
 관리자 판정은 세션의 DB 역할(user.role === 'admin')입니다.
 
 ## 캐시·쿼리 키
 
 - 프로필·게시판·차단 조회는 요청마다 DB에서 읽습니다. 사용자 목록만 'use cache' + RECENT_USERS_TAG('users:recent') + 60초 재검증을 쓰고(페이지 번호가 캐시 키), 기록 저장과 프로필 공개 설정·핸들·닉네임·사진 변경 시 태그를 만료합니다.
-- QUERY_KEY: PROFILE { ALL, ME, DETAIL(handle), RECORDS(handle) }, USERS { ALL, LIST(page) }, BOARD { ALL, POSTS(params), POST(id), COMMENTS(postId, page) }, BLOCK { ALL, LIST }.
+- QUERY_KEY: PROFILE { ALL, ME, DETAIL(handle), RECORDS(handle) }, USERS { ALL, LIST(page) }, BOARD { ALL, POSTS(params), POST(id), COMMENTS(postId, page), MINE }, BLOCK { ALL, LIST }.
 - 계정 전환 시 기존 QueryClient.clear 계약이 그대로 적용됩니다.
 
 ## 화면
