@@ -1,1 +1,6 @@
 export const SITE_URL = 'https://iidx.hyns.dev'
+export const PRIVACY_PATHNAME = '/privacy'
+export const PRIVACY_EFFECTIVE_DATE = '2026-10-08'
+export const CONTACT_EMAIL = 'gumyoincirno@gmail.com'
+export const SITE_ISSUES_URL = 'https://github.com/B-HS/iidx-rank/issues'
+export const EXTENSION_ISSUES_URL = 'https://github.com/B-HS/iidx-rank-data-parser/issues'

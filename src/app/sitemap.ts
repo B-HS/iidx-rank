@@ -4,10 +4,11 @@ import { BOARD_PATHNAME, getBoardPostPathname } from '@entities/board/board-page
 import { getSitemapPosts } from '@entities/board/board.server'
 import { getProfilePathname, USERS_PATHNAME } from '@entities/profile/profile-page'
 import { getSitemapProfiles } from '@entities/profile/profile.server'
+import { PRIVACY_PATHNAME } from '@shared/constants/site'
 import { routing } from '@shared/i18n/routing'
 import { getLanguageAlternates, getLocalizedUrl } from '@shared/lib/seo'
 
-const STATIC_PATHNAMES = ['/', '/table']
+const STATIC_PATHNAMES = ['/', '/table', PRIVACY_PATHNAME]
 
 const createLocalizedEntries = (pathname: string, lastModified?: string) =>
     routing.locales.map((locale) => ({

@@ -41,7 +41,8 @@
         "languageCurrent": "Language: {language}",
         "myPage": "My page",
         "profileSettings": "Profile settings",
-        "board": "Board"
+        "board": "Board",
+        "privacy": "Privacy policy"
     },
     "home": {
         "loading": "Loading the dashboard.",
@@ -528,7 +529,8 @@
         "socialAccountNotLinked": "An account with the same email already exists, so the external account could not be linked. Sign in with your email and password.",
         "socialCancelled": "External sign-in was cancelled.",
         "socialEmailMissing": "Could not get a verified email from the external account. Check that email sharing is allowed and try again, or sign up with your email.",
-        "socialError": "Could not complete external sign-in. Please try again shortly."
+        "socialError": "Could not complete external sign-in. Please try again shortly.",
+        "privacyLink": "View the privacy policy"
     },
     "errors": {
         "pageTitle": "Error",
@@ -536,5 +538,221 @@
         "genericDescription": "A temporary error occurred. Please try again shortly.",
         "notFoundTitle": "Page not found.",
         "notFoundDescription": "The requested page does not exist."
+    },
+    "privacy": {
+        "title": "Privacy Policy",
+        "description": "What information the IIDX Rank site and the IIDX Data Parser extension handle, and what it is used for.",
+        "effectiveDate": "Effective date: {date, date, long}",
+        "intro": "This page explains what information the IIDX Rank site and the IIDX Data Parser browser extension handle, what that information is used for, and who can see it.",
+        "scope": {
+            "title": "What this covers",
+            "items": {
+                "site": "The IIDX Rank site: provides the beatmania IIDX difficulty table, personal records, profiles, and a board.",
+                "extension": "The IIDX Data Parser extension: reads your own beatmania IIDX play data from the e-amusement site, stores it in your browser, and reflects it to IIDX Rank."
+            }
+        },
+        "collected": {
+            "title": "Information collected and when",
+            "body": "The information below is stored on the server when you take the action listed in the table. If you only browse without signing in, only the access information in the last row applies.",
+            "columnWhen": "When",
+            "columnWhat": "Information",
+            "rows": {
+                "signUp": {
+                    "when": "Signing up with email",
+                    "what": "Name (nickname), email address, and password. Only a hash of the password is stored."
+                },
+                "socialSignIn": {
+                    "when": "Signing in with GitHub or Naver",
+                    "what": "The name, email address, profile image address, and account identifier provided by that service, plus its access token and refresh token. The tokens are stored encrypted."
+                },
+                "session": {
+                    "when": "Signing in",
+                    "what": "Session token and its expiry time, IP address, and browser information (user agent)"
+                },
+                "profile": {
+                    "when": "Editing profile settings",
+                    "what": "Handle, nickname, bio, profile photo, and whether the profile is public"
+                },
+                "relations": {
+                    "when": "Following or blocking",
+                    "what": "The users you follow or block, and when"
+                },
+                "records": {
+                    "when": "Entering records in the difficulty table",
+                    "what": "Lamp, DJ grade, and memo for each chart, the time of the change, and the change history"
+                },
+                "eamusementImport": {
+                    "when": "Importing from e-amusement (extension or file)",
+                    "what": "Each import stores DJ NAME, IIDX ID, Dan rank, DJ POINT, play counts, notes radar, game version, collection time, and processed counts. The lamp, DJ grade, EX SCORE, and MISS COUNT of SP level 12 charts and their change history are stored as well."
+                },
+                "board": {
+                    "when": "Writing board posts or comments",
+                    "what": "Post title and body, comments, and the times they were written or edited"
+                },
+                "upload": {
+                    "when": "Uploading an image",
+                    "what": "Profile photo and post image files, and the format, size, and upload time of each file"
+                },
+                "preferences": {
+                    "when": "Changing display settings while signed in",
+                    "what": "How versions are shown in the difficulty table and the logo opacity"
+                },
+                "visit": {
+                    "when": "Visiting the site (automatic)",
+                    "what": "Page address, referrer, approximate location, and device, operating system, and browser type, for traffic statistics and performance measurement. See the Vercel entry under Service providers below."
+                }
+            }
+        },
+        "purposes": {
+            "title": "How the information is used",
+            "items": {
+                "account": "To create your account and keep you signed in.",
+                "records": "To store your difficulty table records and show your progress on the home screen and your profile.",
+                "community": "To provide profiles, following, the user list, and the board.",
+                "abuse": "To limit how often sign-in requests, posts, comments, image uploads, and imports can be made, in order to prevent abuse.",
+                "statistics": "To check traffic statistics and page performance."
+            }
+        },
+        "visibility": {
+            "title": "Information visible to other users",
+            "body": "Profiles are private at first. You can change this in profile settings.",
+            "items": {
+                "board": "Board posts and comments can be read by visitors who are not signed in, and the author nickname, handle, and profile photo are shown with them regardless of whether the profile is public.",
+                "publicProfile": "If you make your profile public, anyone can see your nickname, handle, bio, profile photo, follower and following counts, number of charts played, the lamp, DJ grade, and update time of each chart, and the DJ NAME, Dan rank, notes radar, and last import time imported from e-amusement.",
+                "listing": "Public profiles may appear in the user list, and public profiles and board posts may be indexed by search engines.",
+                "privateProfile": "Only you can see the page and records of a private profile.",
+                "neverShown": "Your email address, IIDX ID, DJ POINT, play counts, EX SCORE, MISS COUNT, memos, and block list are not shown to other users. Your IIDX ID is shown only on your own settings screen.",
+                "files": "An uploaded image can be opened without signing in by anyone who knows its address."
+            }
+        },
+        "extension": {
+            "title": "Data handled by the extension",
+            "body": "IIDX Data Parser works only on the beatmania IIDX pages of the e-amusement site and on the IIDX Rank site. It reads e-amusement pages only when you start a sign-in check or a collection from the popup.",
+            "reads": {
+                "title": "What it reads",
+                "items": {
+                    "login": "Whether you are signed in to e-amusement, and the nickname and DJ NAME shown on the page",
+                    "status": "The profile items shown on your own DJ data screen (DJ NAME, IIDX ID, Dan rank, DJ POINT, play counts, and so on) and the notes radar",
+                    "charts": "Per-song records for the levels you select (song title, difficulty, lamp, DJ grade, EX SCORE, and PGREAT and GREAT counts)"
+                }
+            },
+            "stores": {
+                "title": "What it stores in your browser",
+                "items": {
+                    "dataset": "The collected results read above, the collection progress, and the collection settings",
+                    "login": "The result of the e-amusement sign-in check (signed-in state, nickname, DJ NAME, time of the check, and the address of the checked page)",
+                    "rank": "The result of the IIDX Rank sign-in check (user identifier, nickname, and handle) and the last sync result (time, processed counts, and some of the songs that did not match)",
+                    "location": "This information stays in the extension storage of your browser (chrome.storage) and does not leave your device except in the cases listed under What it sends below."
+                }
+            },
+            "sends": {
+                "title": "What it sends and when",
+                "items": {
+                    "session": "When you open the popup or a sync is in progress, it sends a request to check whether you are signed in to IIDX Rank. The request contains no collected data, and the browser attaches the IIDX Rank sign-in cookie.",
+                    "handoff": "When a collection you started finishes while you are signed in to IIDX Rank, or when you press the sync button in the popup, it opens the IIDX Rank import screen in a new tab and passes the collected data to that screen. The screen uploads it with the signed-in account.",
+                    "payload": "The data passed consists of the game version, collection time, DJ NAME, IIDX ID, Dan rank, DJ POINT, play counts, notes radar, and the song title, difficulty, level, lamp, DJ grade, and EX SCORE of the collected songs. Of the song records, the server stores only those that are in the SP level 12 difficulty table.",
+                    "exportFile": "When you press export in the popup, the collected results are downloaded to your device as a JSON file."
+                }
+            },
+            "never": {
+                "title": "What it does not do",
+                "items": {
+                    "credentials": "It does not read or store passwords or cookie values for e-amusement or IIDX Rank, and it does not sign in on your behalf.",
+                    "otherSites": "It does not read the content of pages other than the two sites above, or your browsing history.",
+                    "otherServers": "It does not send data to any server other than e-amusement and IIDX Rank.",
+                    "otherPlayers": "It does not collect the play data of other people."
+                }
+            }
+        },
+        "browserStorage": {
+            "title": "Cookies and browser storage",
+            "body": "The site stores the items below in your browser. It does not use advertising cookies.",
+            "columnName": "Name",
+            "columnKind": "Type",
+            "columnPurpose": "Purpose",
+            "kinds": {
+                "cookie": "Cookie",
+                "localStorage": "Local storage"
+            },
+            "purposes": {
+                "session": "Keeps you signed in",
+                "oauthState": "Verifies the request while an external sign-in is in progress (expires after a few minutes)",
+                "locale": "Remembers the language you chose",
+                "sidebar": "Remembers whether the sidebar is collapsed",
+                "anonymousDisplay": "Difficulty table display settings while you are not signed in",
+                "theme": "Your choice of light or dark theme",
+                "touchHint": "Remembers whether you closed the difficulty table usage hint",
+                "commentsSeen": "Marks the comments you have already checked on the home screen (per account)"
+            },
+            "note": "On https connections, the names of the sign-in cookies are prefixed with __Secure-."
+        },
+        "providers": {
+            "title": "Service providers",
+            "body": "The site is run with the services below. Each one receives or stores the information its role requires.",
+            "columnProvider": "Provider",
+            "columnRole": "Role",
+            "columnData": "Related information",
+            "rows": {
+                "vercel": {
+                    "role": "Site hosting, traffic statistics (Web Analytics), and performance measurement (Speed Insights)",
+                    "data": "Requests to the site pass through Vercel. The statistics record the page address, referrer, approximate location, device, operating system, and browser type, and performance metrics. According to the Vercel documentation, visitors are identified by a hash created from the request, the visitor session is discarded after 24 hours, and no third-party cookies are used."
+                },
+                "turso": {
+                    "role": "Database",
+                    "data": "The account, profile, record, and board data listed under Information collected above"
+                },
+                "r2": {
+                    "role": "Image file storage",
+                    "data": "Uploaded profile photos and post images"
+                },
+                "socialLogin": {
+                    "role": "External sign-in",
+                    "data": "When you sign in with one of these services, authentication requests are exchanged with it, and the site receives your name, email address, profile image address, and account identifier."
+                }
+            }
+        },
+        "sharing": {
+            "title": "Sharing and sale",
+            "items": {
+                "noSale": "The collected information is not sold.",
+                "noTransfer": "It is not transferred to third parties, except where the service providers above need it to perform their roles.",
+                "limitedUse": "It is not used or transferred for purposes unrelated to providing the service, and it is not used to determine creditworthiness or for lending decisions."
+            }
+        },
+        "retention": {
+            "title": "Retention and deletion",
+            "body": "There is currently no feature that automatically deletes account information or records after a set period. A sign-in session is deleted when you sign out and can no longer be used after its expiry time.",
+            "self": {
+                "title": "What you can do yourself",
+                "items": {
+                    "profile": "In profile settings you can change your nickname, handle, bio, and profile photo, or make your profile private again. When you change or remove your profile photo, the previous photo file is deleted.",
+                    "board": "You can edit or delete your own posts and delete your own comments.",
+                    "relations": "You can unfollow or unblock at any time.",
+                    "records": "You can edit your own lamp, DJ grade, and memo in the difficulty table.",
+                    "extension": "The delete stored data action in the extension popup removes the collected results and the last sync result. Removing the extension makes the browser clear the extension storage as well.",
+                    "browser": "You can delete cookies and local storage from your browser settings."
+                }
+            },
+            "request": {
+                "title": "What requires a request",
+                "items": {
+                    "account": "There is no account deletion screen yet. To have your account and the information linked to it deleted, send a request to the contact below.",
+                    "history": "The change history of records and the import history cannot be deleted from the screen.",
+                    "images": "Deleting a post does not automatically delete the image files uploaded to its body."
+                }
+            }
+        },
+        "contact": {
+            "title": "Contact",
+            "body": "Send privacy questions and deletion requests to the following.",
+            "emailLabel": "Email",
+            "siteIssuesLabel": "IIDX Rank GitHub issues",
+            "extensionIssuesLabel": "IIDX Data Parser GitHub issues",
+            "note": "GitHub issues are visible to everyone, so please send anything that contains personal information by email."
+        },
+        "changes": {
+            "title": "Changes to this policy",
+            "body": "When the content changes, this page is updated and a new effective date is written."
+        }
     }
 }

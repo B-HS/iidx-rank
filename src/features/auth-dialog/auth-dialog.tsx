@@ -9,7 +9,9 @@ import { getAuthErrorKey } from '@entities/auth/auth-error'
 import { authClient } from '@entities/auth/auth.api'
 import { SocialSignInButtons } from '@features/auth-dialog/social-sign-in-buttons'
 import { AUTH_PASSWORD_MIN_LENGTH, AUTH_PASSWORD_MAX_LENGTH } from '@shared/constants/auth'
+import { PRIVACY_PATHNAME } from '@shared/constants/site'
 import { useSocialProviders } from '@shared/hooks/use-social-providers'
+import { Link } from '@shared/i18n/navigation'
 import { Button } from '@shared/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@shared/ui/dialog'
 import { FieldError } from '@shared/ui/field'
@@ -185,6 +187,9 @@ export const AuthDialogWidget: FC<Props> = ({ children, open, onOpenChange }) =>
                 ) : (
                     <SignInForm onSuccess={() => handleOpenChange(false)} onSwitch={() => setMode('sign-up')} />
                 )}
+                <Link href={PRIVACY_PATHNAME} target='_blank' className='justify-self-center text-xs text-muted-foreground hover:underline'>
+                    {t('auth.privacyLink')}
+                </Link>
             </DialogContent>
         </Dialog>
     )

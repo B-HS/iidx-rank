@@ -10,6 +10,7 @@ import { authClient } from '@entities/auth/auth.api'
 import { useMyProfile } from '@entities/profile/profile.query'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
 import { LOCALE_OPTIONS } from '@shared/constants/locale'
+import { PRIVACY_PATHNAME } from '@shared/constants/site'
 import {
     SHELL_FOOTER_COLLAPSED_HEIGHT_PX,
     SHELL_RAIL_CHROME_HEIGHT_PX,
@@ -242,6 +243,11 @@ export const AppShell: FC<PropsWithChildren> = ({ children }) => {
                                     ref={setSidebarSlotElement}
                                     className='min-w-0 border-y border-border empty:hidden group-data-[collapsible=icon]:hidden'
                                 />
+                                <Link
+                                    href={PRIVACY_PATHNAME}
+                                    className='mt-auto shrink-0 px-3 py-2 text-2xs text-muted-foreground outline-none hover:text-foreground hover:underline focus-visible:text-foreground focus-visible:underline group-data-[collapsible=icon]:hidden'>
+                                    {t('navigation.privacy')}
+                                </Link>
                             </SidebarContent>
                             <SidebarFooter
                                 className='h-(--shell-footer-row-height) shrink-0 gap-0 bg-sidebar p-0 group-data-[collapsible=icon]:h-(--shell-footer-collapsed-height)'
