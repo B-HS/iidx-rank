@@ -13,6 +13,8 @@ import { DashboardPanelLoading } from '@features/dashboard-panel/dashboard-panel
 import { DashboardIdentity } from '@features/dashboard-profile/dashboard-identity'
 import { DashboardImportSummary } from '@features/dashboard-profile/dashboard-import-summary'
 import { DashboardPlayerInfo } from '@features/dashboard-profile/dashboard-player-info'
+import { ExtensionStoreLink } from '@features/extension-store-link/extension-store-link'
+import { Button } from '@shared/ui/button'
 
 type HomeProfilePanelProps = {
     userId: string
@@ -75,9 +77,14 @@ export const HomeProfilePanel: FC<HomeProfilePanelProps> = ({ userId }) => {
                     {!isStatusFailed && !statusQuery.data && <DashboardPanelLoading label={t('settings.eamusementStatusLoading')} />}
                     {statusQuery.data && !latest && (
                         <DashboardPanelEmpty message={t('home.importEmpty')}>
-                            <DashboardPanelLink href={SETTINGS_PATHNAME} variant='outline'>
-                                {t('home.importAction')}
-                            </DashboardPanelLink>
+                            <div className='flex min-w-0 flex-wrap items-center justify-center gap-1.5'>
+                                <Button size='xs' asChild>
+                                    <ExtensionStoreLink>{t('extension.install')}</ExtensionStoreLink>
+                                </Button>
+                                <DashboardPanelLink href={SETTINGS_PATHNAME} variant='outline'>
+                                    {t('home.importAction')}
+                                </DashboardPanelLink>
+                            </div>
                         </DashboardPanelEmpty>
                     )}
                     {latest && (

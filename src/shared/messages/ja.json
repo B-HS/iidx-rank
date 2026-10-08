@@ -50,7 +50,7 @@
         "profilePublic": "公開",
         "followingCount": "フォロー中 {count, number}人",
         "profileLoadError": "マイ情報を読み込めませんでした。",
-        "importEmpty": "e-amusementからインポートした記録がまだありません。iidx-data-parser拡張機能でプレーヤー情報と記録をインポートできます。",
+        "importEmpty": "e-amusementからインポートした記録がまだありません。デスクトップ版Chrome向けのiidx-data-parser拡張機能でプレーヤー情報と記録をインポートできます。",
         "importAction": "インポート設定",
         "lastSynced": "最終同期",
         "radarChartLabel": "ノーツレーダーチャート。{values}",
@@ -80,7 +80,7 @@
         "guestIntroDescription": "ログインすると、クリアランプとDJランクを記録して、自分の状況をこの画面でまとめて確認できます。",
         "guestFeatureTable": "難易度表で譜面ごとのノーマル・ハードランクを確認できます。",
         "guestFeatureRecords": "ランプ状況、ランク別ランプ、最近プレーした曲をまとめて表示します。",
-        "guestFeatureImport": "iidx-data-parser拡張機能でe-amusementの記録をインポートできます。",
+        "guestFeatureImport": "Chrome向けの<store>iidx-data-parser拡張機能</store>でe-amusementの記録をインポートできます。",
         "guestSignIn": "ログインまたは登録",
         "sourceTitle": "難易度表の状況",
         "versionCount": "収録バージョン数",
@@ -155,6 +155,7 @@
         "saveError": "プロフィールを保存できませんでした。しばらくしてからもう一度お試しください。",
         "eamusementSection": "e-amusementインポート",
         "eamusementSectionDescription": "e-amusementから取得したSPレベル12の記録を、ランプ・DJランク・EX SCORE・MISS COUNTとともに難易度表へ反映します。",
+        "eamusementExtensionTitle": "拡張機能でインポート",
         "eamusementExtensionNotice": "iidx-data-parser拡張機能でデータを取得して反映を開始すると、インポート画面が開いてアップロード結果を表示します。拡張機能がなくても、下からrank-import v2ファイルをアップロードして反映できます。",
         "eamusementStatusTitle": "最近のインポート",
         "eamusementStatusLoading": "インポート状況を読み込み中です。",
@@ -207,6 +208,8 @@
         "guideTitle": "受け取った記録がありません。",
         "guideDescription": "iidx-data-parser拡張機能でe-amusementのデータを取得してから反映を開始してください。拡張機能がなくても、設定からrank-import v2ファイルをアップロードして反映できます。",
         "guideSettingsLink": "設定でファイルからインポート",
+        "missingTitle": "拡張機能を確認できませんでした。",
+        "missingDescription": "iidx-data-parser拡張機能をインストールしてから、拡張機能でe-amusementのデータを取得して反映を開始してください。拡張機能がなくても、設定からrank-import v2ファイルをアップロードして反映できます。",
         "signInTitle": "ログインが必要です。",
         "signInDescription": "ログインすると、受け取った記録を続けてアップロードします。",
         "failureTitle": "記録を反映できませんでした。",
@@ -227,6 +230,12 @@
         "lampChange": "{previous}から{next}に変更",
         "unknownChart": "不明な曲",
         "openTable": "難易度表を見る"
+    },
+    "extension": {
+        "install": "拡張機能をインストール",
+        "storeInstall": "Chromeウェブストアでインストール",
+        "browserHint": "Chrome系のデスクトップブラウザ専用です。モバイルやその他のブラウザにはインストールできません。",
+        "newTabHint": "(新しいタブで開きます)"
     },
     "social": {
         "follow": "フォロー",

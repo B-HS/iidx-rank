@@ -50,7 +50,7 @@
         "profilePublic": "공개",
         "followingCount": "팔로잉 {count, number}명",
         "profileLoadError": "내 정보를 불러오지 못했습니다.",
-        "importEmpty": "아직 e-amusement에서 가져온 기록이 없습니다. iidx-data-parser 익스텐션으로 플레이어 정보와 기록을 가져올 수 있습니다.",
+        "importEmpty": "아직 e-amusement에서 가져온 기록이 없습니다. 데스크톱 Chrome용 iidx-data-parser 익스텐션으로 플레이어 정보와 기록을 가져올 수 있습니다.",
         "importAction": "가져오기 설정",
         "lastSynced": "마지막 동기화",
         "radarChartLabel": "노트레이더 차트. {values}",
@@ -80,7 +80,7 @@
         "guestIntroDescription": "로그인하면 플레이 램프와 DJ 랭크를 기록하고 내 현황을 이 화면에서 한눈에 볼 수 있습니다.",
         "guestFeatureTable": "난이도표에서 보면별 노멀·하드 랭크를 확인합니다.",
         "guestFeatureRecords": "램프 현황과 랭크별 램프, 최근 플레이곡을 모아 봅니다.",
-        "guestFeatureImport": "iidx-data-parser 익스텐션으로 e-amusement 기록을 가져옵니다.",
+        "guestFeatureImport": "Chrome용 <store>iidx-data-parser 익스텐션</store>으로 e-amusement 기록을 가져옵니다.",
         "guestSignIn": "로그인 또는 가입",
         "sourceTitle": "난이도표 현황",
         "versionCount": "수록 버전 수",
@@ -155,6 +155,7 @@
         "saveError": "프로필을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
         "eamusementSection": "e-amusement 가져오기",
         "eamusementSectionDescription": "e-amusement에서 받은 SP 레벨 12 기록을 램프·DJ 랭크·EX SCORE·MISS COUNT와 함께 난이도표에 반영합니다.",
+        "eamusementExtensionTitle": "익스텐션으로 가져오기",
         "eamusementExtensionNotice": "iidx-data-parser 익스텐션에서 데이터를 수집하고 반영을 시작하면 가져오기 화면이 열려 업로드 결과를 보여 줍니다. 익스텐션 없이도 아래에서 rank-import v2 파일을 올려 반영할 수 있습니다.",
         "eamusementStatusTitle": "최근 가져오기",
         "eamusementStatusLoading": "가져오기 상태를 불러오는 중입니다.",
@@ -207,6 +208,8 @@
         "guideTitle": "넘겨받은 기록이 없습니다.",
         "guideDescription": "iidx-data-parser 익스텐션에서 e-amusement 데이터를 수집한 뒤 반영을 시작해 주세요. 익스텐션 없이도 설정에서 rank-import v2 파일을 올려 반영할 수 있습니다.",
         "guideSettingsLink": "설정에서 파일로 가져오기",
+        "missingTitle": "익스텐션을 확인하지 못했습니다.",
+        "missingDescription": "iidx-data-parser 익스텐션을 설치한 뒤 익스텐션에서 e-amusement 데이터를 수집하고 반영을 시작해 주세요. 익스텐션 없이도 설정에서 rank-import v2 파일을 올려 반영할 수 있습니다.",
         "signInTitle": "로그인이 필요합니다.",
         "signInDescription": "로그인하면 넘겨받은 기록을 이어서 업로드합니다.",
         "failureTitle": "기록을 반영하지 못했습니다.",
@@ -227,6 +230,12 @@
         "lampChange": "{previous}에서 {next}(으)로 변경",
         "unknownChart": "알 수 없는 곡",
         "openTable": "난이도표 보기"
+    },
+    "extension": {
+        "install": "익스텐션 설치",
+        "storeInstall": "Chrome 웹 스토어에서 설치",
+        "browserHint": "Chrome 계열 데스크톱 브라우저 전용입니다. 모바일과 그 밖의 브라우저에는 설치할 수 없습니다.",
+        "newTabHint": "(새 탭에서 열림)"
     },
     "social": {
         "follow": "팔로우",

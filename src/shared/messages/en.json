@@ -50,7 +50,7 @@
         "profilePublic": "Public",
         "followingCount": "{count, number} following",
         "profileLoadError": "Could not load your info.",
-        "importEmpty": "No records have been imported from e-amusement yet. Use the iidx-data-parser extension to import your player info and records.",
+        "importEmpty": "No records have been imported from e-amusement yet. Use the iidx-data-parser extension for desktop Chrome to import your player info and records.",
         "importAction": "Import settings",
         "lastSynced": "Last synced",
         "radarChartLabel": "Notes radar chart. {values}",
@@ -80,7 +80,7 @@
         "guestIntroDescription": "Sign in to record clear lamps and DJ grades and see your progress at a glance on this screen.",
         "guestFeatureTable": "Check normal and hard gauge ranks for each chart in the difficulty table.",
         "guestFeatureRecords": "See your lamp status, lamps by rank and recently played charts together.",
-        "guestFeatureImport": "Import your e-amusement records with the iidx-data-parser extension.",
+        "guestFeatureImport": "Import your e-amusement records with the <store>iidx-data-parser extension</store> for Chrome.",
         "guestSignIn": "Sign in or sign up",
         "sourceTitle": "Difficulty table status",
         "versionCount": "Versions",
@@ -155,6 +155,7 @@
         "saveError": "Could not save the profile. Please try again shortly.",
         "eamusementSection": "e-amusement import",
         "eamusementSectionDescription": "Applies your SP level 12 records from e-amusement to the difficulty table, including lamp, DJ grade, EX SCORE, and MISS COUNT.",
+        "eamusementExtensionTitle": "Import with the extension",
         "eamusementExtensionNotice": "When you collect data with the iidx-data-parser extension and start applying it, the import screen opens and shows the upload result. Without the extension, you can also upload a rank-import v2 file below.",
         "eamusementStatusTitle": "Latest import",
         "eamusementStatusLoading": "Loading import status.",
@@ -207,6 +208,8 @@
         "guideTitle": "No records were handed over.",
         "guideDescription": "Collect your e-amusement data with the iidx-data-parser extension, then start applying it. Without the extension, you can also upload a rank-import v2 file in settings.",
         "guideSettingsLink": "Import from a file in settings",
+        "missingTitle": "The extension was not detected.",
+        "missingDescription": "Install the iidx-data-parser extension, then collect your e-amusement data with it and start applying it. Without the extension, you can also upload a rank-import v2 file in settings.",
         "signInTitle": "Sign-in required.",
         "signInDescription": "Sign in to continue uploading the received records.",
         "failureTitle": "Could not apply the records.",
@@ -227,6 +230,12 @@
         "lampChange": "Changed from {previous} to {next}",
         "unknownChart": "Unknown chart",
         "openTable": "View difficulty table"
+    },
+    "extension": {
+        "install": "Install the extension",
+        "storeInstall": "Install from the Chrome Web Store",
+        "browserHint": "For Chromium-based desktop browsers only. It cannot be installed on mobile or other browsers.",
+        "newTabHint": "(opens in a new tab)"
     },
     "social": {
         "follow": "Follow",

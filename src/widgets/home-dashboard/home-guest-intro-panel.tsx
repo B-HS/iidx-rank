@@ -5,9 +5,12 @@ import { useTranslations } from 'next-intl'
 import { AuthDialogWidget } from '@features/auth-dialog/auth-dialog'
 import { DashboardPanel } from '@features/dashboard-panel/dashboard-panel'
 import { DashboardPanelLink } from '@features/dashboard-panel/dashboard-panel-link'
+import { ExtensionStoreLink } from '@features/extension-store-link/extension-store-link'
 import { Button } from '@shared/ui/button'
 
 const FEATURE_KEYS = ['guestFeatureTable', 'guestFeatureRecords', 'guestFeatureImport'] as const
+const STORE_LINK_CLASS_NAME =
+    'text-foreground underline underline-offset-4 outline-none hover:text-muted-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 [&_svg]:ml-0.5 [&_svg]:inline [&_svg]:size-3 [&_svg]:align-[-0.125em]'
 
 export const HomeGuestIntroPanel: FC = () => {
     const t = useTranslations()
@@ -20,7 +23,11 @@ export const HomeGuestIntroPanel: FC = () => {
                     {FEATURE_KEYS.map((key) => (
                         <li key={key} className='flex min-w-0 gap-1.5'>
                             <span aria-hidden='true' className='mt-1.5 size-1 shrink-0 bg-muted-foreground' />
-                            <span className='min-w-0'>{t(`home.${key}`)}</span>
+                            <span className='min-w-0'>
+                                {t.rich(`home.${key}`, {
+                                    store: (chunks) => <ExtensionStoreLink className={STORE_LINK_CLASS_NAME}>{chunks}</ExtensionStoreLink>,
+                                })}
+                            </span>
                         </li>
                     ))}
                 </ul>
