@@ -333,3 +333,24 @@ main의 기본값: 스크롤 없는 배치는 데스크톱(md 이상)의 콘텐�
 현재 상태: 완료 (2026-10-08)
 
 사용자 요청으로 public/google19f71cd33313e675.html을 저장소에 추가해 https://iidx.hyns.dev/google19f71cd33313e675.html 로 노출했습니다. src/proxy.ts의 matcher가 점이 든 경로를 제외하므로 로케일 리다이렉트 없이 정적 파일로 응답합니다. 확인 상태를 유지하려면 이 파일을 지우지 않습니다.
+
+## 개인정보처리방침 페이지와 익스텐션 권한 축소
+
+현재 상태: 구현·검증·기록·GitHub 반영 완료 (4/4). 권한 축소 뒤의 실제 Chrome 동작은 사용자 확인 대기
+
+- [x] a. 문의 연락처 확인, 두 저장소 공개 여부 확인
+- [x] b. iidx-rank(Opus) — /privacy 페이지(ko·ja·en), 실제 코드가 다루는 데이터만 기술, sitemap·사이드바 하단 링크
+- [x] c. 파서(Opus) — tabs·unlimitedStorage 권한이 실제로 필요한지 코드 근거로 검토하고, 필요 없으면 제거와 테스트
+- [x] d. main의 내용·diff 확인, 최소 검증, 기록·commit·push, 익스텐션 재빌드
+
+사용자 요청(2026-10-08): Chrome 웹 스토어 제출용 개인정보처리방침 URL로 쓸 페이지를 만들고, 익스텐션의 tabs·unlimitedStorage 권한을 뺄 수 있는지 검토합니다. 문의 연락처는 사용자 선택으로 이메일 gumyoincirno@gmail.com과 GitHub 저장소 이슈(B-HS/iidx-rank, B-HS/iidx-rank-data-parser 모두 공개 확인)를 함께 적습니다. 방침은 법률 검토를 거친 문서가 아니므로 코드로 확인한 사실만 적고 과장하거나 지어내지 않습니다. 진행 방식은 이 세션에서 정한 대로 Workflow 도구와 Opus·Sonnet입니다.
+
+결과: 창이 꺼져 workflow가 한 번 중단됐고(파일 변경 전), 사용자 요청으로 같은 workflow를 다시 실행했습니다(에이전트 2개, Opus).
+
+/privacy: 정적 서버 컴포넌트이고 본문은 messages의 privacy 네임스페이스(ko·ja·en)입니다. 수집 정보와 시점, 이용 목적, 공개 범위, 익스텐션이 읽고 저장하고 보내는 것과 하지 않는 일, 쿠키와 브라우저 저장소 9종, 외부 제공자(Vercel, Turso, Cloudflare R2, GitHub·Naver), 판매·제3자 제공 없음, 보관과 삭제, 문의처(이메일과 GitHub 이슈 두 곳), 시행일 2026-10-08을 담았습니다. 코드로 확인한 사실만 넣었고 법적 근거, 국외 이전, 보관 기한, 규정 준수 주장은 넣지 않았습니다. 사이드바 하단 보조 링크와 로그인 대화상자 링크, sitemap을 추가했습니다. main이 한국어 본문 전체와 화면을 읽어 확인했고 한국어 줄바꿈(break-keep)만 고쳤습니다.
+
+익스텐션 권한: tabs와 unlimitedStorage를 제거해 permissions가 storage 하나입니다. 근거는 Chrome 공식 문서(탭 생성·이동·닫기는 권한 불필요, Tab.url은 host permission으로 채워짐, storage.local 한도 10MB)와 dataset 크기 측정(현실적 최대 약 2~3MB)입니다. 권한 없는 호스트로 넘어가면 tab.url을 읽을 수 없으므로, 로딩이 끝났는데 기대한 주소임을 확인하지 못하면 즉시 url_mismatch로 처리하도록 waitForLoad를 바꿨습니다.
+
+검증: iidx-rank typecheck 오류 0, lint 오류 0·기존 경고 4, test 236 pass, build 성공, 세 로케일 화면을 1280x720과 390x844에서 확인(가로 넘침 없음). 파서 typecheck 오류 0, test 165 pass, build 성공.
+
+미검증·사용자 확인: 권한 축소 뒤 실제 Chrome에서의 수집 전체 흐름(host permission만으로 onUpdated의 tab.url이 채워지는지), 설치 시 방문 기록 경고가 사라졌는지. 방침은 법률 검토를 거치지 않았습니다. 계정 삭제 화면이 없어 문의로 요청하도록 적었습니다.

@@ -15,17 +15,18 @@
 
 모두 src/app/[locale]/(shell)/ 아래이며 (shell)/layout.tsx가 AppShell을 한 번만 렌더합니다.
 
-| 경로 | 파일 | 내용 |
-|---|---|---|
-| / | (shell)/page.tsx | 홈 대시보드 |
-| /table | (shell)/table/page.tsx | 기존 난이도표 |
-| /u/[handle] | (shell)/u/[handle]/page.tsx | 사용자 페이지 |
-| /users | (shell)/users/page.tsx | 사용자 목록(?page=) |
-| /settings | (shell)/settings/page.tsx | 프로필 설정·공개 범위·차단 목록 |
-| /board | (shell)/board/page.tsx | 게시판 목록(?page=) |
-| /board/new | (shell)/board/new/page.tsx | 글쓰기 |
-| /board/[postId] | (shell)/board/[postId]/page.tsx | 글 상세·댓글 |
-| /board/[postId]/edit | (shell)/board/[postId]/edit/page.tsx | 글 수정 |
+| 경로                 | 파일                                 | 내용                                           |
+| -------------------- | ------------------------------------ | ---------------------------------------------- |
+| /                    | (shell)/page.tsx                     | 홈 대시보드                                    |
+| /privacy             | (shell)/privacy/page.tsx             | 개인정보처리방침(사이트와 익스텐션, 색인 허용) |
+| /table               | (shell)/table/page.tsx               | 기존 난이도표                                  |
+| /u/[handle]          | (shell)/u/[handle]/page.tsx          | 사용자 페이지                                  |
+| /users               | (shell)/users/page.tsx               | 사용자 목록(?page=)                            |
+| /settings            | (shell)/settings/page.tsx            | 프로필 설정·공개 범위·차단 목록                |
+| /board               | (shell)/board/page.tsx               | 게시판 목록(?page=)                            |
+| /board/new           | (shell)/board/new/page.tsx           | 글쓰기                                         |
+| /board/[postId]      | (shell)/board/[postId]/page.tsx      | 글 상세·댓글                                   |
+| /board/[postId]/edit | (shell)/board/[postId]/edit/page.tsx | 글 수정                                        |
 
 cacheComponents 환경이므로 요청시간 데이터(세션·params·searchParams)는 Suspense 아래에서 읽습니다. 링크는 @shared/i18n/navigation의 Link를 사용합니다.
 
@@ -42,18 +43,22 @@ cacheComponents 환경이므로 요청시간 데이터(세션·params·searchPar
 SQLite(libSQL)·Drizzle. 컬럼은 snake_case, 필드는 camelCase, 시각은 ISO 문자열(text)입니다. 스키마 파일은 src/shared/server/db/ 아래입니다.
 
 profile-schema.ts
+
 - user_profile: user_id PK(FK user, cascade), handle unique not null, bio not null default '', avatar_key null, is_public boolean not null default false, created_at, updated_at
 - user_follow: follower_id, followee_id(FK user, cascade), created_at. PK(follower_id, followee_id), index(followee_id)
 - user_block: blocker_id, blocked_id(FK user, cascade), created_at. PK(blocker_id, blocked_id)
 
 board-schema.ts
+
 - board_post: id PK(UUID), author_id(FK user, cascade), kind 'notice'|'general', title, content(리치 텍스트 JSON 문자열), comment_count not null default 0, created_at, updated_at. index(kind, created_at)
 - board_comment: id PK(UUID), post_id(FK board_post, cascade), author_id(FK user, cascade), content, created_at. index(post_id, created_at)
 
 file-schema.ts
+
 - uploaded_file: key PK, owner_id(FK user, cascade), purpose 'avatar'|'board', content_type, size, created_at. index(owner_id, created_at)
 
 checker-schema.ts
+
 - user_record_revision에 updated_at(text, null 허용) 추가. 기록 upsert 트랜잭션에서 함께 갱신합니다. 최근 갱신 사용자 정렬 기준입니다.
 
 마이그레이션은 기존 계정의 user_profile 행(handle = 'user_' + UUID에서 하이픈을 뺀 앞 12자, 비공개)과 user_record_revision.updated_at(해당 사용자의 max(user_record.updated_at))을 채웁니다. 신규 계정은 better-auth의 user create after 훅에서 프로필 행을 만듭니다. 프로필 행이 없는 사용자는 비공개로 취급합니다.
@@ -87,6 +92,7 @@ checker-schema.ts
 응답 봉투와 오류 형식은 기존과 같습니다({ success, data } / { success: false, error: { code, message } }). 변경 메서드는 같은 출처 확인과 세션 인증을 거치고 입력은 Zod로 검증합니다. 응답은 private, no-store입니다(파일 GET 제외).
 
 프로필 (entities/profile)
+
 - GET /api/profiles/me → MyProfile { userId, handle, name, bio, avatarKey, avatarUrl, isPublic }
 - PATCH /api/profiles/me ← { name, handle, bio, isPublic, avatarKey } → MyProfile. 핸들 중복은 409 HANDLE_TAKEN. avatarKey는 본인이 올린 avatar 용도 파일이어야 합니다.
 - GET /api/profiles/[handle] → Profile { handle, name, bio, avatarUrl, isPublic, followerCount, followingCount, playedCount, isOwner, isFollowing }. 없거나 비공개(본인 제외)면 404 PROFILE_NOT_FOUND.
@@ -97,10 +103,12 @@ checker-schema.ts
 playedCount는 활성 곡 중 lamp가 NO_PLAY가 아닌 기록 수입니다.
 
 차단 (entities/block)
+
 - GET /api/blocks → { users: [{ handle, name, avatarUrl }] }
 - PUT·DELETE /api/blocks/[handle] → 같은 목록. 자기 자신은 차단할 수 없습니다.
 
 게시판 (entities/board)
+
 - 작성자 표기 Author { handle, name, avatarUrl, isPublic }
 - GET /api/board/posts?page= → { notices: PostSummary[], posts: PostSummary[], pagination: { page, limit, total, totalPages } }. PostSummary { id, kind, title, author, commentCount, createdAt, updatedAt }. notices는 최신 공지 5개로 모든 페이지에 포함, posts는 일반 글 20개씩. 로그인 사용자가 차단한 작성자의 일반 글은 제외합니다.
 - POST /api/board/posts ← { kind, title, content } → Post. kind 'notice'는 관리자만.
