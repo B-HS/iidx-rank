@@ -354,3 +354,22 @@ main의 기본값: 스크롤 없는 배치는 데스크톱(md 이상)의 콘텐�
 검증: iidx-rank typecheck 오류 0, lint 오류 0·기존 경고 4, test 236 pass, build 성공, 세 로케일 화면을 1280x720과 390x844에서 확인(가로 넘침 없음). 파서 typecheck 오류 0, test 165 pass, build 성공.
 
 미검증·사용자 확인: 권한 축소 뒤 실제 Chrome에서의 수집 전체 흐름(host permission만으로 onUpdated의 tab.url이 채워지는지), 설치 시 방문 기록 경고가 사라졌는지. 방침은 법률 검토를 거치지 않았습니다. 계정 삭제 화면이 없어 문의로 요청하도록 적었습니다.
+
+## 익스텐션 스토어 링크와 README 개편
+
+현재 상태: 구현·검증·기록·GitHub 반영 완료 (4/4)
+
+- [x] a. 스토어 주소 응답 확인, 두 저장소의 README·라이선스·자산 확인
+- [x] b. iidx-rank(Opus) — 익스텐션 설치 링크를 가져오기 관련 화면에 배치, README를 TAIDE 형식으로 개편(스크린샷 포함)
+- [x] c. 파서(Sonnet) — README를 TAIDE 형식으로 개편(스토어 설치 안내, 스크린샷), 문서의 설치 안내 갱신
+- [x] d. main의 확인·최소 검증·commit·push
+
+사용자 요청(2026-10-08): 익스텐션이 Chrome 웹 스토어에 게시됐습니다(https://chromewebstore.google.com/detail/iidx-data-parser/ihhbemlpcommigeghkpfahgncipbikmk). iidx-rank에서 UI/UX상 적절한 곳에 이 익스텐션으로 가는 길을 두고, 두 저장소의 README를 /Users/hyunseokbyun/development/TAIDE/README.md 형식으로 고칩니다. 진행 방식은 이 세션에서 정한 대로 Workflow 도구와 Opus·Sonnet입니다.
+
+main의 기본값: README는 참고 문서와 같은 영어로 씁니다(공개 저장소이고 사이트가 ko·ja·en을 지원). 두 저장소 모두 LICENSE 파일이 없으므로 라이선스 절은 넣지 않습니다. 스크린샷은 개인정보가 없는 공개 화면(운영 난이도표, 익스텐션 popup 확인용 화면)만 씁니다. 파서 저장소의 추적되지 않은 data-parser.zip은 사용자 파일이라 건드리지 않습니다.
+
+결과: Workflow 1회(에이전트 2개, Opus와 Sonnet). 스토어 주소는 shared/constants/site.ts의 EXTENSION_STORE_URL이고 링크 표현은 features/extension-store-link 하나입니다(새 탭, 외부 링크 아이콘, 접근 가능한 이름). 넣은 곳은 설정의 가져오기 섹션(익스텐션으로 가져오기 소제목 아래 보조 버튼), /import의 익스텐션 무응답 상태(주 버튼), 홈 내 정보 패널의 가져온 기록 없음 상태, 비로그인 홈 소개 문장의 인라인 링크입니다. /import는 무응답과 none 응답을 나눠, 익스텐션이 이미 있는 사용자에게는 설치를 권하지 않습니다. 사이드바·헤더·전역 배너와 개인정보처리방침에는 넣지 않았습니다. 두 README는 TAIDE 구성으로 영어로 다시 썼고 License 절은 없습니다. 스크린샷은 운영 난이도표의 비로그인 화면과, 가짜 표본 데이터로 띄운 익스텐션 popup입니다.
+
+검증(임시 SQLite): typecheck 오류 0, lint 오류 0·기존 경고 4, test 236 pass, 메시지 키 일치, build 성공(설정 섹션 마크업 최종 수정 전 실행, 이후는 typecheck·lint·dev 렌더로 확인). 화면은 비로그인 홈·가입 후 홈(1280x720, 1440x900)·/settings·/import·모바일 390x844에서 넘침 0과 링크 href·새 탭 속성을 확인했습니다. main은 설정·가져오기 화면 스크린샷과 두 README, 스크린샷 이미지를 직접 확인했습니다.
+
+미검증: 실제 익스텐션이 설치된 브라우저에서 /import의 hello·none 흐름, Chrome 외 Chromium 브라우저에서의 설치.

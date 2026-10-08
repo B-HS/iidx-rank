@@ -1,48 +1,74 @@
+<div align="center">
+
+<img src="docs/assets/app-icon.svg" alt="IIDX Rank icon" width="96" />
+
 # IIDX Rank
 
-Google Sheets 공개 HTML의 ☆12 SP 난이도표를 읽고, 사용자별 클리어 램프와 메모를 저장하는 Next.js 앱입니다. 원본의 노마게·하드 랭크와 빨간색 개인차 표시를 함께 수집합니다.
+**A beatmania IIDX SP ☆12 difficulty table that keeps your clear lamps, scores and notes next to every chart.**
 
-## 로컬 실행
+[Open IIDX Rank](https://iidx.hyns.dev) · [Chrome extension](https://chromewebstore.google.com/detail/iidx-data-parser/ihhbemlpcommigeghkpfahgncipbikmk) · [Extension source](https://github.com/B-HS/iidx-rank-data-parser) · [Importing](#importing-from-e-amusement) · [Development](#development)
 
-Bun을 사용합니다. 프로젝트 루트에서 실행하세요.
+</div>
+
+![IIDX Rank — normal gauge difficulty table grouped by rank](docs/assets/screenshot.png)
+
+IIDX Rank reads a published Google Sheets difficulty table for beatmania IIDX SP level 12 and turns it into a dense, filterable board: every chart sits in its normal gauge or hard gauge rank, and charts marked as personal difference in the source are kept apart. Sign in and each card carries your own clear lamp, DJ LEVEL and notes; bring your play data over from e-amusement with the companion extension and the home dashboard, your profile and the table all fill in from it. The table itself is public and needs no account.
+
+IIDX Rank is an unofficial fan project and is not affiliated with KONAMI.
+
+## Features
+
+- **Difficulty table** — SP ☆12 charts grouped from S+ down to F by normal gauge or hard gauge rank, with general-skill and personal-difference charts separated inside each rank and collapsible rank sections
+- **Filters** — search by title and narrow by difficulty (HYPER, ANOTHER, LEGGENDARIA), version, rank, personal difference only or unplayed only
+- **Clear lamps and notes** — click a card to step its lamp, hold it to open the record and set the clear lamp, DJ LEVEL and a private note; a click cycles EASY and CLEAR in normal gauge mode or HARD and EX HARD in hard gauge mode, and never lowers a higher lamp
+- **Home dashboard** — your profile and e-amusement player info, notes radar, lamp totals with DJ LEVEL distribution, lamps per rank, recently played charts and board activity on one screen; guests see the state of the table, notices and recent posts instead
+- **Profiles and follow** — a page per player at `/u/<handle>` with lamp summary, play records, DJ NAME, dan rank and notes radar; profiles are private until you make them public, and public players are listed by most recent record update
+- **Board** — posts and comments with a rich text editor and images, notices pinned on top, and a block list that hides another user's posts and comments
+- **e-amusement import** — lamps, DJ LEVEL, EX SCORE and MISS COUNT for SP level 12 charts, plus DJ NAME, dan rank and notes radar, through the IIDX Data Parser extension or a `rank-import` v2 JSON file; every change is kept as history and your notes are preserved
+- **Sign-in** — email and password, GitHub or Naver
+- **Display settings** — show each chart's version as a logo or as a name and adjust logo opacity; saved to your account, or to the browser for guests
+- **Themes** — light and dark
+- **Localized** — English · 한국어 · 日本語
+
+## Importing from e-amusement
+
+1. Install [IIDX Data Parser](https://chromewebstore.google.com/detail/iidx-data-parser/ihhbemlpcommigeghkpfahgncipbikmk) from the Chrome Web Store. It runs on Chromium-based desktop browsers.
+2. Sign in to IIDX Rank and to e-amusement in the same browser.
+3. Collect your play data with the extension. It opens the IIDX Rank import screen, which uploads the data with your signed-in account and shows the charts that changed.
+
+Without the extension, open **Profile settings** and upload a `rank-import` v2 JSON file exported by IIDX Data Parser. Only SP data is imported, and only chart records that are in the level 12 table are stored. What the site and the extension handle is described in the [privacy policy](https://iidx.hyns.dev/en/privacy).
+
+## Development
 
 ```sh
 bun install --frozen-lockfile
-bun run db:migrate
-bun run source:sync
+bun run db:migrate    # apply Drizzle migrations to the local SQLite file
+bun run source:sync   # fetch the published difficulty table into the database
 bun run dev
 ```
 
-공개 난이도표는 인증 설정 없이 조회할 수 있습니다. 회원가입·로그인·개인 기록에는 `BETTER_AUTH_SECRET` 환경변수가 필요합니다. 본인이 32자 이상의 무작위 값을 만들어 실행 환경에 설정하세요. `.env.example`에는 변수 이름만 있습니다. Next에서는 `.env.local`을 사용할 수 있으며 Bun 스크립트는 같은 DB 환경변수를 전달받아야 합니다.
+```sh
+bun run typecheck
+bun run lint
+bun test
+bun run build && bun run start
+```
 
-| 변수               | 생략 시 동작                     |
-| ------------------ | -------------------------------- |
-| DATABASE_URL       | file:./data/iidx.db              |
-| BETTER_AUTH_URL    | http://localhost:3000            |
-| BETTER_AUTH_SECRET | 공개 조회만 가능, 인증 설정 필요 |
-| TURSO_AUTH_TOKEN   | 로컬 SQLite에서는 불필요         |
+The public table works without any configuration. Accounts and personal records need `BETTER_AUTH_SECRET`. Set variables in `.env.local` for Next.js; the Bun scripts read the same variables from their environment.
 
-다른 포트나 도메인에서 실행할 때는 `BETTER_AUTH_URL`을 실제 주소와 맞추세요. SQLite 파일과 인증 시크릿은 버전 관리에 포함하지 않습니다. `bun run build` 후 `bun run start`로 프로덕션 모드를 실행할 수 있습니다.
+| Variable                                     | Purpose                                                                                  |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                               | Database location. Defaults to a local SQLite file; production uses Turso                |
+| `TURSO_AUTH_TOKEN`                           | Turso access token. Not needed for local SQLite                                          |
+| `BETTER_AUTH_URL`                            | Origin the app is served from. Match it when you run on another port or domain           |
+| `BETTER_AUTH_SECRET`                         | Session secret, 32 characters or more. Without it only the public table is available     |
+| `ADMIN_BOOTSTRAP_EMAILS`                     | Comma-separated emails that receive the admin role, which allows a manual source refresh |
+| `CRON_SECRET`                                | Bearer secret for the scheduled source sync endpoint                                     |
+| `R2_ACCESS_KEY` · `R2_SECRET_KEY` · `R2_URL` | Cloudflare R2 storage for profile pictures and board images                              |
+| `GITHUB_CLIENT_ID` · `GITHUB_SECRET_KEY`     | GitHub sign-in. The button appears only when both are set                                |
+| `NAVER_CLIENT_ID` · `NAVER_SECRET_KEY`       | Naver sign-in. The button appears only when both are set                                 |
+| `EXTENSION_ORIGINS`                          | Optional comma-separated `chrome-extension://` origins allowed to post imports directly  |
 
-## 데이터와 캐시
+Next.js 16 App Router with Cache Components (`use cache`, partial prerendering), React 19 with React Compiler, Tailwind CSS 4, shadcn/ui, TanStack Query, next-intl and better-auth, with Bun as the package manager, script runner and test runner. Data goes through Drizzle ORM to SQLite locally and Turso in production. The source table is collected once a day by a Vercel Cron job or by an admin from the table sidebar, never during a build or a page request; a failed fetch or parse keeps the last good snapshot. The code follows a Feature-Sliced layout under `src/` (`app`, `widgets`, `features`, `entities`, `shared`).
 
-- 일반·하드 표와 안내 HTML을 검증하고 하나의 트랜잭션으로 저장합니다. 파싱 실패 시 마지막 정상 데이터를 유지합니다.
-- 실행 중 요청 시 수집시각을 확인하며, 5분 이후 원본을 다시 확인합니다. 인증 사용자에게 수동 동기화도 제공합니다. Google Sheets가 게시한 내용이 최신성의 기준입니다.
-- Next Cache Components/PPR와 `use cache`, TanStack Query 서버 프리페치를 사용합니다. 개인 기록 캐시에는 사용자 UUID와 기록 revision이 포함됩니다.
-- 기록 저장과 개인 캐시 갱신 API는 서버 세션의 사용자에게만 적용됩니다. 계정 변경 시 클라이언트 캐시를 비웁니다.
-
-## 화면
-
-좌측 사이드바에 필터·원본 갱신 정보·기록 요약을 통합하고 콘텐츠와 함께 2단으로 표시합니다. 외곽 패딩을 제거한 카드 그리드는 모바일에서도 최소 3열을 유지합니다. 카드 상세에서 전체 곡명·개인차와 램프·메모를 확인하고 편집합니다. 모바일에서는 좌측 메뉴 버튼으로 필터를 엽니다.
-
-## 문서
-
-- [캐시와 갱신 계약](docs/CACHE.md)
-- [데이터와 API 계약](docs/ARCHITECTURE.md)
-- [디자인 기준](docs/DESIGN.md)
-- [e-amusement 향후 연동 계획](docs/E-AMUSEMENT.md)
-- [Production 배포](docs/DEPLOYMENT.md)
-- [작업 상태](docs/PROCESS.md)
-- [검증 결과](docs/quality-assurance/implementation.md)
-
-e-amusement 실제 연동은 아직 구현하지 않았습니다. 로컬 개발은 SQLite를 사용하고, Production 배포는 docs/DEPLOYMENT.md의 Turso와 Vercel 설정을 사용합니다.
+Contracts and decision records live in [docs/](docs) (Korean): [data and API](docs/ARCHITECTURE.md), [caching](docs/CACHE.md), [e-amusement import](docs/E-AMUSEMENT.md), [community features](docs/COMMUNITY.md), [design](docs/DESIGN.md) and [deployment](docs/DEPLOYMENT.md).
