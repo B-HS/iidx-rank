@@ -30,6 +30,7 @@ import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert'
 import { Button } from '@shared/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@shared/ui/dialog'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@shared/ui/empty'
+import { Input } from '@shared/ui/input'
 import { Progress } from '@shared/ui/progress'
 import { ScrollContainer } from '@shared/ui/scroll-container'
 import { SidebarTrigger } from '@shared/ui/sidebar'
@@ -372,9 +373,19 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
             <ShellSidebarPortal>{sidebarContent}</ShellSidebarPortal>
             <section style={chartDisplayStyle} className='checker-workspace'>
                 <header className='checker-toolbar'>
-                    <div className='flex min-w-0 items-center gap-2'>
+                    <div className='flex min-w-0 flex-1 items-center gap-2 md:flex-initial'>
                         <SidebarTrigger aria-label={t('navigation.openSidebar')} className='shrink-0 md:hidden' />
-                        <div className='min-w-0'>
+                        <Input
+                            type='search'
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            aria-label={t('checker.searchLabel')}
+                            placeholder={t('checker.searchPlaceholder')}
+                            enterKeyHint='search'
+                            autoComplete='off'
+                            className='min-w-0 flex-1 md:hidden'
+                        />
+                        <div className='sr-only min-w-0 md:not-sr-only'>
                             <h1 className='truncate text-sm font-semibold'>
                                 {t('checker.headingWithMode', { mode: mode === 'normal' ? t('checker.normalMode') : t('checker.hardMode') })}
                             </h1>
