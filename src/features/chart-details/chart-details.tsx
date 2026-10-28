@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { type Record as ChartRecord, LAMPS, SCORE_GRADES, MAX_MEMO_LENGTH, type RecordInput } from '@entities/checker/checker.dto'
 import { type Chart } from '@entities/catalog/catalog.dto'
 import { CHART_MEMO_TEXTAREA_ROWS } from '@shared/constants/checker'
+import { formatChartTitle } from '@shared/lib/chart-title'
 import { Badge } from '@shared/ui/badge'
 import { Button } from '@shared/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@shared/ui/dialog'
@@ -47,7 +48,7 @@ export const ChartDetails: FC<Props> = ({
         <Dialog open={Boolean(chart)} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle className='pr-8 leading-snug break-words'>{chart.title}</DialogTitle>
+                    <DialogTitle className='pr-8 leading-snug break-words'>{formatChartTitle(chart.title, chart.difficulty)}</DialogTitle>
                     <DialogDescription>
                         {t(`difficulty.${chart.difficulty}`)} · {chart.version}
                     </DialogDescription>

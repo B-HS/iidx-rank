@@ -22,8 +22,6 @@ export const LAMP_STATIC_BACKGROUNDS = {
     FULL_COMBO: 'linear-gradient(to bottom, var(--iidx-hard) 50%, var(--iidx-easy) 50%)',
 } as const
 
-export const DIFFICULTY_COLORS = { H: 'var(--iidx-hyper)', A: 'var(--iidx-another)', L: 'var(--iidx-leggendaria)' } as const
-
 export const DASHBOARD_GRID_CLASS_NAME =
     'grid min-w-0 grid-cols-1 gap-px bg-border @min-[45rem]/dashboard:min-h-[44rem] @min-[45rem]/dashboard:flex-1 @min-[45rem]/dashboard:grid-cols-2 @min-[45rem]/dashboard:grid-rows-[15rem_15rem_minmax(0,1fr)] @min-[62rem]/dashboard:min-h-[31rem] @min-[62rem]/dashboard:grid-cols-3 @min-[62rem]/dashboard:grid-rows-[minmax(15rem,1fr)_minmax(0,1.6fr)] @min-[96rem]/dashboard:grid-cols-4'
 export const DASHBOARD_WIDE_PANEL_CLASS_NAME = '@min-[96rem]/dashboard:col-span-2'

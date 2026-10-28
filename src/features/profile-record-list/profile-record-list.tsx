@@ -1,6 +1,7 @@
 import type { FC } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import type { ProfileRecord } from '@entities/profile/profile.dto'
+import { formatChartTitle } from '@shared/lib/chart-title'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@shared/ui/empty'
 
 type ProfileRecordListProps = {
@@ -28,7 +29,7 @@ export const ProfileRecordList: FC<ProfileRecordListProps> = ({ records }) => {
             {records.map((record) => (
                 <li key={record.chartId} className='flex min-w-0 items-center gap-3 px-3 py-2'>
                     <div className='grid min-w-0 flex-1 gap-0.5'>
-                        <p className='truncate text-sm font-medium'>{record.title}</p>
+                        <p className='truncate text-sm font-medium'>{formatChartTitle(record.title, record.difficulty)}</p>
                         <p className='truncate text-xs text-muted-foreground'>
                             {t(`difficulty.${record.difficulty}`)} · {record.version}
                         </p>

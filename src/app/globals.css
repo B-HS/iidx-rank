@@ -289,7 +289,6 @@ html {
 }
 
 :root {
-    --iidx-hyper: #ffff00;
     --iidx-another: #ff0000;
     --iidx-leggendaria: #b000ff;
     --iidx-easy: #00ff00;
@@ -297,23 +296,11 @@ html {
     --iidx-hard: #ffffff;
     --iidx-ex-hard: #ff0000;
     --iidx-lamp-off: #737373;
-    --iidx-lamp-dark: #000000;
     --checker-logo-opacity: 0.1;
-    --checker-difficulty-border-width: 2px;
 }
 .checker-chart-card {
     border: 1px solid var(--border);
-    border-left: var(--checker-difficulty-border-width) solid var(--chart-difficulty-color);
     -webkit-touch-callout: none;
-}
-.checker-chart-card[data-difficulty='H'] {
-    --chart-difficulty-color: var(--iidx-hyper);
-}
-.checker-chart-card[data-difficulty='A'] {
-    --chart-difficulty-color: var(--iidx-another);
-}
-.checker-chart-card[data-difficulty='L'] {
-    --chart-difficulty-color: var(--iidx-leggendaria);
 }
 .checker-chart-empty {
     border: 1px solid var(--border);
@@ -346,25 +333,5 @@ html {
     --lamp-alternate: var(--iidx-easy);
 }
 .checker-lamp:not([data-lamp='NO_PLAY']) {
-    background: var(--lamp-color);
-    animation-name: checker-lamp-blink;
-    animation-timing-function: steps(1, end);
-    animation-iteration-count: infinite;
-}
-@keyframes checker-lamp-blink {
-    0%,
-    100% {
-        background: var(--lamp-color);
-    }
-    50% {
-        background: var(--lamp-alternate, var(--iidx-lamp-dark));
-    }
-}
-@media (prefers-reduced-motion: reduce) {
-    .checker-lamp {
-        animation: none !important;
-    }
-    .checker-lamp:not([data-lamp='NO_PLAY']) {
-        background: linear-gradient(to bottom, var(--lamp-color) 50%, var(--lamp-alternate, var(--lamp-color)) 50%);
-    }
+    background: linear-gradient(to bottom, var(--lamp-color) 50%, var(--lamp-alternate, var(--lamp-color)) 50%);
 }

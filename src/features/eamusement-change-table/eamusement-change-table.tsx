@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import type { ImportChangeRow } from '@entities/eamusement/eamusement-change-rows'
 import { EMPTY_VALUE_PLACEHOLDER } from '@shared/constants/eamusement-display'
+import { formatChartTitle } from '@shared/lib/chart-title'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table'
 
 type EamusementChangeTableProps = {
@@ -48,7 +49,9 @@ export const EamusementChangeTable: FC<EamusementChangeTableProps> = ({ rows }) 
                             <TableRow key={row.chartId} className='hover:bg-transparent'>
                                 <TableCell className='break-words whitespace-normal'>
                                     <span className={row.title === null ? 'block text-muted-foreground' : 'block font-medium'}>
-                                        {row.title ?? t('import.unknownChart')}
+                                        {row.title === null || row.difficulty === null
+                                            ? t('import.unknownChart')
+                                            : formatChartTitle(row.title, row.difficulty)}
                                     </span>
                                     <span className='block text-muted-foreground @2xl:hidden'>{difficultyLabel}</span>
                                 </TableCell>

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import type { ImportResult } from '@entities/eamusement/eamusement.dto'
 import { IMPORT_UNMATCHED_LIMIT } from '@shared/constants/eamusement'
 import { IMPORT_DIFFICULTY_LABELS } from '@shared/constants/eamusement-display'
+import { formatChartTitle } from '@shared/lib/chart-title'
 import { Button } from '@shared/ui/button'
 import { Collapsible } from '@shared/ui/collapsible'
 import { CollapsibleContent } from '@shared/ui/collapsible-content'
@@ -35,7 +36,7 @@ export const EamusementUnmatchedList: FC<EamusementUnmatchedListProps> = ({ unma
                         <li
                             key={`${title}-${difficulty}`}
                             className='flex min-w-0 items-baseline justify-between gap-2 border-b border-border py-1.5 text-xs'>
-                            <span className='min-w-0 break-words'>{title}</span>
+                            <span className='min-w-0 break-words'>{formatChartTitle(title, difficulty)}</span>
                             <span className='shrink-0 text-muted-foreground'>{IMPORT_DIFFICULTY_LABELS[difficulty]}</span>
                         </li>
                     ))}

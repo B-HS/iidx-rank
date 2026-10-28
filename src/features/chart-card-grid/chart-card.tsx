@@ -6,8 +6,9 @@ import type { Chart } from '@entities/catalog/catalog.dto'
 import type { Record as ChartRecord } from '@entities/checker/checker.dto'
 import type { DisplayPreferencesInput } from '@entities/preferences/preferences.dto'
 import { getSeriesLogo } from '@entities/catalog/catalog-series'
-import { CHART_LONG_PRESS_MS, CHART_PRESS_MOVE_TOLERANCE_PX, CHART_LAMP_WIDTH_PX, CHART_LAMP_BLINK_DURATION_MS } from '@shared/constants/checker'
+import { CHART_LONG_PRESS_MS, CHART_PRESS_MOVE_TOLERANCE_PX, CHART_LAMP_WIDTH_PX } from '@shared/constants/checker'
 import { CHART_CARD_BODY_CLASS_NAMES } from '@shared/constants/display'
+import { formatChartTitle } from '@shared/lib/chart-title'
 import { cn } from '@shared/lib/utils'
 import { Card, CardContent } from '@shared/ui/card'
 import { Skeleton } from '@shared/ui/skeleton'
@@ -44,6 +45,7 @@ export const ChartCard: FC<Props> = ({
     const shouldSuppressClick = useRef(false)
     const lamp = isSaving && pendingLamp ? pendingLamp : (record?.lamp ?? 'NO_PLAY')
     const logo = versionDisplay === 'logo' ? getSeriesLogo(chart.version) : null
+    const chartTitle = formatChartTitle(chart.title, chart.difficulty)
     const visibleLamp = mode === 'hard' && !['HARD', 'EX_HARD', 'FULL_COMBO'].includes(lamp) ? 'NO_PLAY' : lamp
     const handleCancelPress = () => {
         if (pressTimer.current !== null) clearTimeout(pressTimer.current)
@@ -63,16 +65,13 @@ export const ChartCard: FC<Props> = ({
         }
     }, [isDisabled])
     return (
-        <Card
-            size='sm'
-            data-difficulty={chart.difficulty}
-            className='checker-chart-card relative h-full min-w-0 overflow-hidden rounded-none bg-card p-0 shadow-none ring-0'>
+        <Card size='sm' className='checker-chart-card relative h-full min-w-0 overflow-hidden rounded-none bg-card p-0 shadow-none ring-0'>
             {logo && (
                 <Image
                     src={logo}
                     alt=''
                     fill
-                    sizes='(max-width: 639px) 33vw, (max-width: 1023px) 25vw, (max-width: 1279px) 20vw, (max-width: 1535px) 17vw, 15vw'
+                    sizes='(max-width: 1279px) 20vw, (max-width: 1535px) 17vw, 15vw'
                     className='pointer-events-none object-contain'
                     style={{ opacity: 'var(--checker-logo-opacity)' }}
                 />
@@ -81,7 +80,7 @@ export const ChartCard: FC<Props> = ({
                 aria-hidden='true'
                 data-lamp={isRecordsPending ? 'NO_PLAY' : visibleLamp}
                 className='checker-lamp pointer-events-none absolute inset-y-0 left-0 z-10'
-                style={{ width: CHART_LAMP_WIDTH_PX, animationDuration: CHART_LAMP_BLINK_DURATION_MS + 'ms' }}
+                style={{ width: CHART_LAMP_WIDTH_PX }}
             />
             <CardContent className='relative h-full min-w-0 p-0'>
                 <button
@@ -90,7 +89,7 @@ export const ChartCard: FC<Props> = ({
                     aria-busy={isSaving}
                     aria-keyshortcuts='Shift+Enter'
                     title={
-                        chart.title +
+                        chartTitle +
                         ' · ' +
                         t(`difficulty.${chart.difficulty}`) +
                         ' · ' +
@@ -149,7 +148,7 @@ export const ChartCard: FC<Props> = ({
                         }
                     }}>
                     <span className={cn('line-clamp-2 min-w-0 break-words text-2xs leading-tight font-medium', versionDisplay === 'logo' && 'pr-8')}>
-                        {chart.title}
+                        {chartTitle}
                     </span>
                     <span
                         className={cn(
