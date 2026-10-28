@@ -150,7 +150,7 @@ export const ChartCard: FC<Props> = ({
                     <span
                         className={cn(
                             'line-clamp-2 min-w-0 break-words text-3xs leading-tight font-medium md:text-2xs',
-                            versionDisplay === 'logo' && 'pr-8',
+                            versionDisplay === 'logo' && 'md:pr-8',
                         )}>
                         {chartTitle}
                     </span>

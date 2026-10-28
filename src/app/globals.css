@@ -199,7 +199,7 @@
     --radius-md: var(--radius);
     --radius-lg: var(--radius);
     --radius-xl: var(--radius);
-    --text-3xs: 0.5625rem;
+    --text-3xs: 0.5rem;
     --text-2xs: 0.6875rem;
     --shadow-2xs: none;
     --shadow-xs: none;
