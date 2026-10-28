@@ -1,4 +1,5 @@
 export const THEME_STORAGE_KEY = 'iidx-rank-theme'
+export const DEFAULT_THEME = 'dark'
 export const SHELL_SIDEBAR_WIDTH_PX = 256
 export const SHELL_SIDEBAR_COLLAPSED_WIDTH_PX = 48
 export const SHELL_SIDEBAR_MOBILE_WIDTH_PX = 288

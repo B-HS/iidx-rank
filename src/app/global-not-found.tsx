@@ -1,7 +1,7 @@
 import { ThemeProvider } from 'next-themes'
 import type { Metadata } from 'next'
 import { NotFoundNotice } from '@features/not-found-notice/not-found-notice'
-import { THEME_STORAGE_KEY } from '@shared/constants/ui'
+import { DEFAULT_THEME, THEME_STORAGE_KEY } from '@shared/constants/ui'
 import { routing } from '@shared/i18n/routing'
 import { getLocalizedPath, NO_INDEX_ROBOTS } from '@shared/lib/seo'
 import ko from '@shared/messages/ko.json'
@@ -17,7 +17,12 @@ export const metadata: Metadata = { title: `${NOT_FOUND_STATUS_LABEL} | ${ko.app
 const GlobalNotFound = () => (
     <html lang={routing.defaultLocale} suppressHydrationWarning>
         <body className='min-h-dvh bg-background font-sans text-foreground antialiased'>
-            <ThemeProvider attribute='class' defaultTheme='light' enableSystem={false} storageKey={THEME_STORAGE_KEY} disableTransitionOnChange>
+            <ThemeProvider
+                attribute='class'
+                defaultTheme={DEFAULT_THEME}
+                enableSystem={false}
+                storageKey={THEME_STORAGE_KEY}
+                disableTransitionOnChange>
                 <NotFoundNotice
                     statusLabel={NOT_FOUND_STATUS_LABEL}
                     notices={routing.locales.map((locale) => ({
