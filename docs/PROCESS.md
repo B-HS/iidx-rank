@@ -373,3 +373,21 @@ main의 기본값: README는 참고 문서와 같은 영어로 씁니다(공개 
 검증(임시 SQLite): typecheck 오류 0, lint 오류 0·기존 경고 4, test 236 pass, 메시지 키 일치, build 성공(설정 섹션 마크업 최종 수정 전 실행, 이후는 typecheck·lint·dev 렌더로 확인). 화면은 비로그인 홈·가입 후 홈(1280x720, 1440x900)·/settings·/import·모바일 390x844에서 넘침 0과 링크 href·새 탭 속성을 확인했습니다. main은 설정·가져오기 화면 스크린샷과 두 README, 스크린샷 이미지를 직접 확인했습니다.
 
 미검증: 실제 익스텐션이 설치된 브라우저에서 /import의 hello·none 흐름, Chrome 외 Chromium 브라우저에서의 설치.
+
+## 난이도표 표시 정리와 모바일 헤더 검색
+
+현재 상태: 구현·검증·기록 완료 (5/5)
+
+- [x] a. 클리어 램프 깜빡임 제거 — 두 색 램프(EX HARD·FULL COMBO)는 대시보드와 같은 위아래 분할 고정 배경으로 표시
+- [x] b. 난이도 색(HYPER 노랑·ANOTHER 빨강·LEGGENDARIA 보라) 제거, 곡명을 보여 주는 모든 화면에서 LEGGENDARIA 곡명 앞에 `[L] ` 접두사 표시
+- [x] c. 모바일(md 미만) 난이도표 헤더에 곡명 검색창을 바로 노출하고 입력 즉시 필터
+- [x] d. 난이도표 카드 그리드를 모바일 5열로 변경
+- [x] e. main의 diff 확인·최소 검증·모바일 화면 확인·commit·push
+
+사용자 요청(2026-10-29): 위 1~4번. 5번(웹에서 직접 e-amusement 수집)은 조사 후 사용자 결정으로 제외했습니다. 조사 결론은 docs/acknowledge/2026-10-29-eamusement-web-collection.md에 있습니다. 진행 방식은 사용자 지시대로 Workflow 도구입니다.
+
+결과: Workflow 1회(구현 Sonnet 2명 병렬, 검증 Sonnet 1명). 램프는 애니메이션 없이 위아래 분할 고정 배경으로 바꿨습니다(EX HARD 빨강/노랑, FULL COMBO 흰색/초록). 카드·최근 기록의 난이도 색 테두리와 관련 CSS 변수·상수를 지웠습니다. 곡명 표시는 shared/lib/chart-title.ts의 formatChartTitle로 LEGGENDARIA에 `[L] `을 붙이며, 적용 위치는 난이도표 카드·상세 다이얼로그·홈 최근 기록·프로필 기록 목록·가져오기 변경 표·미일치 목록입니다. 카드 aria-label은 난이도명을 이미 읽으므로 원래 곡명을 유지합니다. 검색과 정렬은 원래 곡명 기준입니다. 모바일 헤더(md 미만)는 제목 대신 곡명 검색창을 보여 주고(제목은 sr-only 유지), 입력할 때마다 바로 필터링합니다. 필터 시트의 검색과 같은 상태를 공유합니다. 그리드는 xl 미만 5열, xl 6열, 2xl 7열입니다.
+
+검증: typecheck 오류 0, 변경 파일 ESLint·Prettier 통과, 제거한 심볼의 남은 참조 0. 로컬 SQLite(셸 환경변수로 DATABASE_URL=file:./data/iidx.db 지정)로 dev 서버를 띄워 360x780 모바일에서 헤더 높이 48px, 검색창 폭 119px·글꼴 16px, 'Beyond' 입력 즉시 카드 3개, 램프 animation-name none, 가로 넘침 없음을 확인했습니다. 1280x800 데스크톱에서는 헤더가 변경 전과 같고 6열에 `[L]` 표시를 확인했습니다.
+
+남은 사항: 360px 5열에서는 카드 폭이 약 72px이라 곡명이 두 줄에서 3~4글자만 보이고 잘립니다. 로그인 상태에서는 새로고침 버튼이 더해져 검색창이 약 87px로 좁아집니다(추정, 미측정). 로컬 .env의 DATABASE_URL이 turso: 스킴이라 기본 설정으로는 dev 서버가 DB에 연결하지 못합니다(이번 변경과 무관).
