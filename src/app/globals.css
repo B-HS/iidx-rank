@@ -294,10 +294,14 @@ html {
     --iidx-leggendaria: #b000ff;
     --iidx-easy: #00ff00;
     --iidx-clear: #ffff00;
-    --iidx-hard: #ffffff;
+    --iidx-hard: #d4d4d4;
     --iidx-ex-hard: #ff0000;
     --iidx-lamp-off: #737373;
     --checker-logo-opacity: 0.1;
+}
+.dark,
+[data-theme='dark'] {
+    --iidx-hard: #ffffff;
 }
 .checker-chart-card {
     border: 1px solid var(--border);
@@ -305,13 +309,6 @@ html {
 }
 .checker-chart-empty {
     border: 1px solid var(--border);
-}
-.checker-lamp {
-    --lamp-edge-color: color-mix(in oklch, var(--foreground) 45%, transparent);
-    box-shadow: 1px 0 0 0 var(--lamp-edge-color);
-}
-.checker-lamp[data-lamp='NO_PLAY'] {
-    box-shadow: inset 0 0 0 1px var(--lamp-edge-color);
 }
 .checker-lamp[data-lamp='EASY'] {
     --lamp-color: var(--iidx-easy);
