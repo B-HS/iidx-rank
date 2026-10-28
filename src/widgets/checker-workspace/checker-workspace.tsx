@@ -383,7 +383,7 @@ export const CheckerWorkspace: FC<Props> = ({ initialUserId, initialIsAdmin, ini
                             placeholder={t('checker.searchPlaceholder')}
                             enterKeyHint='search'
                             autoComplete='off'
-                            className='min-w-0 flex-1 md:hidden'
+                            className='h-7 min-w-0 flex-1 bg-card md:hidden dark:bg-card'
                         />
                         <div className='sr-only min-w-0 md:not-sr-only'>
                             <h1 className='truncate text-sm font-semibold'>

@@ -147,12 +147,16 @@ export const ChartCard: FC<Props> = ({
                             onOpenDetails(chart)
                         }
                     }}>
-                    <span className={cn('line-clamp-2 min-w-0 break-words text-2xs leading-tight font-medium', versionDisplay === 'logo' && 'pr-8')}>
+                    <span
+                        className={cn(
+                            'line-clamp-2 min-w-0 break-words text-3xs leading-tight font-medium md:text-2xs',
+                            versionDisplay === 'logo' && 'pr-8',
+                        )}>
                         {chartTitle}
                     </span>
                     <span
                         className={cn(
-                            'flex min-w-0 items-center justify-between gap-1 text-2xs leading-tight text-muted-foreground',
+                            'flex min-w-0 items-center justify-between gap-1 text-3xs leading-tight text-muted-foreground md:text-2xs',
                             logo && 'absolute right-1.5 bottom-1',
                         )}>
                         <span className='min-w-0 flex-1 truncate'>{logo ? <span className='sr-only'>{chart.version}</span> : chart.version}</span>
