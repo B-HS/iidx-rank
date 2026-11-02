@@ -68,7 +68,10 @@ export const writeImport = async (userId: string, channel: ImportChannel, input:
 
         if (latestImports[0] && latestImports[0].createdAt > cooldownAfter) return { status: 'COOLDOWN' as const }
 
-        const activeCharts = await transaction.select({ id: catalogCharts.id }).from(catalogCharts).where(eq(catalogCharts.isActive, true))
+        const activeCharts = await transaction
+            .select({ id: catalogCharts.id, title: catalogCharts.title, difficulty: catalogCharts.difficulty })
+            .from(catalogCharts)
+            .where(eq(catalogCharts.isActive, true))
         const currentRecords = await transaction
             .select({
                 chartId: userRecord.chartId,
@@ -80,7 +83,7 @@ export const writeImport = async (userId: string, channel: ImportChannel, input:
             })
             .from(userRecord)
             .where(eq(userRecord.userId, userId))
-        const { changes, unmatched, ...counts } = planImport(currentRecords, new Set(activeCharts.map((chart) => chart.id)), input.charts, observedAt)
+        const { changes, unmatched, ...counts } = planImport(currentRecords, activeCharts, input.charts, observedAt)
         const [savedImport] = await transaction
             .insert(eamusementImport)
             .values({

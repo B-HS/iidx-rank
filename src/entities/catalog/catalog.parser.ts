@@ -1,6 +1,6 @@
-import { createHash } from 'node:crypto'
 import { isTag, isText, type AnyNode } from 'domhandler'
 import { load, type CheerioAPI } from 'cheerio'
+import { canonicalChartId } from '@entities/catalog/chart-title'
 import { CatalogSchema, DIFFICULTIES, RANKS, type Catalog, type Chart } from '@entities/catalog/catalog.dto'
 
 const SOURCE_BASE_URL =
@@ -12,9 +12,7 @@ const MAX_SOURCE_HTML_BYTES = 1_000_000
 const MAX_CELL_SPAN = 64
 const FIRST_VERSION_COLUMN_INDEX = 2
 const TRAILING_LABEL_COLUMN_COUNT = 1
-const CHART_ID_HASH_LENGTH = 32
 const RED_COLORS = new Set(['#ff0000', 'rgb(255, 0, 0)'])
-const SOURCE_TITLE_ALIASES = new Map([['Life Is A Game ft.DD"ナカタ"Metal"', 'Life Is A Game ft.DD"ナカタ"Metal']])
 
 type SourceChart = Pick<Chart, 'title' | 'difficulty' | 'version'> & {
     rank: NonNullable<Chart['normalRank']>
@@ -37,16 +35,6 @@ export class CatalogParseError extends Error {
 }
 
 const normalizeRank = (value: string) => value.normalize('NFKC').trim().toUpperCase()
-
-const normalizeTitleKey = (title: string) => {
-    const normalized = title
-        .normalize('NFKC')
-        .replace(/[〜～∼]/g, '~')
-        .replace(/\s+/g, ' ')
-        .trim()
-
-    return SOURCE_TITLE_ALIASES.get(normalized) ?? normalized
-}
 
 const cssColor = (declaration: string) => {
     const match = declaration.match(/(?:^|;)\s*color\s*:\s*([^;]+)/i)
@@ -165,13 +153,6 @@ const expandedCells = ($: CheerioAPI, row: AnyNode) => {
 
     return logicalCells
 }
-
-const canonicalChartId = (title: string, difficulty: string) =>
-    'chart-' +
-    createHash('sha256')
-        .update(normalizeTitleKey(title) + '\0' + difficulty)
-        .digest('hex')
-        .slice(0, CHART_ID_HASH_LENGTH)
 
 const parseSourceMode = (html: string): CatalogSourceMode => {
     if (Buffer.byteLength(html, 'utf8') > MAX_SOURCE_HTML_BYTES) {
