@@ -415,3 +415,20 @@ main의 기본값: README는 참고 문서와 같은 영어로 씁니다(공개 
 - [x] a. next-themes 기본 테마를 light에서 dark로 변경 — `shared/constants/ui.ts`의 `DEFAULT_THEME`를 앱 provider와 global-not-found 두 곳에서 사용
 
 사용자 요청(2026-10-29). 이미 테마를 고른 사용자는 localStorage(`iidx-rank-theme`)에 저장된 값이 우선이라 그대로 유지됩니다. 검증: typecheck 오류 0, 변경 파일 ESLint·Prettier 통과. 저장된 테마가 없는 새 브라우저 컨텍스트에서 html class dark, color-scheme dark, 어두운 배경을 확인했습니다.
+
+## e-amusement 곡명 표기 차이 보정
+
+현재 상태: 구현·검증·기록 완료 (6/6)
+
+- [x] a. 곡명 키를 `entities/catalog/chart-title.ts`로 분리 — `normalizeTitleKey`·`canonicalChartId` 출력은 그대로 두고 호출부만 옮김
+- [x] b. 보정 키 `normalizeTitleMatchKey`·`chartMatchKey`와 원문 별칭(`火影` → `焱影`) 추가
+- [x] c. `planImport`가 catalog 차트 목록을 받아 exact `chartId` → 보정 키 순서로 해석하고, 보정 키가 겹치면 미일치로 남김
+- [x] d. `eamusement.storage.ts`가 활성 catalog의 id·title·difficulty를 넘기도록 수정
+- [x] e. 실제 여섯 곡(하트 누락 2, 공백 차이 2, 발음기호 누락 1, `火影`/`焱影` 1)과 모호성·정확 일치 우선·탁점 보존 테스트
+- [x] f. 문서 갱신과 검증
+
+문제: e-amusement가 보낸 `chartId`가 난이도표의 곡명 표기와 달라 해시가 어긋난 여섯 곡이 `unmatched`로 남았습니다. `chartId` 해시 입력은 기존 기록과 호환되어야 하므로 바꾸지 않고, 해석 단계에서만 곡명을 보정하기로 했습니다.
+
+결과: `normalizeTitleKey`·`canonicalChartId`는 `entities/catalog/chart-title.ts`로 옮겼고 출력이 바뀌지 않는 것을 운영 catalog 673곡의 `chartId`를 다시 계산해 전부 일치하는 것으로 확인했습니다. `planImport`는 가져온 `chartId`가 활성 catalog에 있으면 그대로 쓰고, 없으면 `chartMatchKey`로 찾습니다. 같은 보정 키의 catalog 차트가 둘 이상이면 `null`로 두어 미일치로 남깁니다. 같은 차트로 해석되는 항목이 여럿이면 마지막이 이기고 변경 목록 순서는 처음 나온 차트 순서입니다. 보정 규칙과 별칭 추가 방법은 docs/E-AMUSEMENT.md, 원인 분류표는 docs/acknowledge/2026-11-03-eamusement-title-matching.md에 있습니다.
+
+검증: `bun test src/entities/eamusement src/entities/catalog` 71 pass, `tsc --noEmit` 오류 0, 변경 파일 ESLint 오류 0, Prettier 차이 0. 운영 catalog 673곡(updatedAt 2026-10-29)을 내려받아 보정 키+난이도 충돌 0건과 여섯 곡의 e-amusement 표기가 각각 catalog chartId 하나로 해석되는 것을 확인했습니다.

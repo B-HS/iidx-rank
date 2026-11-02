@@ -97,9 +97,9 @@ iidx-rank(이 저장소)와 익스텐션 iidx-data-parser(`/Users/hyunseokbyun/d
 
 - `channel`: 요청 출처가 `EXTENSION_ORIGINS`에 있으면 `extension`, 사이트 출처면 `file`.
 - `receivedCount`: 본문 `charts` 수.
-- `matchedCount`: `level === 12`이고 활성 catalog 차트와 `chartId`가 일치한 수.
+- `matchedCount`: `level === 12`이고 활성 catalog 차트와 `chartId`가 일치하거나 곡명 보정 키로 해석된 수.
 - `changedCount`: 실제로 기록이 바뀌어 이력에 추가된 수.
-- `unmatched`: `level === 12`인데 catalog에 없는 차트. 최대 200건. 곡명 정규화 차이를 찾는 근거입니다.
+- `unmatched`: `level === 12`인데 해석하지 못한 차트. 최대 200건. 곡명 표기 차이를 찾는 근거입니다.
 - 반영 후 `user:<uuid>:records`와 `users:recent` 태그를 `revalidateTag(tag, { expire: 0 })`로 만료합니다. 프로필 조회는 서버 캐시 없이 요청마다 DB를 읽습니다.
 
 ### GET /api/import/status
@@ -111,6 +111,8 @@ iidx-rank(이 저장소)와 익스텐션 iidx-data-parser(`/Users/hyunseokbyun/d
 ## 반영 규칙
 
 - 대상은 SP(`style === 0`)의 `level === 12` 차트 중 활성 catalog에 있는 것입니다. catalog의 `chartId`는 곡명과 패턴 종류만으로 만들어지므로 DP나 다른 레벨을 섞으면 다른 차트와 충돌합니다.
+- 가져온 `chartId`가 활성 catalog에 있으면 곡명과 관계없이 그 차트로 반영합니다. 없으면 곡명 보정 키로 catalog 차트를 찾습니다. 같은 보정 키의 catalog 차트가 둘 이상이면 잘못 붙이지 않고 미일치로 남깁니다.
+- 같은 차트로 해석되는 항목이 여러 개면 마지막 항목이 이기고, 변경 목록의 순서는 처음 나온 차트 순서입니다.
 - 가져온 램프가 `NO_PLAY`인 차트는 기록으로 취급하지 않고 건너뜁니다. e-amusement의 미플레이 표시는 값이 없다는 뜻이므로 기존 기록을 지우지 않습니다.
 - 그 밖에는 최신 값이 이깁니다. 기준 시각은 관측 시각(`generatedAt`과 서버 수신 시각 중 이른 쪽)입니다. 현재 기록의 `updated_at`이 관측 시각보다 나중이면 그 차트는 건너뜁니다. 오래된 파일이나 다른 기기의 예전 수집 결과가 그 뒤의 수정이나 더 새로운 가져오기를 덮지 않게 하기 위함입니다.
 - 가져온 `scoreGrade`·`exScore`·`missCount`가 `null`이면 값이 없는 것으로 보고 현재 값을 유지합니다. 익스텐션은 MISS COUNT를 수집하지 않아 항상 `null`로 보냅니다.
@@ -119,6 +121,21 @@ iidx-rank(이 저장소)와 익스텐션 iidx-data-parser(`/Users/hyunseokbyun/d
 - 메모는 항상 보존합니다.
 - 가져오기 이후의 수동 수정도 같은 규칙으로 최신 값이 됩니다.
 - 한 번의 가져오기는 하나의 트랜잭션입니다. 기록이 하나라도 바뀌면 `user_record_revision`을 1 올립니다.
+
+### 곡명 보정
+
+e-amusement와 난이도표의 곡명 표기가 달라 `chartId`가 어긋나는 곡은 서버가 곡명으로 다시 찾습니다. 규칙은 `src/entities/catalog/chart-title.ts`에 있습니다.
+
+- `normalizeTitleMatchKey`: NFKD 분해 뒤 라틴 문자에 붙은 발음기호를 떼고 NFC로 다시 합칩니다(가나의 탁점은 보존). 물결표 `〜 ～ ∼`는 `~`로, 장식 기호(Unicode `So`, 예: `♥`)는 지우고, 공백은 모두 지운 뒤 대문자로 바꿉니다.
+- `chartMatchKey`: 보정한 곡명과 패턴 종류(`H`·`A`·`L`)를 합친 키입니다.
+- `chartId`를 만드는 `normalizeTitleKey`는 이 보정과 별개입니다. NFKC·물결표 통일·연속 공백 축약만 하며, 이 출력이 바뀌면 기존 `user_record.chart_id`와 호환되지 않습니다.
+- 글자 자체가 다른 표기는 `TITLE_MATCH_ALIASES`에 원문 제목 쌍으로 넣습니다. 지금은 `火影`(e-amusement) → `焱影`(catalog) 한 쌍입니다.
+
+별칭을 추가하는 방법은 다음과 같습니다.
+
+1. `unmatched` 응답에 같은 곡이 두 표기로 반복되는지 확인합니다.
+2. `TITLE_MATCH_ALIASES`에 `[e-amusement 표기, catalog 표기]` 쌍을 그대로 넣습니다.
+3. `bun test src/entities/eamusement src/entities/catalog`로 확인합니다. 보정 키가 겹치는 catalog 차트가 생기면 그 곡은 미일치로 남으므로, 같은 키가 둘 이상이 되지 않는지 테스트로 고정합니다.
 
 ## DB
 
